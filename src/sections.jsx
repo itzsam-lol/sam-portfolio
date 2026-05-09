@@ -93,6 +93,7 @@ function Hero() {
       <div className="bg-stripes" />
       <div className="bg-glow" />
       <div className="bg-glow2" />
+      <canvas id="heroCanvas" aria-hidden="true" />
 
       <div className="marquee">
         <div className="track">
