@@ -70,14 +70,16 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
   // ── Load model ───────────────────────────────────────────────
   function loadModel() {
     const tl = new THREE.TextureLoader();
-    const diffuse = tl.load('assets/f1model/diffuse.png');
-    const specularTex = tl.load('assets/f1model/specular.png');
+    const diffuse = tl.load('formula 1/Substance SpecGloss/Right ones/formula1_DefaultMaterial_Diffuse.png');
+    const specularTex = tl.load('formula 1/Substance SpecGloss/Right ones/formula1_DefaultMaterial_Specular.png');
+    const normalTex = tl.load('formula 1/Substance SpecGloss/Right ones/formula1_DefaultMaterial_Normal.png');
     diffuse.colorSpace = THREE.SRGBColorSpace;
 
     // Shared material — apply to every mesh in the OBJ
     const mat = new THREE.MeshPhongMaterial({
       map: diffuse,
       specularMap: specularTex,
+      normalMap: normalTex,
       specular: new THREE.Color(0x999999),
       shininess: 140,
       transparent: true,
@@ -94,7 +96,7 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
     });
 
     new OBJLoader().load(
-      'assets/f1model/f1.obj',
+      'formula 1/Formula 1 mesh.obj',
       (obj) => {
         const allMats = [mat, mirrorMat];
 

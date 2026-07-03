@@ -30,7 +30,7 @@ const RACES = [
     pos: "P1",
     role: "Teaching Assistant — DSA",
     org: "IIIT Delhi",
-    when: "JAN 2026 — PRESENT",
+    when: "JAN 2026 — MAY 2026",
     gist: "Mentoring 100+ undergrads in advanced data structures, OOP, and algorithmic problem solving. Designing assignments and tutorials on DP, graphs, and scalable design.",
     stat: "100+", statLbl: "Mentees", statColor: "mag",
     logo: "assets/iiitd.png",

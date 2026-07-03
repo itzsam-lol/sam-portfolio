@@ -93,7 +93,6 @@ function Hero() {
       <div className="bg-stripes" />
       <div className="bg-glow" />
       <div className="bg-glow2" />
-      <canvas id="heroCanvas" aria-hidden="true" />
 
       <div className="marquee">
         <div className="track">
@@ -206,10 +205,7 @@ function Profile() {
             <span className="corner r mono">04 · IND</span>
             <span className="corner b mono">28.6448° N · 77.2167° E</span>
             <div className="img">
-              <div className="ph">
-                <div className="ph-num">04</div>
-                <span>[ DRIVER PORTRAIT ]</span>
-              </div>
+              <img src="assets/sam.png" alt="Satyam" />
             </div>
           </div>
 
