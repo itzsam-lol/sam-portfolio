@@ -235,7 +235,7 @@ section.first{border-top:0}
 .lights .l::before{content:'';position:absolute;inset:6px;border-radius:50%;background:#0a0a0a;box-shadow:inset 0 2px 6px rgba(0,0,0,.6);transition:background .2s,box-shadow .25s}
 .lights .l.on::before{background:radial-gradient(circle at 35% 35%,#ff5260,var(--red) 60%,#7a0010 100%);box-shadow:0 0 22px var(--red),inset 0 0 8px rgba(255,255,255,.3)}
 
-.hero-foot{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:0;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);margin-top:40px;background:rgba(10,10,12,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.hero-foot{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:0;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);margin-top:40px;background:rgba(10,10,12,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .hero-foot .cell{padding:16px 22px;border-right:1px solid var(--line);font-family:'JetBrains Mono';font-size:11px;color:var(--ink-dim);letter-spacing:.16em;text-transform:uppercase}
 .hero-foot .cell:last-child{border-right:0}
 .hero-foot .cell .v{display:block;color:var(--ink);font-family:'Anton';font-size:32px;letter-spacing:.02em;margin-top:6px;line-height:1}
@@ -271,7 +271,7 @@ section.first{border-top:0}
 .profile .copy h3 .accent{color:var(--red)}
 .profile .copy p{font-size:17px;line-height:1.6;color:var(--ink-dim);max-width:540px;margin-bottom:18px}
 .profile .copy p b{color:var(--ink);font-weight:600}
-.profile .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:30px}
+.profile .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:30px}
 .profile .stats .s{background:var(--bg);padding:18px 20px;transition:background .3s}
 .profile .stats .s:hover{background:var(--bg-3)}
 .profile .stats .s .lbl{font-family:'JetBrains Mono';font-size:10px;color:var(--ink-faint);letter-spacing:.22em;text-transform:uppercase}
@@ -445,7 +445,7 @@ section.first{border-top:0}
   .hero-foot{grid-template-columns:1fr 1fr}
   .hero-foot .cell{border-right:0;border-bottom:1px solid var(--line);padding:12px 16px}
   .hero-foot .cell:nth-child(odd){border-right:1px solid var(--line)}
-  .hero-foot .cell:nth-last-child(-n+2){border-bottom:0}
+  .hero-foot .cell:last-child{border-bottom:0}
   .hero-foot .cell .v{font-size:24px}
   .profile{grid-template-columns:1fr;gap:40px}
   .photo-card{max-width:100%;aspect-ratio:4/3}

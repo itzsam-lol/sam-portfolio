@@ -82,7 +82,7 @@ function Hero() {
 
   const marqueeItems = [
     'ROUND 04 — IIIT DELHI GP', 'DRIVER 04 · SATYAM',
-    'SEASON 2026', 'TEAM CSE', 'CGPA 8.53',
+    'SEASON 2026', 'TEAM CSE',
     '300+ LEETCODE', '100+ MENTEES',
     'SECTOR 2 — RESEARCH', 'DRS ENABLED',
   ];
@@ -130,10 +130,6 @@ function Hero() {
         </div>
 
         <div className="hero-foot" style={{ opacity: 0 }}>
-          <div className="cell">
-            <span>Best Lap · CGPA</span>
-            <span className="v mag">8.53 / 10</span>
-          </div>
           <div className="cell">
             <span>Top Speed · LeetCode</span>
             <span className="v">300+</span>
@@ -219,7 +215,6 @@ function Profile() {
             ))}
             <div className="stats" ref={statsRef}>
               {[
-                { lbl: 'CGPA', n: '8.53', count: 8.53, float: 1, suffix: '', u: '/10' },
                 { lbl: 'Problems Solved', n: '300', count: 300, suffix: '+', u: '+' },
                 { lbl: 'Mentees', n: '100', count: 100, suffix: '+', u: '+' },
                 { lbl: 'Footfall Managed', n: '50K', count: 50, suffix: 'K+', u: '+' },

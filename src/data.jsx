@@ -9,7 +9,6 @@ const PROFILE = {
     "Teaching Assistant for DSA, research at CoSY Lab on Foodoscope, and a garage of side projects spanning F1 prediction, RISC-V simulation, and quant research.",
   ],
   stats: [
-    { lbl: "CGPA", val: "8.53", u: "/10" },
     { lbl: "Problems Solved", val: "300", u: "+" },
     { lbl: "Mentees", val: "100", u: "+" },
     { lbl: "Footfall Managed", val: "50K", u: "+" },
