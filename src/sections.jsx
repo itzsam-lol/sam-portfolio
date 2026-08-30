@@ -82,8 +82,9 @@ function Hero() {
 
   const marqueeItems = [
     'ROUND 04 — IIIT DELHI GP', 'DRIVER 04 · SATYAM',
-    'SEASON 2026', 'TEAM CSE',
+    'SEASON 2026', 'TEAM CS-AI',
     '300+ LEETCODE', '100+ MENTEES',
+    'PREPRINT · UNDER REVIEW', '18+ LIVE CLIENTS',
     'SECTOR 2 — RESEARCH', 'DRS ENABLED',
   ];
 
@@ -125,7 +126,7 @@ function Hero() {
             </span>
           </h1>
           <div className="sub" style={{ opacity: 0 }}>
-            <h2>CS Engineer · Builder · Race Strategist</h2>
+            <h2>CS Engineer · Systems Builder · Researcher</h2>
           </div>
         </div>
 
@@ -135,7 +136,7 @@ function Hero() {
             <span className="v">300+</span>
           </div>
           <div className="cell">
-            <span>Pit Stops · Internships</span>
+            <span>Pit Stops · Roles</span>
             <span className="v green">03</span>
           </div>
           <div className="cell">
@@ -215,9 +216,9 @@ function Profile() {
             ))}
             <div className="stats" ref={statsRef}>
               {[
-                { lbl: 'Problems Solved', n: '300', count: 300, suffix: '+', u: '+' },
-                { lbl: 'Mentees', n: '100', count: 100, suffix: '+', u: '+' },
-                { lbl: 'Footfall Managed', n: '50K', count: 50, suffix: 'K+', u: '+' },
+                { lbl: 'LeetCode Solved', n: '300', count: 300, suffix: '+', u: '+' },
+                { lbl: 'Students Mentored', n: '100', count: 100, suffix: '+', u: '+' },
+                { lbl: 'Community Built', n: '10K', count: 10, suffix: 'K+', u: '+' },
               ].map((s, i) => (
                 <div className="s" key={i}>
                   <div className="lbl">{s.lbl}</div>
