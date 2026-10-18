@@ -1,188 +1,129 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<meta name="description" content="Satyam — B.Tech CS-AI at IIIT Delhi. Distributed systems, optimization, and ML. TA, researcher, and builder of production backends." />
-<meta name="theme-color" content="#070707" />
-<meta name="color-scheme" content="dark" />
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-<title>Satyam · Driver #04</title>
+<title>Satyam · Computer Science &amp; AI, IIIT-Delhi</title>
+<meta name="description" content="Satyam is a final-year Computer Science and AI student at IIIT-Delhi who builds ML systems and backends and does quantitative research. Dell Technologies intern, bioRxiv preprint author, teaching assistant." />
+<meta name="author" content="Satyam" />
+<link rel="canonical" href="https://itzsam-lol.github.io/sam-portfolio/" />
 
-<meta property="og:title" content="Satyam · Driver #04" />
-<meta property="og:description" content="B.Tech CS-AI at IIIT Delhi — distributed systems, optimization, and ML." />
-<meta property="og:type" content="website" />
+<meta property="og:type" content="profile" />
+<meta property="og:title" content="Satyam · Computer Science & AI, IIIT-Delhi" />
+<meta property="og:description" content="ML systems, backends and quantitative research. Selected work, a bioRxiv preprint, and everything else." />
+<meta property="og:url" content="https://itzsam-lol.github.io/sam-portfolio/" />
+<meta property="og:image" content="https://itzsam-lol.github.io/sam-portfolio/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Satyam, in a red race suit, beside his name set large" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<meta name="theme-color" content="#EFEDE7" id="themeColor" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Satyam",
+  "url": "https://itzsam-lol.github.io/sam-portfolio/",
+  "image": "https://itzsam-lol.github.io/sam-portfolio/assets/portrait.webp",
+  "jobTitle": "B.Tech student, Computer Science and Artificial Intelligence",
+  "affiliation": { "@type": "CollegeOrUniversity", "name": "Indraprastha Institute of Information Technology Delhi" },
+  "address": { "@type": "PostalAddress", "addressLocality": "New Delhi", "addressCountry": "IN" },
+  "email": "mailto:satyam23495@iiitd.ac.in",
+  "sameAs": [
+    "https://github.com/itzsam-lol",
+    "https://linkedin.com/in/satyam564774288",
+    "https://leetcode.com/u/samuraiiii",
+    "https://www.kaggle.com/samuraiiii",
+    "https://huggingface.co/Phantomcloak19"
+  ]
+}
+</script>
+
+<!-- theme before first paint: saved choice wins, then the OS setting -->
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+    document.getElementById('themeColor').content = t === 'dark' ? '#0F0F0E' : '#EFEDE7';
+  })();
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&family=Archivo+Narrow:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Hubot+Sans:wdth,wght@75..125,400..900&family=Mona+Sans:wdth,wght@100..125,300..900&family=Martian+Mono:wdth,wght@87.5..100,300..600&family=STIX+Two+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
 
-<link rel="preload" as="fetch" href="assets/car/car.glb" crossorigin />
+<link rel="preload" as="image" href="assets/portrait.avif" type="image/avif" fetchpriority="high"
+      imagesrcset="assets/portrait-640.avif 640w, assets/portrait.avif 900w" imagesizes="(max-width: 760px) 92vw, 44vw" />
 
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.min.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/"
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.min.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/",
+    "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.core.js": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.core.min.js"
   }
 }
 </script>
-
-<!-- Critical inline CSS: tokens + ignition screen. Prevents any flash before main.css lands. -->
-<style>
-:root{
-  --bg:#070707;--bg-2:#0c0c0e;--bg-3:#121215;--bg-4:#17171b;
-  --line:#1b1b1e;--line-2:#282830;--line-3:#3a3a44;
-  --ink:#fafafa;--ink-dim:#96969e;--ink-faint:#5a5a64;
-  --red:#E8002B;--red-2:#ff2f4f;--red-glow:rgba(232,0,43,.5);
-  --mag:#C800FF;--grn:#00D26A;--yel:#FFD600;--cyan:#25E5FF;
-  --soft:#FF1E1E;--med:#FFD600;--hard:#E8E8E8;
-  --ease:cubic-bezier(.22,.61,.24,1);
-  --gut:clamp(18px,4vw,72px);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:auto;-webkit-text-size-adjust:100%}
-html,body{background:var(--bg);color:var(--ink);font-family:'Archivo',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-body{overflow-x:hidden;min-height:100vh}
-img{max-width:100%;display:block}
-a{color:inherit;text-decoration:none}
-#ignition{
-  position:fixed;inset:0;z-index:9999;background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(26px,5vh,52px);
-  will-change:opacity,transform;
-}
-#ignition.gone{opacity:0;visibility:hidden;pointer-events:none}
-.ig-brand{font-family:'Anton','Archivo Narrow',sans-serif;font-size:clamp(46px,9vw,110px);letter-spacing:.04em;text-transform:uppercase;line-height:1;overflow:hidden}
-.ig-brand em{color:var(--red);font-style:normal}
-.ig-sub{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--ink-faint)}
-.ig-lights{display:flex;gap:clamp(9px,2vw,16px)}
-.ig-light{width:clamp(34px,7vw,52px);aspect-ratio:1;border-radius:50%;background:#111114;border:2px solid #202026;position:relative}
-.ig-light::before{content:'';position:absolute;inset:6px;border-radius:50%;background:#070709;box-shadow:inset 0 2px 7px rgba(0,0,0,.8)}
-.ig-light.on::before{background:radial-gradient(circle at 35% 32%,#ff6070,var(--red) 55%,#5e0012 100%);box-shadow:0 0 26px var(--red-glow),0 0 60px rgba(232,0,43,.28),inset 0 0 10px rgba(255,255,255,.3)}
-.ig-bar{width:min(260px,60vw);height:2px;background:#1c1c22;position:relative;overflow:hidden}
-.ig-bar>i{position:absolute;inset:0 auto 0 0;width:0%;background:linear-gradient(90deg,var(--red),var(--red-2));box-shadow:0 0 12px var(--red-glow)}
-.ig-pct{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.28em;color:var(--ink-faint);font-variant-numeric:tabular-nums}
-.boot-hidden{opacity:0}
-</style>
 
 <link rel="stylesheet" href="css/main.css" />
 </head>
 <body class="is-booting">
 
-<!-- ══ IGNITION ═════════════════════════════════════════════ -->
-<div id="ignition" role="status" aria-label="Loading">
-  <div class="ig-brand">SAT<em>YAM</em></div>
-  <div class="ig-sub">DRIVER #04 · IIIT DELHI · SEASON 2026</div>
-  <div class="ig-lights" id="igLights" aria-hidden="true">
-    <span class="ig-light"></span><span class="ig-light"></span><span class="ig-light"></span>
-    <span class="ig-light"></span><span class="ig-light"></span>
-  </div>
-  <div class="ig-bar"><i id="igBar"></i></div>
-  <div class="ig-pct" id="igPct">SYSTEMS CHECK · 000%</div>
-</div>
+<a class="skip" href="#main">Skip to content</a>
 
-<!-- ══ FIXED CHROME (outside the smooth wrapper) ════════════ -->
-
-<canvas id="scene" aria-hidden="true"></canvas>
-<div class="scene-veil" aria-hidden="true"></div>
-
-<div class="grain" aria-hidden="true"></div>
-<div class="vignette" aria-hidden="true"></div>
-<div class="flash" id="flash" aria-hidden="true"></div>
-
-<div class="reticle" id="ret" aria-hidden="true">
-  <svg viewBox="0 0 60 60"><rect class="ret-box" x="6" y="6" width="48" height="48" rx="2"/>
-    <path class="ret-c" d="M2 12V2h10M48 2h10v10M58 48v10H48M12 58H2V48"/></svg>
-  <span class="ret-label"></span>
-</div>
-<div class="ret-dot" id="retDot" aria-hidden="true"></div>
-
-<div class="rail" aria-hidden="true"><i id="railFill"></i></div>
-
-<header class="nav" id="nav">
-  <a href="#top" class="brand" data-cursor="home">
-    <span class="brand-num">04</span>
-    <span class="brand-txt">SATYAM</span>
+<header class="hdr" id="hdr">
+  <a class="hdr-mark" href="#top" aria-label="Satyam, back to the top">
+    <span class="hdr-name">Satyam</span>
+    <span class="hdr-num" aria-hidden="true">04</span>
   </a>
-  <nav class="nav-links" id="navLinks" aria-label="Sections"></nav>
-  <div class="nav-meta">
-    <span class="nav-clock" id="clock">00:00:00</span>
-    <span class="nav-live"><i></i>LIVE</span>
+  <nav class="hdr-nav" id="nav" aria-label="Sections"></nav>
+  <div class="hdr-side">
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to night mode">
+      <span class="theme-ico" aria-hidden="true"></span><span class="theme-txt">Night</span>
+    </button>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu">Menu</button>
   </div>
-  <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">
-    <span></span><span></span>
-  </button>
+  <div class="hdr-rail" aria-hidden="true"><i id="rail"></i></div>
 </header>
 
-<div class="drawer" id="drawer" aria-hidden="true">
-  <div class="drawer-inner" id="drawerLinks"></div>
-  <div class="drawer-foot">
-    <span>DRIVER 04</span><span>IIIT DELHI</span><span>SEASON 2026</span>
-  </div>
+<div class="menu" id="menu" hidden>
+  <nav class="menu-nav" id="menuNav" aria-label="Sections"></nav>
+  <div class="menu-foot" id="menuFoot"></div>
 </div>
 
-<!-- telemetry -->
-<aside class="hud" id="hud" aria-hidden="true">
-  <div class="hud-gear"><span id="hudGear">N</span><em>GEAR</em></div>
-  <div class="hud-spd"><span id="hudSpd">000</span><em>KM/H</em></div>
-  <div class="hud-tr">
-    <div class="hud-tr-row"><span>THR</span><div class="hud-bar"><i id="hudThr" class="grn"></i></div></div>
-    <div class="hud-tr-row"><span>BRK</span><div class="hud-bar"><i id="hudBrk" class="red"></i></div></div>
-    <div class="hud-tr-row"><span>ERS</span><div class="hud-bar"><i id="hudErs" class="cyan"></i></div></div>
-  </div>
-  <div class="hud-drs" id="hudDrs">DRS</div>
-</aside>
-
-<!-- circuit minimap = navigation -->
-<aside class="circuit" id="circuit">
-  <div class="circuit-head"><span>CIRCUIT MAP</span><span id="circLap">LAP 1/1</span></div>
-  <svg class="circuit-svg" viewBox="0 0 300 200" aria-hidden="true">
-    <path id="trackGhost" class="trk-ghost" fill="none"
-      d="M40,150 C40,112 46,86 72,70 C98,54 128,62 150,44 C172,26 196,20 226,28 C256,36 272,58 268,84 C264,110 240,120 218,124 C196,128 178,140 180,158 C182,176 204,182 226,178 C248,174 262,164 264,150"/>
-    <path id="trackLive" class="trk-live" fill="none"
-      d="M40,150 C40,112 46,86 72,70 C98,54 128,62 150,44 C172,26 196,20 226,28 C256,36 272,58 268,84 C264,110 240,120 218,124 C196,128 178,140 180,158 C182,176 204,182 226,178 C248,174 262,164 264,150"/>
-    <g id="circMarks"></g>
-    <circle id="trackCar" class="trk-car" r="4.5" cx="40" cy="150"/>
-  </svg>
-  <div class="circuit-secs" id="circSecs"></div>
-</aside>
-
-<!-- ══ PAGE ═════════════════════════════════════════════════ -->
-<div id="smooth-wrapper">
-  <div id="smooth-content">
-    <main id="app"></main>
-  </div>
-</div>
+<main id="main" tabindex="-1"></main>
 
 <noscript>
-  <div style="padding:60px 6vw;font-family:'Archivo',sans-serif">
-    <h1 style="font-family:'Anton';font-size:48px">SATYAM · DRIVER 04</h1>
-    <p style="color:#96969e;margin-top:12px">This portfolio needs JavaScript. Reach me at
-      <a style="color:#E8002B" href="mailto:satyam23495@iiitd.ac.in">satyam23495@iiitd.ac.in</a> or on
-      <a style="color:#E8002B" href="https://github.com/itzsam-lol">GitHub</a>.</p>
+  <div class="nojs">
+    <h1>Satyam</h1>
+    <p>Final-year Computer Science and AI student at IIIT-Delhi. I build machine learning systems and backends, and I do quantitative research.</p>
+    <p>This page draws itself with JavaScript. Reach me at
+      <a href="mailto:satyam23495@iiitd.ac.in">satyam23495@iiitd.ac.in</a>, or see my work on
+      <a href="https://github.com/itzsam-lol">GitHub</a> and
+      <a href="https://linkedin.com/in/satyam564774288">LinkedIn</a>.</p>
   </div>
 </noscript>
 
-<!-- ══ SCRIPTS ══════════════════════════════════════════════ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollSmoother.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/CustomEase.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/DrawSVGPlugin.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/MotionPathPlugin.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrambleTextPlugin.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Flip.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Observer.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Draggable.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/InertiaPlugin.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/SplitText.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/DrawSVGPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/Flip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"></script>
 
 <script src="js/data.js"></script>
+<script src="js/figures.js"></script>
 <script src="js/dom.js"></script>
-<script src="js/cursor.js"></script>
-<script src="js/hud.js"></script>
+<script src="js/ui.js"></script>
 <script src="js/motion.js"></script>
 <script src="js/main.js"></script>
 <script type="module" src="js/scene.js"></script>

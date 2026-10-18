@@ -1,501 +1,319 @@
 /* ============================================================
-   SCENE — one WebGL scene behind the whole page.
-   The camera rig is keyframed per section and interpolated by
-   real scroll position, so the car is the site's spine rather
-   than hero wallpaper.
+   SCENE: the interlude. One car, two renderings.
+   Right of the red line: an ink drawing made from the car's own
+   normals and depth (silhouette, creases, a little hatching).
+   Left of it: the same car, lit. Scroll moves the line and swings
+   the camera from a side elevation to a front three-quarter view.
+
+   three.js is only fetched once the reader starts down the page,
+   and frames are only drawn when something actually changed.
    ============================================================ */
 
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-
-const BOOT = () => window.BOOT || { scene() {}, sceneFailed() {} };
-
-/* ---------- capability gate ---------- */
-const calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
-const canvas = document.getElementById('scene');
+const stage = document.querySelector('.machine-stage');
+const canvas = document.getElementById('machineCanvas');
+const root = document.documentElement;
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const small = innerWidth < 861;
+const M = (window.__machine = window.__machine || { p: 0, active: false, near: false });
+const capture = new URLSearchParams(location.search).get('capture');
 
 function webglOK() {
-  try {
-    const c = document.createElement('canvas');
-    return !!(c.getContext('webgl2') || c.getContext('webgl'));
-  } catch (e) { return false; }
+  try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); }
+  catch (e) { return false; }
 }
+const lowTier = (navigator.deviceMemory || 4) <= 2 || (navigator.hardwareConcurrency || 4) <= 2;
 
-const mem = navigator.deviceMemory || 4;
-const cores = navigator.hardwareConcurrency || 4;
-const small = innerWidth < 861;
-const lowTier = mem <= 2 || cores <= 2;
-
-if (calm || !canvas || !webglOK() || lowTier) {
-  BOOT().sceneFailed();
+if (!stage || !canvas) {
+  // nothing to do
+} else if (!webglOK() || lowTier) {
+  stillImage();
 } else {
-  start();
+  // fetch three.js (~1 MB with the car) only for readers who are on their way:
+  // when the section is half a screen off, or once they have started scrolling
+  let started = false;
+  const go = () => {
+    if (started) return;
+    started = true; io.disconnect(); removeEventListener('scroll', onScroll);
+    start().catch(fail);
+  };
+  const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) go(); }, { rootMargin: '50% 0px 50% 0px' });
+  const onScroll = () => { if (scrollY > innerHeight * 0.35) go(); };
+  io.observe(stage);
+  addEventListener('scroll', onScroll, { passive: true });
+  if (capture) go();
 }
 
-function start() {
-  const TEX = small
-    ? { base: 'assets/car/basecolor_1k.webp', orm: 'assets/car/orm_1k.webp', norm: 'assets/car/normal_1k.webp' }
-    : { base: 'assets/car/basecolor.webp',    orm: 'assets/car/orm.webp',    norm: 'assets/car/normal.webp' };
+// the pre-rendered drawing is only downloaded when it is actually shown
+function stillImage() {
+  root.classList.add('no-webgl');
+  const img = document.getElementById('machineFallback');
+  if (img && !img.src) img.src = img.dataset.src;
+}
 
-  const renderer = new THREE.WebGLRenderer({
-    canvas, alpha: true, antialias: !small, powerPreference: 'high-performance',
-  });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, small ? 1.6 : 2));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.15;
+function fail(err) {
+  console.warn('[scene] falling back to the drawing:', err);
+  stillImage();
+  // the interlude just lost its long scroll, so every trigger below it moved
+  if (window.ScrollTrigger) requestAnimationFrame(() => window.ScrollTrigger.refresh());
+}
+
+async function start() {
+  const [THREE, { GLTFLoader }, { DRACOLoader }, { RoomEnvironment }] = await Promise.all([
+    import('three'),
+    import('three/addons/loaders/GLTFLoader.js'),
+    import('three/addons/loaders/DRACOLoader.js'),
+    import('three/addons/environments/RoomEnvironment.js'),
+  ]);
+
+  let needs = true;                      // textures report in while the model is still loading
+  const DPR = Math.min(devicePixelRatio || 1, small ? 1.5 : 1.75);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !small, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: !!capture });
+  renderer.setPixelRatio(DPR);
+  // Neutral keeps the red red; ACES pushes it towards orange
+  renderer.toneMapping = THREE.NeutralToneMapping;
+  renderer.toneMappingExposure = 0.95;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.autoClear = false;
+  renderer.setClearColor(0x000000, 0);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 220);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
+  const key = new THREE.DirectionalLight(0xffffff, 1.5);
+  key.position.set(-5, 9, 6);
+  scene.add(key);
 
-  /* scroll readers — track the *visually smoothed* position when
-     ScrollSmoother is running, so the camera never leads the content */
-  const scrollY = () => (window.__scrollY ? window.__scrollY() : (window.scrollY || 0));
-  const maxScroll = () => (window.__maxScroll
-    ? window.__maxScroll()
-    : Math.max(1, document.documentElement.scrollHeight - innerHeight));
+  const camera = new THREE.PerspectiveCamera(22, 1, 0.1, 200);
 
-  /* ---------- studio environment (garage strip lights) ---------- */
-  function buildEnv() {
-    const c = document.createElement('canvas');
-    c.width = 512; c.height = 256;
-    const g = c.getContext('2d');
-    g.fillStyle = '#0a0a0e'; g.fillRect(0, 0, 512, 256);
+  /* ---------- normal + depth pass for the drawing ---------- */
+  const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType });
+  rt.depthTexture = new THREE.DepthTexture(4, 4);
 
-    // two long overhead strips → the long specular highlights on bodywork
-    const strip = (y, h, a) => {
-      const gr = g.createLinearGradient(0, y - h, 0, y + h);
-      gr.addColorStop(0, 'rgba(255,255,255,0)');
-      gr.addColorStop(0.5, `rgba(230,240,255,${a})`);
-      gr.addColorStop(1, 'rgba(255,255,255,0)');
-      g.fillStyle = gr; g.fillRect(0, y - h, 512, h * 2);
-    };
-    strip(52, 26, 0.95);
-    strip(104, 14, 0.4);
+  const normalMat = new THREE.ShaderMaterial({
+    vertexShader: `varying vec3 vN;
+      void main(){ vN = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`,
+    fragmentShader: `varying vec3 vN;
+      void main(){ vec3 n = normalize(vN); if (!gl_FrontFacing) n = -n;
+        float lit = clamp(dot(n, normalize(vec3(-.45, .8, .55))), 0., 1.);
+        gl_FragColor = vec4(n * .5 + .5, lit); }`,
+  });
 
-    const blob = (x, y, r, col) => {
-      const gr = g.createRadialGradient(x, y, 0, x, y, r);
-      gr.addColorStop(0, col); gr.addColorStop(1, 'rgba(0,0,0,0)');
-      g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
-    };
-    blob(96, 150, 130, 'rgba(232,0,43,.55)');     // red pit wall
-    blob(400, 132, 110, 'rgba(37,229,255,.28)');  // cool bounce
-    blob(268, 232, 150, 'rgba(90,90,110,.25)');   // floor
+  const ink = new THREE.Vector3();
+  const edgeMat = new THREE.ShaderMaterial({
+    transparent: true, depthTest: false, depthWrite: false,
+    uniforms: {
+      tN: { value: rt.texture }, tD: { value: rt.depthTexture },
+      res: { value: new THREE.Vector2(4, 4) }, near: { value: camera.near }, far: { value: camera.far },
+      ink: { value: ink }, hatch: { value: small ? 0 : 1 }, px: { value: DPR },
+    },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }`,
+    fragmentShader: `
+      uniform sampler2D tN; uniform sampler2D tD; uniform vec2 res; uniform float near; uniform float far;
+      uniform vec3 ink; uniform float hatch; uniform float px;
+      varying vec2 vUv;
+      float lin(float z){ float n = z * 2. - 1.; return 2. * near * far / (far + near - n * (far - near)); }
+      vec3 N(vec2 o){ return texture2D(tN, vUv + o * px / res).rgb; }
+      float Z(vec2 o){ return lin(texture2D(tD, vUv + o * px / res).r); }
+      float cov(vec2 o){ return step(texture2D(tD, vUv + o * px / res).r, .9999); }
+      void main(){
+        float c0 = cov(vec2(0.));
+        float ring = 0.;
+        for (int i = 0; i < 8; i++) { float a = float(i) * .785398; ring += cov(vec2(cos(a), sin(a)) * 1.6); }
+        float sil = (c0 > .5) ? step(ring, 7.5) : step(.5, ring);
+        vec3 gx = -N(vec2(-1,-1)) - 2.*N(vec2(-1,0)) - N(vec2(-1,1)) + N(vec2(1,-1)) + 2.*N(vec2(1,0)) + N(vec2(1,1));
+        vec3 gy = -N(vec2(-1,-1)) - 2.*N(vec2(0,-1)) - N(vec2(1,-1)) + N(vec2(-1,1)) + 2.*N(vec2(0,1)) + N(vec2(1,1));
+        float crease = smoothstep(.9, 1.6, (length(gx) + length(gy)) * c0) * .85;
+        float z0 = Z(vec2(0.));
+        float zx = abs(Z(vec2(1,0)) - Z(vec2(-1,0))), zy = abs(Z(vec2(0,1)) - Z(vec2(0,-1)));
+        float stp = smoothstep(.02, .05, (zx + zy) / max(z0, 1e-3)) * c0;
+        vec2 p = vUv * res / px;
+        float lit = texture2D(tN, vUv).a;
+        float h = hatch * c0 * step(.5, fract((p.x + p.y) / 7.)) * (1. - smoothstep(.12, .3, lit)) * .45;
+        float a = clamp(max(max(sil, crease), max(stp, h)), 0., 1.);
+        gl_FragColor = vec4(ink * a, a);
+      }`,
+  });
+  const qScene = new THREE.Scene();
+  qScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), edgeMat));
+  const qCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    const t = new THREE.CanvasTexture(c);
-    t.mapping = THREE.EquirectangularReflectionMapping;
-    t.colorSpace = THREE.SRGBColorSpace;
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    const env = pmrem.fromEquirectangular(t).texture;
-    pmrem.dispose(); t.dispose();
-    return env;
-  }
-  scene.environment = buildEnv();
+  /* ---------- the car ---------- */
+  const TEX = small
+    ? { base: 'assets/car/basecolor_1k.webp', orm: 'assets/car/orm_1k.webp', norm: 'assets/car/normal_1k.webp' }
+    : { base: 'assets/car/basecolor.webp', orm: 'assets/car/orm.webp', norm: 'assets/car/normal.webp' };
+  const tl = new THREE.TextureLoader();
+  const tex = (u, srgb) => { const t = tl.load(u, () => (needs = true)); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.flipY = false;
+    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return t; };
+  const orm = tex(TEX.orm);
+  const mBody = new THREE.MeshStandardMaterial({ map: tex(TEX.base, true), normalMap: tex(TEX.norm), roughnessMap: orm, metalnessMap: orm, roughness: 1, metalness: 1, envMapIntensity: 1.05 });
+  const mChrome = new THREE.MeshStandardMaterial({ color: 0x9aa0aa, roughness: 0.14, metalness: 1 });
+  const mMatte = new THREE.MeshStandardMaterial({ color: 0x111113, roughness: 0.72, metalness: 0.1 });
 
-  /* ---------- lights ---------- */
-  scene.add(new THREE.AmbientLight(0x0a0a14, 2.2));
+  const car = new THREE.Group();
+  scene.add(car);
 
-  const key = new THREE.DirectionalLight(0xd8ecff, 2.6);
-  key.position.set(6, 9, 7); scene.add(key);
+  // soft contact shadow, lit side only
+  const sc = document.createElement('canvas'); sc.width = sc.height = 256;
+  const g = sc.getContext('2d');
+  const gr = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  gr.addColorStop(0, 'rgba(0,0,0,.55)'); gr.addColorStop(0.5, 'rgba(0,0,0,.2)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 2.7),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false, toneMapped: false }));
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.y = -1.27;
+  scene.add(shadow);
 
-  const rim = new THREE.DirectionalLight(0xe8002b, 7);
-  rim.position.set(-9, 2.5, -6.5); scene.add(rim);
-
-  const cool = new THREE.DirectionalLight(0x2a6cff, 1.6);
-  cool.position.set(8, 1.5, -7); scene.add(cool);
-
-  const under = new THREE.PointLight(0x6600cc, 4.5, 26);
-  under.position.set(0, -4.5, 3); scene.add(under);
-
-  /* ---------- rig ---------- */
-  const carGroup = new THREE.Group();
-  const carPivot = new THREE.Group();      // scroll-driven yaw + push-away
-  carPivot.add(carGroup);
-  scene.add(carPivot);
-
-  /* ---------- contact shadow ---------- */
-  (function shadow() {
-    const c = document.createElement('canvas');
-    c.width = c.height = 256;
-    const g = c.getContext('2d');
-    const gr = g.createRadialGradient(128, 128, 0, 128, 128, 128);
-    gr.addColorStop(0, 'rgba(0,0,0,.72)');
-    gr.addColorStop(0.45, 'rgba(0,0,0,.34)');
-    gr.addColorStop(1, 'rgba(0,0,0,0)');
-    g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
-    const m = new THREE.Mesh(
-      new THREE.PlaneGeometry(9, 5.2),
-      new THREE.MeshBasicMaterial({
-        map: new THREE.CanvasTexture(c), transparent: true,
-        depthWrite: false, opacity: 0.85,
-      })
-    );
-    m.rotation.x = -Math.PI / 2;
-    m.position.y = -1.28;
-    carGroup.add(m);
-  })();
-
-  /* ---------- speed streaks ---------- */
-  const streaks = (function () {
-    const N = small ? 90 : 200;
-    const pos = new Float32Array(N * 6);
-    const dir = new Float32Array(N * 2);
-    const rnd = new Float32Array(N * 2);
-    for (let i = 0; i < N; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const r = 3.4 + Math.random() * 12;
-      const x = Math.cos(a) * r, y = (Math.random() - 0.4) * 9, z = -30 + Math.random() * 60;
-      for (let k = 0; k < 2; k++) {
-        pos[i * 6 + k * 3] = x; pos[i * 6 + k * 3 + 1] = y; pos[i * 6 + k * 3 + 2] = z;
-        dir[i * 2 + k] = k;                       // 0 = head, 1 = tail
-        rnd[i * 2 + k] = 0.35 + Math.random() * 0.65;
-      }
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    geo.setAttribute('aDir', new THREE.BufferAttribute(dir, 1));
-    geo.setAttribute('aRnd', new THREE.BufferAttribute(rnd, 1));
-
-    const mat = new THREE.ShaderMaterial({
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      uniforms: { uLen: { value: 0 }, uOp: { value: 0 }, uT: { value: 0 } },
-      vertexShader: `
-        attribute float aDir; attribute float aRnd;
-        uniform float uLen; uniform float uT;
-        varying float vA;
-        void main(){
-          vec3 p = position;
-          p.z = mod(p.z + uT * aRnd * 9.0 + 30.0, 60.0) - 30.0;
-          p.z += aDir * uLen * aRnd;
-          vA = (1.0 - aDir) * aRnd;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0);
-        }`,
-      fragmentShader: `
-        uniform float uOp; varying float vA;
-        void main(){ gl_FragColor = vec4(0.92,0.95,1.0, vA * uOp); }`,
-    });
-    const ls = new THREE.LineSegments(geo, mat);
-    ls.frustumCulled = false;
-    scene.add(ls);
-    return mat;
-  })();
-
-  /* ---------- shot list ----------
-     One shot per section, interpolated by real scroll position.
-
-     Shots are described in *composition* terms rather than world coordinates,
-     so the framing survives any viewport:
-       dist / az / el  — an orbit around the car
-       fov             — vertical field of view
-       rel             — the car's heading RELATIVE to the camera, so changing
-                         the azimuth never swings us round to a different side
-                         of the model; world yaw is derived as rel + azimuth
-       frame [x,y]     — where the car should land on screen, as a fraction of
-                         the viewport (0.5,0.5 = dead centre)
-       push            — the car's own travel along z (used to launch it away)
-       op              — canvas opacity, so the car recedes behind copy
-
-     Hand-tuned world positions break the moment the window resizes; this
-     survives it. A 4.4 × 0.9 unit car is also a thin sliver on a portrait
-     screen, so narrow viewports get their own head-on `portrait` overrides
-     rather than a scaled-down version of the desktop framing. */
-  const D2R = Math.PI / 180;
-  const SHOTS = [
-    // id          dist   az°    el°  fov  rel     push  opacity  frame [x,y]
-    { id: 'top',     dist: 14.5, az: 37,   el: 15, fov: 23, rel: 0.29,  push: 0,   op: 1.00, frame: [0.60, 0.42],
-      portrait: { dist: 8.6, az: 16, el: 11, fov: 33, rel: 1.44, frame: [0.50, 0.34] } },
-    { id: 'driver',  dist: 13.0, az: -72,  el: 8,  fov: 22, rel: -0.31, push: 0,   op: 0.30, frame: [0.66, 0.54],
-      portrait: { dist: 10.5, fov: 30, frame: [0.50, 0.50] } },
-    { id: 'setup',   dist: 13.5, az: 12,   el: 78, fov: 26, rel: 0.54,  push: 0,   op: 0.22, frame: [0.52, 0.48],
-      portrait: { dist: 10.5, fov: 34 } },
-    { id: 'history', dist: 19.0, az: 45,   el: 14, fov: 20, rel: -0.16, push: 0,   op: 0.20, frame: [0.26, 0.60],
-      portrait: { dist: 14.0, fov: 28, frame: [0.40, 0.56] } },
-    { id: 'garage',  dist: 12.5, az: 190,  el: 12, fov: 29, rel: 1.04,  push: 0,   op: 0.28, frame: [0.50, 0.44],
-      portrait: { dist: 9.0, fov: 36 } },
-    { id: 'crew',    dist: 15.0, az: -130, el: 34, fov: 26, rel: -0.41, push: 0,   op: 0.22, frame: [0.70, 0.40],
-      portrait: { dist: 12.0, fov: 32, frame: [0.55, 0.44] } },
-    { id: 'pitlane', dist: 13.5, az: 0,    el: 8,  fov: 34, rel: -2.91, push: -19, op: 0.85, frame: [0.50, 0.46],
-      portrait: { dist: 9.5, fov: 42, push: -14 } },
-  ];
-
-  let ACTIVE = SHOTS;
-  function pickShots() {
-    const portrait = camera.aspect < 1.15;
-    ACTIVE = SHOTS.map((s) => (portrait && s.portrait ? Object.assign({}, s, s.portrait) : s));
-  }
-
-  // unwrap azimuths once so the camera always takes the short way between
-  // consecutive shots — and so the derived yaw never jumps a full turn
-  for (let i = 1; i < SHOTS.length; i++) {
-    while (SHOTS[i].az - SHOTS[i - 1].az > 180) SHOTS[i].az -= 360;
-    while (SHOTS[i].az - SHOTS[i - 1].az < -180) SHOTS[i].az += 360;
-  }
-
-  const CAR_CENTRE = new THREE.Vector3(0, -0.55, 0);
-  const _fwd = new THREE.Vector3(), _right = new THREE.Vector3(), _up = new THREE.Vector3();
-  const _wUp = new THREE.Vector3(0, 1, 0);
-
-  /* Turn a shot description into a camera position + lookAt for the current viewport. */
-  function compose(dist, az, el, fov, fx, fy, outCam, outLook) {
-    const a = camera.aspect;
-    // safety net against extreme aspects — sized for a head-on car, since the
-    // portrait shots are head-on and the wide ones already sit far enough back
-    const need = 2.8 / (2 * Math.tan(fov * 0.5 * D2R) * Math.max(0.35, a));
-    const d = Math.max(dist, need);
-
-    const ce = Math.cos(el * D2R), se = Math.sin(el * D2R);
-    outCam.set(
-      CAR_CENTRE.x + d * ce * Math.sin(az * D2R),
-      CAR_CENTRE.y + d * se,
-      CAR_CENTRE.z + d * ce * Math.cos(az * D2R)
-    );
-
-    _fwd.copy(CAR_CENTRE).sub(outCam).normalize();
-    _right.crossVectors(_fwd, _wUp).normalize();
-    _up.crossVectors(_right, _fwd).normalize();
-
-    // world size of the frustum at the car's distance
-    const h = 2 * d * Math.tan(fov * 0.5 * D2R);
-    const w = h * a;
-
-    // put the car at (fx, fy) by sliding the aim point the other way
-    outLook.copy(CAR_CENTRE)
-      .addScaledVector(_right, -(fx - 0.5) * w)
-      .addScaledVector(_up, -(0.5 - fy) * h);
-  }
-
-  // layout-based document offset — unaffected by ScrollSmoother's transform
-  function docTop(el) {
-    let y = 0;
-    while (el) { y += el.offsetTop; el = el.offsetParent; }
-    return y;
-  }
-
-  let stops = SHOTS.map((_, i) => i / (SHOTS.length - 1));
-  function measure() {
-    const max = maxScroll();
-    stops = SHOTS.map((s) => {
-      const el = document.getElementById(s.id);
-      if (!el) return 0;
-      return Math.min(1, Math.max(0, (docTop(el) + el.offsetHeight * 0.35) / max));
-    });
-    // guarantee monotonic
-    for (let i = 1; i < stops.length; i++) if (stops[i] <= stops[i - 1]) stops[i] = stops[i - 1] + 0.001;
-  }
-
-  const vCam = new THREE.Vector3();
-  const vLook = new THREE.Vector3();
-  const tCam = new THREE.Vector3();
-  const tLook = new THREE.Vector3();
-  let tFov = SHOTS[0].fov, tYaw = SHOTS[0].yaw, tPush = 0, tOp = 1;
-
-  function sample(p) {
-    let i = 0;
-    while (i < stops.length - 2 && p > stops[i + 1]) i++;
-    const a = ACTIVE[i], b = ACTIVE[i + 1] || ACTIVE[i];
-    const span = Math.max(1e-4, stops[i + 1] - stops[i]);
-    let t = Math.min(1, Math.max(0, (p - stops[i]) / span));
-    t = t * t * (3 - 2 * t);                       // smoothstep
-    const mix = (u, v) => u + (v - u) * t;
-
-    // interpolate the *description*, then compose — so every in-between
-    // frame is a valid composition rather than a lerp through world space
-    tFov = mix(a.fov, b.fov);
-    tPush = mix(a.push, b.push);
-    tOp = mix(a.op, b.op);
-
-    const az = mix(a.az, b.az);
-    tYaw = mix(a.rel, b.rel) + az * D2R;
-
-    compose(
-      mix(a.dist, b.dist), az, mix(a.el, b.el), tFov,
-      mix(a.frame[0], b.frame[0]), mix(a.frame[1], b.frame[1]),
-      tCam, tLook
-    );
-  }
-
-  // seeded after the first resize(), once camera.aspect is real
-  function seedRig() { sample(0); vCam.copy(tCam); vLook.copy(tLook); }
-
-  /* ---------- resize ---------- */
-  function resize() {
-    const w = innerWidth, h = innerHeight;
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    pickShots();
-    measure();
-  }
-  resize();
-  seedRig();
-  addEventListener('resize', () => { clearTimeout(resize._t); resize._t = setTimeout(resize, 200); });
-  addEventListener('load', measure);
-  document.addEventListener('launched', () => setTimeout(measure, 400));
-  // pinning changes document height, so re-measure whenever ScrollTrigger does
-  if (window.ScrollTrigger) ScrollTrigger.addEventListener('refresh', measure);
-
-  /* ---------- pointer parallax ---------- */
-  let px = 0, py = 0, pxT = 0, pyT = 0;
-  addEventListener('pointermove', (e) => {
-    pxT = (e.clientX / innerWidth - 0.5) * 2;
-    pyT = (e.clientY / innerHeight - 0.5) * 2;
-  }, { passive: true });
-
-  /* ---------- load the car ---------- */
   const draco = new DRACOLoader();
-  draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/libs/draco/gltf/');
-  draco.setDecoderConfig({ type: 'js' });
-
+  draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/libs/draco/gltf/');
   const loader = new GLTFLoader();
   loader.setDRACOLoader(draco);
 
-  const tl = new THREE.TextureLoader();
-  function tex(url, srgb) {
-    const t = tl.load(url);
-    if (srgb) t.colorSpace = THREE.SRGBColorSpace;
-    t.flipY = false;                               // glTF convention
-    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    return t;
-  }
-
-  const mBody = new THREE.MeshStandardMaterial({
-    map: tex(TEX.base, true),
-    normalMap: tex(TEX.norm, false),
-    roughnessMap: tex(TEX.orm, false),
-    metalnessMap: tex(TEX.orm, false),
-    roughness: 1, metalness: 1,
-    envMapIntensity: 1.5,
-    transparent: true, opacity: 0,
-  });
-  const mChrome = new THREE.MeshStandardMaterial({
-    color: 0x9aa0aa, roughness: 0.09, metalness: 1,
-    envMapIntensity: 2.2, transparent: true, opacity: 0,
-  });
-  const mMatte = new THREE.MeshStandardMaterial({
-    color: 0x0a0a0d, roughness: 0.72, metalness: 0.1,
-    envMapIntensity: 0.5, transparent: true, opacity: 0,
-  });
-  const ALL = [mBody, mChrome, mMatte];
-
-  let loaded = false;
-
-  loader.load('assets/car/car.glb',
-    (gltf) => {
-      const root = gltf.scene;
-      root.traverse((o) => {
+  const box = new THREE.Box3();
+  const corners = [];
+  await new Promise((resolve, reject) => {
+    loader.load('assets/car/car.glb', (gltf) => {
+      const m = gltf.scene;
+      m.traverse((o) => {
         if (!o.isMesh) return;
         const n = (o.material && o.material.name || '').toLowerCase();
-        o.material = n.includes('mirror') ? mChrome
-                   : n.includes('filler') ? mMatte
-                   : mBody;
-        o.castShadow = o.receiveShadow = false;
+        o.material = n.includes('mirror') ? mChrome : n.includes('filler') ? mMatte : mBody;
         o.frustumCulled = false;
       });
+      // scale first, then centre on the scaled box. The mesh arrives mirrored
+      // (its livery text reads backwards on both sides), so flip it across its
+      // lateral axis; three.js swaps the winding for the negative determinant
+      const s = new THREE.Box3().setFromObject(m).getSize(new THREE.Vector3());
+      const k = 4.2 / Math.max(s.x, s.y, s.z);
+      m.scale.set(k, k, -k);
+      m.updateMatrixWorld(true);
+      const b = new THREE.Box3().setFromObject(m), c = b.getCenter(new THREE.Vector3());
+      m.position.x -= c.x; m.position.z -= c.z; m.position.y -= b.min.y + 1.0;
+      car.add(m);
+      car.updateMatrixWorld(true);
+      box.setFromObject(car);
+      for (let i = 0; i < 8; i++) corners.push(new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z));
+      resolve();
+    }, undefined, reject);
+  });
 
-      // scale FIRST, then re-measure and centre — centring on the unscaled
-      // box would offset by 1/scale and throw the car out of frame entirely
-      const size = new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3());
-      root.scale.setScalar(4.2 / Math.max(size.x, size.y, size.z));
-      root.updateMatrixWorld(true);
+  /* ---------- shot: side elevation to front three-quarter ---------- */
+  const D2R = Math.PI / 180;
+  const centre = new THREE.Vector3(0, -0.55, 0);
+  const look = new THREE.Vector3(), fwd = new THREE.Vector3(), right = new THREE.Vector3(), up = new THREE.Vector3();
+  const wUp = new THREE.Vector3(0, 1, 0);
+  const ss = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
-      const box = new THREE.Box3().setFromObject(root);
-      const ctr = box.getCenter(new THREE.Vector3());
-      root.position.x -= ctr.x;
-      root.position.z -= ctr.z;
-      root.position.y -= box.min.y + 1.0;      // wheels just above the shadow plane
-      carGroup.add(root);
-
-      loaded = true;
-      BOOT().scene(1);
-
-      const reveal = () => {
-        if (!window.gsap) { ALL.forEach((m) => (m.opacity = 1)); return; }
-        const o = { v: 0 };
-        window.gsap.to(o, {
-          v: 1, duration: 2.2, ease: 'power2.out',
-          onUpdate: () => ALL.forEach((m) => (m.opacity = o.v)),
-          onComplete: () => ALL.forEach((m) => { m.transparent = false; m.opacity = 1; }),
-        });
-      };
-      document.addEventListener('launched', reveal, { once: true });
-      // if we somehow load after launch, don't wait forever
-      setTimeout(() => { if (ALL[0].opacity === 0) reveal(); }, 7000);
-    },
-    (ev) => {
-      if (ev.lengthComputable) BOOT().scene(Math.min(0.98, ev.loaded / ev.total));
-      else BOOT().scene(0.5);
-    },
-    (err) => { console.warn('[scene] car failed to load:', err); BOOT().sceneFailed(); }
-  );
-
-  // small handle for debugging in the console
-  window.__scene = { scene, camera, carGroup, carPivot, renderer, mats: ALL, SHOTS, get loaded() { return loaded; } };
-
-  /* ---------- render loop (shares the GSAP ticker) ---------- */
-  const clock = new THREE.Clock();
-  let lastY = 0, vel = 0, streakLen = 0, streakOp = 0, tAcc = 0, reveal = 0;
-
-  function frame() {
-    const dt = Math.min(0.05, clock.getDelta());
-    const t = clock.elapsedTime;
-
-    const y = scrollY();
-    const max = maxScroll();
-    const p = Math.min(1, Math.max(0, y / max));
-
-    const rawV = (y - lastY) / Math.max(0.008, dt);
-    vel += (rawV - vel) * 0.14;
-    lastY = y;
-
-    sample(p);
-
-    // ease the rig toward the sampled shot
-    const k = 1 - Math.pow(0.001, dt);
-    px += (pxT - px) * k * 0.55;
-    py += (pyT - py) * k * 0.55;
-
-    vCam.lerp(tCam, k * 0.75);
-    vLook.lerp(tLook, k * 0.75);
-
-    camera.position.set(
-      vCam.x + px * 0.85,
-      vCam.y - py * 0.55 + Math.sin(t * 0.5) * 0.09,
-      vCam.z
-    );
-    camera.lookAt(vLook);
-    camera.fov += (tFov - camera.fov) * k * 0.6;
+  function shot(p) {
+    const portrait = camera.aspect < 1;
+    const t = ss(0.05, 0.95, p);
+    // film the car's right side: nose pointing right, the way the page reads
+    const az = 180 + 38 * t;
+    const el = 2 + (13 - 2) * t;
+    const fov = portrait ? 34 : 21;
+    const dist = (portrait ? 13.5 : 13.4) - (portrait ? 1.5 : 2.4) * t;
+    const fx = portrait ? 0.5 : 0.625, fy = portrait ? 0.62 : 0.56;
+    // keep the car inside the frame on narrow screens
+    const need = 5.2 / (2 * Math.tan(fov * 0.5 * D2R) * Math.max(0.45, camera.aspect));
+    const d = Math.max(dist, need);
+    const ce = Math.cos(el * D2R);
+    camera.fov = fov;
+    camera.position.set(centre.x + d * ce * Math.sin(az * D2R), centre.y + d * Math.sin(el * D2R), centre.z + d * ce * Math.cos(az * D2R));
+    fwd.copy(centre).sub(camera.position).normalize();
+    right.crossVectors(fwd, wUp).normalize();
+    up.crossVectors(right, fwd).normalize();
+    const h = 2 * d * Math.tan(fov * 0.5 * D2R), w = h * camera.aspect;
+    look.copy(centre).addScaledVector(right, -(fx - 0.5) * w).addScaledVector(up, -(0.5 - fy) * h);
+    camera.lookAt(look);
     camera.updateProjectionMatrix();
-
-    carPivot.rotation.y += (tYaw - carPivot.rotation.y) * k * 0.55;
-    carPivot.position.z += (tPush - carPivot.position.z) * k * 0.5;
-    // gentle life, but never enough to destroy a composed shot
-    carGroup.rotation.y = Math.sin(t * 0.17) * 0.055;
-    carGroup.rotation.z = Math.sin(t * 0.23 + 1.1) * 0.012;
-    carGroup.position.y = Math.sin(t * 0.45) * 0.1;
-
-    // lights breathe
-    rim.intensity = 7 + Math.sin(t * 1.5) * 1.6;
-    under.intensity = 4.5 + Math.sin(t * 0.85 + 1) * 1.1;
-
-    // streaks respond to scroll speed
-    const sp = Math.min(1, Math.abs(vel) / 2600);
-    streakLen += (sp * 26 - streakLen) * k * 0.5;
-    streakOp += (sp * 0.55 - streakOp) * k * 0.4;
-    tAcc += dt * (0.4 + sp * 5);
-    streaks.uniforms.uLen.value = streakLen;
-    streaks.uniforms.uOp.value = streakOp;
-    streaks.uniforms.uT.value = tAcc;
-
-    // one-way fade-in once the model is in, then pure shot-driven opacity
-    reveal += ((loaded ? 1 : 0) - reveal) * k * 0.25;
-    canvas.style.opacity = (tOp * reveal).toFixed(3);
-
-    renderer.render(scene, camera);
+    return az - 180;
   }
 
-  // GSAP already sleeps/wakes its ticker with document visibility — no extra handler needed
-  if (window.gsap) window.gsap.ticker.add(frame);
-  else (function raf() { requestAnimationFrame(raf); frame(); })();
+  // where the car sits on screen, so the line sweeps across the car and not empty paper
+  const v = new THREE.Vector3();
+  function carSpan() {
+    let lo = 1, hi = 0;
+    for (const c of corners) { v.copy(c).project(camera); const x = (v.x + 1) / 2; lo = Math.min(lo, x); hi = Math.max(hi, x); }
+    return [Math.max(0, lo - 0.04), Math.min(1, hi + 0.04)];
+  }
+
+  /* ---------- size + theme ---------- */
+  let W = 1, H = 1;
+  function resize() {
+    W = stage.clientWidth; H = stage.clientHeight;
+    renderer.setSize(W, H, false);
+    camera.aspect = W / H;
+    const bw = Math.round(W * DPR), bh = Math.round(H * DPR);
+    rt.setSize(bw, bh);
+    edgeMat.uniforms.res.value.set(bw, bh);
+    needs = true;
+  }
+  function readInk() {
+    const hex = getComputedStyle(root).getPropertyValue('--ink').trim() || '#131312';
+    const n = parseInt(hex.replace('#', ''), 16);
+    ink.set(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
+    needs = true;
+  }
+  resize(); readInk();
+  new ResizeObserver(resize).observe(stage);
+  document.addEventListener('themechange', () => requestAnimationFrame(readInk));
+
+  /* ---------- draw ---------- */
+  const meterDeg = document.getElementById('machineDeg');
+  const meterPct = document.getElementById('machinePct');
+  const scanEl = document.getElementById('machineScan');
+  let ps = calm ? 0.55 : M.p, drawnAt = -1;
+
+  function draw(p) {
+    const az = shot(p);
+    // the line: 0 = all drawing, 1 = all machine
+    const k = ss(0.14, 0.84, p);
+    const [lo, hi] = carSpan();
+    const split = k <= 0 ? 0 : k >= 1 ? 1 : lo + (hi - lo) * k;
+    const sx = Math.round(W * split);
+
+    renderer.setRenderTarget(rt);
+    renderer.clear();
+    scene.overrideMaterial = normalMat; shadow.visible = false;
+    renderer.render(scene, camera);
+    scene.overrideMaterial = null; shadow.visible = true;
+
+    renderer.setRenderTarget(null);
+    renderer.clear();
+    renderer.setScissorTest(true);
+    if (sx > 0) { renderer.setScissor(0, 0, sx, H); renderer.setViewport(0, 0, W, H); renderer.render(scene, camera); }
+    if (sx < W) { renderer.setScissor(sx, 0, W - sx, H); renderer.setViewport(0, 0, W, H); renderer.render(qScene, qCam); }
+    renderer.setScissorTest(false);
+
+    stage.style.setProperty('--scan', (split * 100).toFixed(3) + '%');
+    if (scanEl) scanEl.style.opacity = split > 0.001 && split < 0.999 ? 1 : 0;
+    if (meterDeg) meterDeg.textContent = String(Math.round(Math.abs(az))).padStart(3, '0') + '°';
+    if (meterPct) meterPct.textContent = Math.round(k * 100) + '%';
+    stage.style.setProperty('--mp', k.toFixed(3));
+    drawnAt = p;
+  }
+
+  function frame() {
+    if (!M.near && !needs && drawnAt >= 0) return;
+    if (!calm) ps += (M.p - ps) * 0.14;
+    if (needs || Math.abs(ps - drawnAt) > 0.0004) { needs = false; draw(ps); }
+  }
+  if (window.gsap && !calm) window.gsap.ticker.add(frame);
+  else if (!calm) {
+    // GSAP never arrived (blocked CDN): read progress straight off the scroll position
+    const sec = document.getElementById('machine');
+    (function tick() {
+      const r = sec.getBoundingClientRect();
+      M.p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - innerHeight)));
+      M.near = r.top < innerHeight * 1.5 && r.bottom > -innerHeight * 0.5;
+      frame();
+      requestAnimationFrame(tick);
+    })();
+  } else { draw(ps); document.addEventListener('themechange', () => setTimeout(() => draw(ps), 30)); new ResizeObserver(() => draw(ps)).observe(stage); }
+
+  // headless capture hook (used to make the no-WebGL fallback image)
+  window.__sceneCapture = (p) => { ps = p; draw(p); return true; };
+  window.__ready = true;
+  root.classList.add('webgl-ready');
 }

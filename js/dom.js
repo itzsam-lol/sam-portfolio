@@ -1,339 +1,470 @@
 /* ============================================================
-   DOM — builds the page from window.DATA. No framework.
-   Everything renders synchronously into #app before motion runs.
+   DOM: builds the page from window.DATA.
+   Plain template strings; everything lands in <main> before
+   any motion runs, so the page is complete without GSAP.
    ============================================================ */
 
 (function () {
   const D = window.DATA;
+  const P = D.person;
 
   /* ---------- helpers ---------- */
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pad = (n) => String(n).padStart(2, '0');
+  const ext = '<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg>';
+  // `about` names the thing being linked, for anyone navigating by links alone
+  const extLink = (l, cls = 'lnk', about = '') =>
+    `<a class="${cls}" href="${esc(l.href)}" target="_blank" rel="noopener"${about ? ` aria-label="${esc(about)}: ${esc(l.label)}"` : ''}>${esc(l.label)}${ext}</a>`;
+  // Greek letters only exist in STIX's subset
+  const greek = (s) => esc(s).replace(/ρ/g, '<span class="gr">ρ</span>');
+  // Hubot's zero carries a notch that reads as θ at display sizes; set digits in Mona
+  const dg = (s) => esc(s).replace(/\d[\d.,]*/g, '<span class="dg">$&</span>');
 
-  // "text with |red part" -> markup with the piece after | wrapped in .hot
-  const hot = (s) => {
-    const i = s.indexOf('|');
-    return i < 0 ? esc(s) : esc(s.slice(0, i)) + '<span class="hot">' + esc(s.slice(i + 1)) + '</span>';
-  };
+  // a section header: hairline row (label + aside), then the big title
+  function head(label, title, aside, intro) {
+    return `
+      <header class="sec-head">
+        <div class="sec-row"><span class="sec-label">${esc(label)}</span><span class="sec-aside">${esc(aside)}</span></div>
+        <div class="sec-main ${title.length <= 7 ? 'is-short' : ''}">
+          <h2 class="sec-title split">${esc(title)}</h2>
+          ${intro ? `<p class="sec-intro reveal">${esc(intro)}</p>` : ''}
+        </div>
+      </header>`;
+  }
 
-  // split a word into individually animatable spans
-  const chars = (word, cls) =>
-    [...word].map((c) => `<span class="${cls}">${esc(c)}</span>`).join('');
-
-  const secHead = (n, label, side) => `
-    <div class="sec-head">
-      <span class="n">${esc(n)} /</span>
-      <span>${esc(label)}</span>
-      <span class="rule"></span>
-      <span class="side">${esc(side)}</span>
-    </div>`;
-
-  const chips = (arr) => arr.map((t) => `<span class="chip">${esc(t)}</span>`).join('');
-
-  /* ---------- 0. HERO ---------- */
+  /* ---------- 0. hero ---------- */
   function hero() {
-    const d = D.driver;
-    const head = d.name.slice(0, d.split);
-    const tail = d.name.slice(d.split);
-
-    const tick = D.ticker.map((t) =>
-      `<span><b>&#9679;</b>&nbsp; ${esc(t)}</span>`).join('');
-
-    const cells = D.heroCells.map((c) => `
-      <div class="cell">
-        <span>${esc(c.k)}</span>
-        <b class="${c.tone === 'green' ? 'green' : ''}" ${c.k === 'Status' ? 'id="heroStatus"' : ''}>${esc(c.v)}</b>
-      </div>`).join('');
+    const name = P.name.toUpperCase();
+    const facts = D.hero.facts.map((f) => `
+      <li class="hf">
+        <span class="hf-k">${esc(f.k)}</span>
+        <b class="hf-v">${dg(f.v)}</b>
+        <span class="hf-d">${esc(f.d)}</span>
+      </li>`).join('');
+    const sizes = '(max-width: 760px) 92vw, 44vw';
+    const p = P.portrait;
 
     return `
-    <section class="hero" id="top">
-      <div class="hero-bg">
-        <div class="hero-grid"></div>
-        <div class="hero-glow"></div>
-        <div class="hero-glow2"></div>
-        <div class="hero-scan"></div>
+    <section class="hero" id="top" aria-label="Introduction">
+      <div class="hero-meta boot">
+        <p class="hero-role">${esc(P.role)}<br>${esc(P.school)}, class of ${esc(P.classOf)}</p>
+        <p class="hero-where"><span>${esc(P.city)}</span> <time class="clock" id="clock">00:00</time> <span class="hero-tz">IST</span></p>
       </div>
 
-      <div class="ticker" aria-hidden="true">
-        <div class="ticker-track" id="tickerA">${tick}</div>
-        <div class="ticker-track" id="tickerB">${tick}</div>
-      </div>
-
-      <div class="hero-body">
-        <div class="hero-top boot-hidden" id="heroTop">
-          <div class="hero-kicker">
-            <div>SESSION <b>RACE</b> &middot; ROUND <b>${esc(d.round)}</b> &middot; CIRCUIT <b>${esc(d.circuit)}</b></div>
-            <div>TEAM <b>${esc(d.team)}</b> &middot; SEASON <b>${esc(d.season)}</b></div>
-          </div>
-          <div class="hero-lights" id="heroLights" aria-hidden="true">
-            <i></i><i></i><i></i><i></i><i></i>
-          </div>
+      <div class="hero-stage">
+        <h1 class="hero-name" id="heroName" aria-label="${esc(P.name)}">
+          <span class="hn" aria-hidden="true">${[...name].map((c) => `<span class="hn-ch">${esc(c)}</span>`).join('')}</span>
+        </h1>
+        <picture class="hero-portrait" id="portrait">
+          <source type="image/avif" srcset="${esc(p.small.replace('.webp', '.avif'))} 640w, ${esc(p.avif)} 900w" sizes="${sizes}">
+          <source type="image/webp" srcset="${esc(p.small)} 640w, ${esc(p.webp)} 900w" sizes="${sizes}">
+          <img src="${esc(p.webp)}" width="${p.w}" height="${p.h}" alt="${esc(p.alt)}" fetchpriority="high" decoding="async">
+        </picture>
+        <div class="hero-plate boot" aria-hidden="true">
+          <span class="hp-bar"></span><span class="hp-code">${esc(P.code)}</span><span class="hp-num">${esc(P.number)}</span>
         </div>
-
-        <div class="hero-name">
-          <h1 aria-label="${esc(d.name)}">
-            ${chars(head, 'hero-ch')}<span class="red">${chars(tail, 'hero-ch')}</span>
-          </h1>
-          <div class="hero-role boot-hidden" id="heroRole">
-            <span class="dash"></span><span>${esc(d.role)}</span>
-          </div>
-        </div>
-
-        <div class="hero-strip boot-hidden" id="heroStrip">${cells}</div>
       </div>
 
-      <div class="scroll-cue boot-hidden" id="scrollCue">
-        <span>SCROLL &middot; BEGIN STINT</span><span class="tube"></span>
+      <p class="hero-lede boot">${esc(D.hero.lede)}</p>
+      <ul class="hero-facts boot" aria-label="At a glance">${facts}</ul>
+
+      <div class="lights" id="lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    </section>`;
+  }
+
+  /* ---------- 1. intro statement ---------- */
+  function intro() {
+    return `
+    <section class="intro" id="intro" aria-label="In short">
+      <div class="intro-grid">
+        <p class="intro-k">In short</p>
+        <p class="intro-text" id="introText">${esc(D.intro)}</p>
       </div>
     </section>`;
   }
 
-  /* ---------- 1. DRIVER ---------- */
-  function driver() {
-    const p = D.profile, d = D.driver;
-
-    const spec = p.spec.map((s) =>
-      `<div class="r"><span>${esc(s.k)}</span><b>${esc(s.v)}</b></div>`).join('');
-
-    const stats = p.stats.map((s) => `
-      <div class="s">
-        <div class="lbl">${esc(s.lbl)}</div>
-        <div class="val"><span data-count="${s.to}" data-suffix="${esc(s.suffix)}">${s.to}${esc(s.suffix)}</span></div>
-      </div>`).join('');
-
-    const bio = p.bio.map((t) => `<p class="rise">${esc(t)}</p>`).join('');
-
+  /* ---------- 2. interlude: drawing to machine ---------- */
+  function machine() {
+    const M = D.machine;
     return `
-    <section class="sec band" id="driver">
-      <div class="sec-inner">
-        ${secHead('01', 'Driver Profile', 'Installation Lap')}
-        <div class="driver-grid">
+    <section class="machine" id="machine" aria-label="Interlude">
+      <div class="machine-stage">
+        <canvas class="machine-canvas" id="machineCanvas" aria-hidden="true"></canvas>
+        <img class="machine-fallback" id="machineFallback" data-src="assets/car-drawing.webp" alt="" width="1217" height="318" decoding="async">
+        <div class="machine-scan" id="machineScan" aria-hidden="true">
+          <span class="ms-l">Machine</span><span class="ms-r">Drawing</span>
+        </div>
+        <div class="machine-copy">
+          <h2 class="machine-line split">${esc(M.line)}</h2>
+          <p class="machine-note">${esc(M.note)}</p>
+        </div>
+        <p class="machine-cap machine-cap-live">${esc(M.caption)}</p>
+        <p class="machine-cap machine-cap-still">${esc(M.still)}</p>
+        <div class="machine-meter" aria-hidden="true"><span id="machineDeg">000°</span><i><b id="machineBar"></b></i><span id="machinePct">0%</span></div>
+      </div>
+    </section>`;
+  }
 
-          <div class="frame rise" id="driverFrame" data-cursor="driver">
-            <span class="c tl"></span><span class="c tr"></span>
-            <span class="c bl"></span><span class="c br"></span>
-            <span class="tag a rec"><i></i>REC</span>
-            <span class="tag b">04 &middot; IND</span>
-            <span class="tag c2">${esc(d.coords)}</span>
-            <span class="tag d">ISO 800 &middot; f/1.8</span>
-            <div class="frame-media">
-              <img src="${esc(d.photo)}" alt="Satyam" width="1100" height="1100" loading="lazy" decoding="async" id="driverImg" />
-              <span class="frame-sweep"></span>
+  /* ---------- 3. selected work: drawing sheets ---------- */
+  function metricsDL(ms) {
+    if (!ms || !ms.length) return '';
+    return `<dl class="metrics">${ms.map((m) => `
+      <div class="metric"><dt>${esc(m.k)}</dt><dd><span class="m-v">${esc(m.v)}</span>${m.u ? `<span class="m-u">${esc(m.u)}</span>` : ''}</dd></div>`).join('')}
+    </dl>`;
+  }
+
+  function work() {
+    const total = D.work.length;
+    // the anchor stays in normal flow; the sticky sheet itself is a poor scroll target
+    const sheets = D.work.map((w, i) => `
+      <div class="anchor" id="${esc(w.id)}"></div>
+      <article class="sheet" style="--i:${i}" aria-labelledby="t-${esc(w.id)}">
+        <div class="sheet-in">
+          <header class="sheet-top">
+            <span class="sheet-n">${pad(i + 1)}</span>
+            <span class="sheet-area">${esc(w.area)}</span>
+            <span class="sheet-status">${esc(w.status)}</span>
+            <span class="sheet-links">${w.links.map((l) => extLink(l, 'lnk', w.title)).join('')}</span>
+          </header>
+          <div class="sheet-body">
+            <div class="sheet-text">
+              <h3 class="sheet-title" id="t-${esc(w.id)}">${dg(w.title)}</h3>
+              <p class="sheet-line">${esc(w.line)}</p>
+              <p class="sheet-desc">${esc(w.body)}</p>
+              <ul class="sheet-points">${w.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
+              ${metricsDL(w.metrics)}
             </div>
+            <figure class="fig sheet-fig" data-fig="${esc(w.fig)}">
+              <div class="fig-plate">${window.Figures.render(w.fig)}</div>
+              <figcaption><span class="fig-n">Fig. ${i + 1}</span>${esc(w.caption)}</figcaption>
+            </figure>
           </div>
-
-          <div class="driver-copy">
-            <div class="eyebrow rise">// PROFILE.READ</div>
-            <h3 class="split-lines">${hot(p.heading[0])}<br>${hot(p.heading[1])}</h3>
-            ${bio}
-            <div class="spec-list rise">${spec}</div>
-            <div class="stat-row rise">${stats}</div>
-          </div>
-
+          <footer class="tblock">
+            <div class="tb"><span>Project</span><b>${esc(w.title)}</b></div>
+            <div class="tb tb-wide"><span>Stack</span><b>${esc(w.stack.join(' · '))}</b></div>
+            <div class="tb"><span>Sheet</span><b>${i + 1} of ${total}</b></div>
+          </footer>
         </div>
-      </div>
-    </section>`;
-  }
-
-  /* ---------- 2. SETUP ---------- */
-  function setup() {
-    const comps = D.compounds.map((c) => `
-      <button class="comp ${c.id === 'all' ? 'on' : ''}" data-c="${esc(c.id)}"
-              aria-pressed="${c.id === 'all'}" data-cursor="filter">
-        <span class="ring">${esc(c.letter)}</span>
-        <span class="cl">${esc(c.label)}</span>
-      </button>`).join('');
-
-    const rows = D.skills.map((s, i) => `
-      <div class="skill" data-c="${esc(s.compound)}" data-w="${s.w}">
-        <span class="skill-mark"></span>
-        <div class="skill-top">
-          <span class="skill-name">${esc(s.name)}</span>
-          <span class="skill-pct">${String(s.w).padStart(3, '0')} / 100</span>
-        </div>
-        <div class="skill-bar"><i class="${i % 2 ? 'alt' : ''}" style="width:${s.w}%"></i><u></u></div>
-        <div class="skill-tags">${chips(s.tags)}</div>
-      </div>`).join('');
-
-    return `
-    <section class="sec" id="setup">
-      <div class="sec-inner">
-        ${secHead('02', 'Setup Sheet', 'Tech Stack · Compound Analysis')}
-        <div class="setup-grid">
-          <div class="setup-left">
-            <div class="eyebrow rise">// GARAGE.LOADOUT</div>
-            <h3 class="split-lines">Tools<br>I race with.</h3>
-            <p class="rise">Calibrated for high-stakes builds &mdash; from algorithmic problem sets
-              through ML pipelines to production payment-flow testing. Pick a compound to filter
-              the setup.</p>
-            <div class="compounds rise" id="compounds" role="group" aria-label="Filter by compound">${comps}</div>
-          </div>
-          <div class="skill-grid" id="skillGrid">${rows}</div>
-        </div>
-      </div>
-    </section>`;
-  }
-
-  /* ---------- 3. HISTORY ---------- */
-  function history() {
-    const rows = D.races.map((r, i) => `
-      <div class="trow" data-i="${i}">
-        <button class="trow-main" aria-expanded="false" aria-controls="det-${i}" data-cursor="expand">
-          <span class="t-pos">${esc(r.pos)}</span>
-          <span class="t-role">
-            ${r.logo ? `<span class="t-logo"><img src="${esc(r.logo)}" alt="" width="220" height="220" loading="lazy" decoding="async"></span>` : ''}
-            <span><b>${esc(r.role)}</b><span>${esc(r.org)}</span></span>
-          </span>
-          <span class="t-when">${esc(r.when)}</span>
-          <span class="t-laps">${esc(r.laps)}</span>
-          <span class="t-best ${esc(r.tone)}">${esc(r.best)}<span>${esc(r.bestLbl)}</span></span>
-          <span class="t-tog" aria-hidden="true"></span>
-        </button>
-        <div class="t-detail" id="det-${i}">
-          <div class="t-detail-in">
-            <p>${esc(r.gist)}</p>
-            <ul class="t-points">${r.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
-          </div>
-        </div>
-      </div>`).join('');
-
-    return `
-    <section class="sec band" id="history">
-      <div class="sec-inner">
-        ${secHead('03', 'Race History', 'Seasons 2024 → 2026')}
-        <h2 class="sec-title split-lines">Race <span class="hot">results.</span></h2>
-        <div class="board">
-          <div class="board-head">
-            <span>Pos</span><span>Role &amp; Team</span><span>Window</span>
-            <span>Duration</span><span>Best</span><span></span>
-          </div>
-          ${rows}
-        </div>
-      </div>
-    </section>`;
-  }
-
-  /* ---------- 4. GARAGE ---------- */
-  function garage() {
-    const cards = D.projects.map((p) => `
-      <a class="card ${p.featured ? 'wide' : ''}" href="${esc(p.href)}"
-         target="_blank" rel="noreferrer noopener" data-cursor="open">
-        <div class="card-top">
-          <span class="card-n">${esc(p.n)}</span>
-          <span class="card-badge"><i></i>${esc(p.badge)}</span>
-        </div>
-        <h4>${esc(p.title)}</h4>
-        <div class="sub">${esc(p.subtitle)}</div>
-        <p>${esc(p.desc)}</p>
-        <div class="card-metrics">
-          ${p.metrics.map((m) => `<div><div class="k">${esc(m.k)}</div><div class="v">${esc(m.v)}</div></div>`).join('')}
-        </div>
-        <div class="card-stack">${chips(p.stack)}</div>
-        <div class="card-foot">
-          <span>Chassis ${esc(p.n)}</span>
-          <span class="go">Open repo <span class="arr"></span></span>
-        </div>
-      </a>`).join('');
-
-    return `
-    <section class="garage" id="garage">
-      ${secHead('04', 'The Garage', 'Projects · Chassis Builds')}
-      <h2 class="sec-title split-lines">What I&rsquo;m <span class="hot">shipping.</span></h2>
-      <div class="rail-vp" id="railVp">
-        <div class="rail-track" id="railTrack">${cards}</div>
-      </div>
-      <div class="rail-meter">
-        <span class="rail-hint"><i></i><span id="railHint">Drag or scroll</span></span>
-        <span class="bar"><i id="railMeter"></i></span>
-        <span class="tnum" id="railCount">01 / ${String(D.projects.length).padStart(2, '0')}</span>
-      </div>
-    </section>`;
-  }
-
-  /* ---------- 5. CREW ---------- */
-  function crew() {
-    const tiles = D.crew.map((c) => `
-      <article class="tile ${esc(c.size)}">
-        <div class="tile-head">
-          <span class="tile-role">${esc(c.role)}</span>
-          ${c.logo ? `<span class="tile-logo"><img src="${esc(c.logo)}" alt="" width="220" height="220" loading="lazy" decoding="async"></span>` : ''}
-        </div>
-        <h4>${esc(c.title)}</h4>
-        <div class="when">${esc(c.when)}</div>
-        <p>${esc(c.gist)}</p>
-        <div class="big"><span data-count="${c.to}" data-suffix="${esc(c.suffix)}">${c.to}${esc(c.suffix)}</span>
-          <span>${esc(c.bigLbl)}</span></div>
-      </article>`).join('');
-
-    const stats = D.crewStats.map((s) => `
-      <article class="tile stat sm">
-        <span class="k">${esc(s.k)}</span>
-        <span class="v" data-count="${s.to}" data-suffix="${esc(s.suffix)}">${s.to}${esc(s.suffix)}</span>
       </article>`).join('');
 
     return `
-    <section class="sec" id="crew">
-      <div class="sec-inner">
-        ${secHead('05', 'Pit Crew', 'Leadership · Operations')}
-        <h2 class="sec-title split-lines">Off-track <span class="hot">ops.</span></h2>
-        <div class="bento" id="bento">${tiles}${stats}</div>
+    <section class="work" id="work">
+      ${head('Selected work', 'Work', `${pad(total)} of ${D.archive.length} projects`,
+        'Six projects I would happily walk an engineer through. Each sheet has a drawing of how the thing actually works; everything else is in the archive.')}
+      <div class="sheets">${sheets}</div>
+    </section>`;
+  }
+
+  /* ---------- 4. research ---------- */
+  function research() {
+    const R = D.paper;
+    const U = D.udyox;
+
+    const results = R.results.map((r) => `
+      <div class="res ${r.primary ? 'is-primary' : ''}">
+        <dt>${greek(r.k)}</dt>
+        <dd><span class="res-v">${esc(r.v)}</span>${r.ci ? `<span class="res-ci">95% CI ${r.ci[0].toFixed(2)} to ${r.ci[1].toFixed(2)}</span>` : ''}<span class="res-d">${esc(r.d)}</span></dd>
+      </div>`).join('');
+
+    const rows = R.datasets.map((d) => `
+      <tr><th scope="row">${esc(d.name)}</th><td>${esc(d.cell)}</td><td>${esc(d.kind)}</td><td>${esc(d.unit)}</td><td class="num">${esc(d.n)}</td></tr>`).join('');
+
+    const quant = D.quant.map((q, i) => `
+      <article class="qcard" id="${esc(q.id)}">
+        <header class="qcard-top"><span class="qcard-n">${String.fromCharCode(97 + i)}</span><h4 class="qcard-title">${dg(q.title)}</h4>
+          ${q.href ? `<a class="lnk lnk-sm" href="${esc(q.href)}" target="_blank" rel="noopener" aria-label="${esc(q.title)} repository">Code${ext}</a>` : ''}</header>
+        <p class="qcard-q">${esc(q.q)}</p>
+        <figure class="fig qfig" data-fig="${esc(q.fig)}"><div class="fig-plate fig-plate-sm">${window.Figures.render(q.fig)}</div></figure>
+        <p class="qcard-body">${esc(q.body)}</p>
+        ${q.finds.length ? `<ul class="qcard-finds">${q.finds.map((x) => `<li>${greek(x)}</li>`).join('')}</ul>` : ''}
+      </article>`).join('');
+
+    const ongoing = D.ongoing.map((o) => `
+      <li class="og"><b>${dg(o.title)}</b><span>${esc(o.d)}</span>${o.href ? extLink({ href: o.href, label: o.label }, 'lnk lnk-sm', o.title) : '<i class="og-tag">Ongoing</i>'}</li>`).join('');
+
+    return `
+    <section class="research" id="research">
+      ${head('Research', 'Research', 'A preprint, a field study, four quant projects',
+        'The questions I keep coming back to are about deciding before spending: which experiment to run, which retry to make, which signal to trust.')}
+
+      <div class="paper" id="research-paper">
+        <div class="paper-sheet-wrap">
+          <article class="paper-sheet" aria-label="First page of the preprint">
+            <p class="ps-run"><span>${esc(R.note)}</span></p>
+            <h3 class="ps-title">${esc(R.title)}</h3>
+            <p class="ps-auth">${esc(R.authors)}<sup>1</sup></p>
+            <p class="ps-aff"><sup>1</sup>${esc(R.affiliation)}</p>
+            <p class="ps-abs-h">Abstract</p>
+            <p class="ps-abs">${esc(R.abstract)} On the genome-scale Replogle K562 essential screen the triage achieves Random Forest <mark class="hl">Spearman ρ 0.65</mark> (95% CI [0.61, 0.69]) and <mark class="hl">ROC-AUC 0.86</mark>.</p>
+            <p class="ps-foot"><span>${esc(R.venue)}</span><span>1</span></p>
+          </article>
+        </div>
+        <div class="paper-side">
+          <p class="paper-kicker">${esc(R.venue)} · first author</p>
+          <p class="paper-plain">${esc(R.plain)}</p>
+          <figure class="fig" data-fig="pgip">
+            <div class="fig-plate">${window.Figures.render('pgip')}</div>
+            <figcaption><span class="fig-n">Fig. 7</span>Two-stage triage. Stage 1 predicts Baseline Saturation from features known before the experiment; Stage 2 routes each perturbation to the free baseline or the costly model.</figcaption>
+          </figure>
+          <dl class="results">${results}</dl>
+          <figure class="fig" data-fig="pgipres">
+            <div class="fig-plate fig-plate-flat">${window.Figures.render('pgipres')}</div>
+            <figcaption><span class="fig-n">Fig. 8</span>Headline results with the 95% bootstrap interval for the random forest.</figcaption>
+          </figure>
+          <div class="ds">
+            <table class="ds-table">
+              <caption>The six screens used, with scored perturbations</caption>
+              <thead><tr><th scope="col">Dataset</th><th scope="col">Cell line</th><th scope="col">Perturbation</th><th scope="col">Unit</th><th scope="col" class="num">Scored</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+          <p class="paper-meta"><span>Methods</span>${esc(R.methods.join(', '))}</p>
+          <p class="paper-links">${R.links.map((l) => extLink(l, 'lnk', 'Preprint')).join('')}</p>
+        </div>
+      </div>
+
+      <div class="udyox" id="udyox">
+        <div class="udyox-head">
+          <p class="udyox-kind">${esc(U.kind)}</p>
+          <h3 class="udyox-title">${dg(U.title)}</h3>
+          <p class="udyox-line">${esc(U.line)}</p>
+          <p class="udyox-links">${U.links.map((l) => extLink(l, 'lnk', U.title)).join('')}</p>
+        </div>
+        <div class="udyox-body">
+          <ul class="udyox-nums">${U.numbers.map((n) => `<li><b>${esc(n.v)}</b><span>${esc(n.k)}</span></li>`).join('')}</ul>
+          <p class="udyox-text">${esc(U.body)}</p>
+          <p class="udyox-stack">${esc(U.stack.join(' · '))}</p>
+        </div>
+      </div>
+
+      <div class="quant">
+        <div class="quant-head"><h3 class="sub-title">Quant and data</h3><p class="sub-note">Four questions, answered with public data.</p></div>
+        <div class="quant-grid">${quant}</div>
+      </div>
+
+      <div class="ongoing">
+        <h3 class="sub-title">On the bench</h3>
+        <ul class="og-list">${ongoing}</ul>
       </div>
     </section>`;
   }
 
-  /* ---------- 6. PIT LANE ---------- */
-  function pitlane() {
-    const L = D.links;
+  /* ---------- 5. experience: stint chart + entries ---------- */
+  const ym = (s) => { const [y, m] = s.split('-').map(Number); return y * 12 + (m - 1); };
+  const monthName = (s) => new Date(s + '-01T00:00:00').toLocaleString('en-GB', { month: 'short', year: 'numeric' });
+
+  function stints() {
+    const T = D.timeline;
+    const now = new Date();
+    const nowYM = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+    const a = ym(T.from), b = ym(T.to) + 1, span = b - a;
+    const pct = (s) => ((Math.min(Math.max(ym(s), a), b) - a) / span) * 100;
+    const nowPct = pct(nowYM);
+
+    const years = [];
+    for (let y = +T.from.slice(0, 4) + 1; y <= +T.to.slice(0, 4); y++) years.push(y);
+    const axis = years.map((y) => `<span class="st-year" style="left:${pct(y + '-01').toFixed(3)}%">${y}</span>`).join('');
+
+    const rows = T.rows.map((r) => `
+      <div class="st-row">
+        <span class="st-label">${esc(r.label)}</span>
+        <div class="st-track">
+          ${r.stints.map((s) => {
+            const open = !s.to;
+            const end = open ? nowYM : s.to;
+            const l = pct(s.from), w = Math.max(1.4, pct(end) - l + (open ? 0 : 100 / span));
+            const months = ym(end) - ym(s.from) + 1;
+            const narrow = months <= 5;            // label rides outside short stints
+            const C = D.compounds[s.c];
+            const when = `${monthName(s.from)} to ${open ? 'now' : monthName(s.to)}`;
+            const label = `<span class="stint-t">${esc(s.at)}</span>`;
+            return `<div class="stint c-${s.c} ${open ? 'is-open' : ''} ${narrow ? 'is-narrow' : ''}" style="left:${l.toFixed(3)}%;width:${w.toFixed(3)}%" tabindex="0"
+                      role="img" aria-label="${esc(`${s.t}, ${s.at}, ${when}`)}">
+                <span class="stint-bar"><span class="tyre" aria-hidden="true">${esc(C.name[0])}</span>${narrow ? '' : label}</span>
+                ${narrow ? label : ''}
+                <span class="stint-tip" role="tooltip"><b>${esc(s.t)}</b><span>${esc(s.at)}</span><span class="stint-when">${esc(when)}</span></span>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`).join('');
+
+    const legend = Object.entries(D.compounds).map(([k, c]) => `
+      <li class="lg c-${k}"><span class="tyre" aria-hidden="true">${esc(c.name[0])}</span><span><b>${esc(c.means)}</b> <i>${esc(c.name.toLowerCase())}</i></span></li>`).join('');
+
     return `
-    <section class="pitlane" id="pitlane">
+      <figure class="stints" id="stints">
+        <div class="st-scroll" id="stScroll">
+          <div class="st-chart" style="--now:${nowPct.toFixed(3)}%">
+            <div class="st-axis">${axis}</div>
+            <div class="st-row st-head" aria-hidden="true"><span class="st-label"></span><span></span></div>
+            ${rows}
+            <div class="st-now" aria-hidden="true"><span>Now</span></div>
+            <div class="st-future" aria-hidden="true"></div>
+          </div>
+        </div>
+        <figcaption class="st-cap">
+          <ul class="st-legend">${legend}</ul>
+          <p>Read it like a tyre-strategy graphic: one row per kind of work, one bar per stint, compound by type. Hatched area is still to come.</p>
+        </figcaption>
+      </figure>`;
+  }
+
+  function experience() {
+    const jobs = D.experience.map((e) => `
+      <li class="job">
+        <div class="job-when"><span>${esc(e.when)}</span><span class="job-where">${esc(e.where)}</span></div>
+        <div class="job-main">
+          <h3 class="job-org">${dg(e.org)}</h3>
+          <p class="job-role">${esc(e.role)}</p>
+          <p class="job-d">${esc(e.d)}</p>
+          <ul class="job-points">${e.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
+          <p class="job-tags">${esc(e.tags.join(' · '))}</p>
+        </div>
+      </li>`).join('');
+
+    return `
+    <section class="experience" id="experience">
+      ${head('Experience', 'Experience', 'August 2023 to graduation, 2027',
+        'Two internships, a teaching role, a research stint and a lot of hackathon logistics, laid out the way a race engineer would read them.')}
+      ${stints()}
+      <ol class="jobs">${jobs}</ol>
+    </section>`;
+  }
+
+  /* ---------- 6. about: off track, awards, toolkit ---------- */
+  function about() {
+    const off = D.offtrack.map((o) => `
+      <li class="ot">
+        <div class="ot-main">
+          <p class="ot-role">${esc(o.role)}</p>
+          <h3 class="ot-org">${o.href ? `<a class="lnk lnk-quiet" href="${esc(o.href)}" target="_blank" rel="noopener">${dg(o.org)}${ext}</a>` : dg(o.org)}</h3>
+          <p class="ot-d">${esc(o.d)}</p>
+        </div>
+        ${o.v ? `<p class="ot-num"><b>${esc(o.v)}</b><span>${esc(o.k)}</span></p>` : '<p class="ot-num ot-num-none" aria-hidden="true"></p>'}
+      </li>`).join('');
+
+    const awards = D.awards.map((a) => `
+      <li class="aw"><b>${a.href ? `<a class="lnk lnk-quiet" href="${esc(a.href)}" target="_blank" rel="noopener">${esc(a.t)}${ext}</a>` : esc(a.t)}</b>${a.d ? `<span>${esc(a.d)}</span>` : ''}</li>`).join('');
+
+    // how many projects use each tool
+    const uses = {};
+    D.archive.forEach((p) => p.stack.forEach((s) => { const k = s.toLowerCase(); (uses[k] = uses[k] || []).push(p.name); }));
+    const groups = D.toolkit.map((g) => `
+      <div class="tk-group">
+        <h4 class="tk-h">${esc(g.group)}</h4>
+        <ul class="tk-list">${g.items.map((it) => {
+          const u = uses[it.toLowerCase()] || [];
+          return `<li><button class="tk" type="button" data-tool="${esc(it)}" ${u.length ? '' : 'data-none'}
+                    aria-label="${esc(it)}${u.length ? `, used in ${u.length} project${u.length > 1 ? 's' : ''}` : ''}">${esc(it)}${u.length ? `<sup>${u.length}</sup>` : ''}</button></li>`;
+        }).join('')}</ul>
+      </div>`).join('');
+
+    return `
+    <section class="about" id="about">
+      ${head('About', 'Off track', 'Community, teaching and the rest',
+        'Most of what I have learned about running things came from organising events for people who did not have to show up.')}
+      <ol class="ot-list">${off}</ol>
+
+      <div class="about-split">
+        <div class="awards">
+          <h3 class="sub-title">Recognition</h3>
+          <ul class="aw-list">${awards}</ul>
+          <p class="langs"><span>Languages</span>${esc(P.languages)}</p>
+        </div>
+        <div class="courses">
+          <h3 class="sub-title">Coursework</h3>
+          <p class="course-list">${D.coursework.map((c) => `<span>${esc(c)}</span>`).join('')}</p>
+        </div>
+      </div>
+
+      <div class="toolkit" id="toolkit">
+        <div class="tk-head">
+          <h3 class="sub-title">Toolkit</h3>
+          <p class="tk-readout" id="tkReadout" aria-live="polite">The small number is how many projects on this page use it. Pick one to see them in the archive.</p>
+        </div>
+        <div class="tk-grid">${groups}</div>
+      </div>
+    </section>`;
+  }
+
+  /* ---------- 7. archive ---------- */
+  function archive() {
+    const count = (id) => id === 'all' ? D.archive.length : D.archive.filter((p) => p.area.includes(id)).length;
+    const filters = D.areas.map((a, i) => `
+      <button class="flt ${i === 0 ? 'is-on' : ''}" type="button" data-area="${esc(a.id)}" aria-pressed="${i === 0}">
+        ${esc(a.label)}<sup>${count(a.id)}</sup></button>`).join('');
+
+    const areaLabel = Object.fromEntries(D.areas.map((a) => [a.id, a.label]));
+    const LINK = { repo: 'Code', live: 'Live', data: 'Data' };
+    const rows = D.archive.map((p, i) => {
+      const links = Object.entries(p.links).map(([k, v]) =>
+        `<a class="lnk lnk-sm" href="${esc(v)}" target="_blank" rel="noopener" aria-label="${esc(p.name)}: ${LINK[k]}">${LINK[k]}${ext}</a>`).join('');
+      return `
+        <li class="ar" data-area="${esc(p.area.join(' '))}" data-stack="${esc(p.stack.join('|').toLowerCase())}">
+          <span class="ar-n">${pad(i + 1)}</span>
+          <span class="ar-name">${p.see ? `<a class="ar-jump" href="#${esc(p.see)}">${dg(p.name)}</a>` : dg(p.name)}</span>
+          <span class="ar-d">${esc(p.d)}</span>
+          <span class="ar-area">${esc(p.area.map((a) => areaLabel[a]).join(', '))}</span>
+          <span class="ar-status s-${esc(p.status.toLowerCase().replace(/[^a-z]+/g, '-'))}">${esc(p.status)}</span>
+          <span class="ar-links">${links || '<span class="ar-nolink">No link yet</span>'}</span>
+        </li>`;
+    }).join('');
+
+    return `
+    <section class="archive" id="archive">
+      ${head('Archive', 'Archive', `All ${D.archive.length} projects`,
+        'Everything I have built, strongest first. Names with a link jump to the full write-up above.')}
+      <div class="flt-bar" role="toolbar" aria-label="Filter projects">${filters}
+        <button class="flt flt-tool" type="button" id="toolChip" hidden></button>
+      </div>
+      <div class="ar-head" aria-hidden="true"><span>#</span><span>Project</span><span>What it is</span><span>Area</span><span>Status</span><span>Links</span></div>
+      <ul class="ar-list" id="arList">${rows}</ul>
+    </section>`;
+  }
+
+  /* ---------- 8. contact + footer ---------- */
+  function contact() {
+    const links = P.links.map((l) => `
+      <li><a class="cl" href="${esc(l.href)}" target="_blank" rel="noopener"><span class="cl-l">${esc(l.label)}</span><span class="cl-h">${esc(l.handle)}</span>${ext}</a></li>`).join('');
+    const updated = new Date(D.updated + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    return `
+    <section class="contact" id="contact">
+      <div class="sec-row"><span class="sec-label">Contact</span><span class="sec-aside"><span class="radio-dot" aria-hidden="true"></span>Team radio
+        <span class="wave" aria-hidden="true">${Array.from({ length: 14 }, (_, i) => `<i style="--k:${i}"></i>`).join('')}</span></span></div>
+      <h2 class="contact-title split">Radio&rsquo;s open.</h2>
+      <div class="contact-grid">
+        <p class="contact-open">${esc(P.open)} Email is the quickest way to reach me.</p>
+        <div class="contact-mail">
+          <a class="mail" href="mailto:${esc(P.email)}" id="mail">${esc(P.email)}</a>
+          <button class="copy" type="button" id="copyMail" data-copy="${esc(P.email)}"><span>Copy</span></button>
+        </div>
+        <ul class="contact-links">${links}</ul>
+        ${P.resume ? `<p class="contact-cv"><a class="lnk" href="${esc(P.resume)}">Résumé (PDF)${ext}</a></p>` : ''}
+      </div>
+      <footer class="foot">
+        <p class="foot-c">&copy; ${new Date().getFullYear()} ${esc(P.name)}</p>
+        <p class="foot-col">Set in Hubot Sans, Mona Sans, Martian Mono and STIX Two Text. Built by hand with GSAP, Lenis and three.js; no framework, no build step.</p>
+        <p class="foot-u">Updated ${esc(updated)}</p>
+        <a class="foot-top lnk" href="#top">Back to the grid</a>
+      </footer>
       <div class="flag" aria-hidden="true"></div>
-      <div class="pitlane-in">
-        ${secHead('06', 'Pit Lane', 'Open to briefs · internships · collabs')}
-        <h2 class="pit-h" aria-label="Box, box.">
-          ${chars('BOX,', 'pit-ch')}<span class="pit-ch">&nbsp;</span><span class="red">${chars('BOX.', 'pit-ch')}</span>
-        </h2>
-        <p class="pit-lead rise">Got a build that needs a fast driver? Drop into the pit lane.
-          I&rsquo;m open to internships, research collabs, and side-project chaos.</p>
-        <div class="pit-ctas rise">
-          <a class="btn primary magnet" href="mailto:${esc(L.email)}" data-cursor="mail">
-            <span>Send transmission <span class="arr"></span></span></a>
-          <a class="btn magnet" href="${esc(L.github)}" target="_blank" rel="noreferrer noopener" data-cursor="open"><span>GitHub</span></a>
-          <a class="btn magnet" href="${esc(L.linkedin)}" target="_blank" rel="noreferrer noopener" data-cursor="open"><span>LinkedIn</span></a>
-          <a class="btn magnet" href="${esc(L.leetcode)}" target="_blank" rel="noreferrer noopener" data-cursor="open"><span>LeetCode</span></a>
-        </div>
-        <div class="foot">
-          <div><a href="mailto:${esc(L.email)}">${esc(L.email)}</a><span>Email</span></div>
-          <div><a href="tel:${esc(L.phone.replace(/\s/g, ''))}">${esc(L.phone)}</a><span>Radio</span></div>
-          <div><span>&copy; Satyam &middot; ${new Date().getFullYear()}</span><span>End &middot; Lap 07</span></div>
-        </div>
-      </div>
     </section>`;
   }
 
   /* ---------- nav ---------- */
-  function navMarkup() {
-    return D.sections.filter((s) => s.id !== 'top').map((s) =>
-      `<a href="#${esc(s.id)}" data-sec="${esc(s.id)}" data-cursor="jump">
-         <span class="idx">${esc(s.tag)}</span>${esc(s.nav)}</a>`).join('');
-  }
-  function drawerMarkup() {
-    return D.sections.map((s) =>
-      `<a href="#${esc(s.id)}" data-sec="${esc(s.id)}">
-         <span class="idx">${esc(s.tag)}</span>${esc(s.nav)}</a>`).join('');
-  }
-
-  /* ---------- circuit sector buttons ---------- */
-  function circuitSecs() {
-    return [1, 2, 3].map((n) =>
-      `<button data-sector="${n}" ${n === 1 ? 'class="on"' : ''}>S${n}</button>`).join('');
-  }
+  const nav = () => D.nav.map((n) => `<a href="#${esc(n.id)}" data-sec="${esc(n.id)}">${esc(n.label)}</a>`).join('');
+  const menuNav = () => D.nav.map((n, i) => `<a href="#${esc(n.id)}" data-sec="${esc(n.id)}"><span class="mn-i">${pad(i + 1)}</span>${esc(n.label)}</a>`).join('');
+  const menuFoot = () => `<a href="mailto:${esc(P.email)}">${esc(P.email)}</a>` +
+    P.links.slice(0, 3).map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('');
 
   /* ---------- mount ---------- */
   window.buildDOM = function buildDOM() {
-    document.getElementById('app').innerHTML =
-      hero() + driver() + setup() + history() + garage() + crew() + pitlane();
-    document.getElementById('navLinks').innerHTML = navMarkup();
-    document.getElementById('drawerLinks').innerHTML = drawerMarkup();
-    document.getElementById('circSecs').innerHTML = circuitSecs();
+    document.getElementById('main').innerHTML =
+      hero() + intro() + machine() + work() + research() + experience() + about() + archive() + contact();
+    document.getElementById('nav').innerHTML = nav();
+    document.getElementById('menuNav').innerHTML = menuNav();
+    document.getElementById('menuFoot').innerHTML = menuFoot();
   };
 })();

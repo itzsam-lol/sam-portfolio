@@ -1,6 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#070707"/>
-  <path d="M4 4h56L48 60H4z" fill="#E8002B"/>
-  <text x="30" y="46" font-family="Anton, Archivo Narrow, Impact, sans-serif" font-size="42"
-        fill="#fff" text-anchor="middle" letter-spacing="-1">04</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs><clipPath id="c"><rect width="32" height="32" rx="7"/></clipPath></defs>
+  <g clip-path="url(#c)">
+    <rect width="32" height="32" fill="#131312"/>
+    <rect y="26" width="32" height="6" fill="#E30B1F"/>
+    <path d="M22.5 7.5H11V14.25H21V20.75H9.5" fill="none" stroke="#EFEDE7" stroke-width="3.6" stroke-linecap="square"/>
+  </g>
 </svg>

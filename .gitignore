@@ -1,2 +1,5 @@
 .claude/
 uploads/
+
+# private source data (phone, applications, visa answers): never publish
+portfolio.json
