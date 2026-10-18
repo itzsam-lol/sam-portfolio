@@ -427,7 +427,6 @@
   function contact() {
     const links = P.links.map((l) => `
       <li><a class="cl" href="${esc(l.href)}" target="_blank" rel="noopener"><span class="cl-l">${esc(l.label)}</span><span class="cl-h">${esc(l.handle)}</span>${ext}</a></li>`).join('');
-    const updated = new Date(D.updated + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
     return `
     <section class="contact" id="contact">
@@ -446,7 +445,6 @@
       <footer class="foot">
         <p class="foot-c">&copy; ${new Date().getFullYear()} ${esc(P.name)}</p>
         <p class="foot-col">Set in Hubot Sans, Mona Sans, Martian Mono and STIX Two Text. Built by hand with GSAP, Lenis and three.js; no framework, no build step.</p>
-        <p class="foot-u">Updated ${esc(updated)}</p>
         <a class="foot-top lnk" href="#top">Back to the grid</a>
       </footer>
       <div class="flag" aria-hidden="true"></div>

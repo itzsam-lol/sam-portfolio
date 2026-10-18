@@ -9,8 +9,6 @@
 
 window.DATA = {
 
-  updated: '2026-10-18',
-
   person: {
     name: 'Satyam',
     code: 'SAT',                       // three-letter timing-screen code
@@ -35,7 +33,7 @@ window.DATA = {
       { label: 'LinkedIn',     handle: 'satyam564774288', href: 'https://linkedin.com/in/satyam564774288' },
       { label: 'LeetCode',     handle: 'samuraiiii',      href: 'https://leetcode.com/u/samuraiiii' },
       { label: 'Kaggle',       handle: 'samuraiiii',      href: 'https://www.kaggle.com/samuraiiii' },
-      { label: 'Hugging Face', handle: 'Phantomcloak19',  href: 'https://huggingface.co/Phantomcloak19' },
+      { label: 'Instagram',    handle: 'sam_r.py',        href: 'https://www.instagram.com/sam_r.py/' },
     ],
     languages: 'English and Hindi; learning French and Japanese.',
   },
@@ -287,7 +285,7 @@ window.DATA = {
   ],
 
   ongoing: [
-    { title: 'TVC-GRPO', d: 'Reinforcement-learning fine-tuning for LLMs: GRPO extended with tri-vector reward decomposition and Lagrangian safety constraints, designed to fit Kaggle hardware.', href: 'https://huggingface.co/Phantomcloak19', label: 'Datasets' },
+    { title: 'TVC-GRPO', d: 'Reinforcement-learning fine-tuning for LLMs: GRPO extended with tri-vector reward decomposition and Lagrangian safety constraints, designed to fit Kaggle hardware.' },
     { title: 'Bank Sentinel', d: 'Bank failure prediction from FDIC Call Report ratios and signals a retrieval-augmented LangChain agent extracts from SEC filings, with walk-forward backtesting.', href: 'https://github.com/itzsam-lol/Bank-Sentinel', label: 'Repository' },
     { title: 'Foodoscope', d: 'Research at CoSY Lab with Prof. Ganesh Bagler on the Foodoscope computational gastronomy platform.' },
   ],
@@ -422,7 +420,7 @@ window.DATA = {
     { name: 'F1 2026 Season Predictor', area: ['ml'], status: 'Completed', d: 'Stacking-ensemble race predictor and Monte Carlo season simulator.', stack: ['Python', 'XGBoost', 'scikit-learn', 'Streamlit', 'Plotly', 'TensorFlow', 'Monte Carlo'], links: { repo: 'https://github.com/itzsam-lol/F1-PREDICTION-APP' } },
     { name: 'RISC-V Toolchain', area: ['systems'], status: 'Completed', d: 'RV32I assembler and simulator, verified against PicoRV32.', stack: ['Python', 'RISC-V', 'SymbiYosys', 'Verilator', 'Computer architecture'], links: { repo: 'https://github.com/itzsam-lol/RISCV_Assembler_Simulator' }, see: 'riscv' },
     { name: 'RR Arbiter', area: ['systems'], status: 'Completed', d: 'Round-robin bus arbiter with an unbounded formal proof by k-induction.', stack: ['SystemVerilog', 'SymbiYosys'], links: { repo: 'https://github.com/itzsam-lol/rr-arbiter-formal' } },
-    { name: 'TVC-GRPO', area: ['ai', 'research'], status: 'In research', d: 'Constrained GRPO fine-tuning with tri-vector rewards.', stack: ['LLM applications'], links: { data: 'https://huggingface.co/Phantomcloak19' } },
+    { name: 'TVC-GRPO', area: ['ai', 'research'], status: 'In research', d: 'Constrained GRPO fine-tuning with tri-vector rewards.', stack: ['LLM applications'], links: {} },
     { name: 'MirrorHire', area: ['web', 'ai'], status: 'Course project', d: 'An applicant-tracking-system simulator, for Human-AI Interaction.', stack: ['FastAPI', 'LLM applications'], links: {} },
     { name: 'Colonist.io Review', area: ['ai'], status: 'Side project', d: 'Engine-style post-game review for online Catan, built on an MCTS simulator.', stack: ['FastAPI'], links: {} },
     { name: 'DocMind', area: ['ai'], status: 'Completed', d: 'Retrieval-augmented document chatbot.', stack: ['RAG', 'LLM applications'], links: {} },
