@@ -167,11 +167,13 @@ scroll choreography are built a slice at a time behind the intro, so no
 single task blocks the page for long, and figures only animate while on
 screen.
 
-Lighthouse (local, compressed): desktop 99 performance; phone 80 to 82
-between runs, its throttled LCP model being pessimistic about the intro
-(LCP measured on a 4x-slowed CPU over slow 4G is 2.4 to 2.6 s).
-Accessibility, best practices and SEO 100 on both. Layout shift is
-effectively zero.
+Lighthouse on the live site: desktop 99 performance, phone about 72. The
+phone score is simulated from the test machine's own timings, so it moves
+with how busy that machine is: the same build scores 80 to 82 on a quiet
+one. Its LCP model is also pessimistic about the intro (LCP measured on a
+4x-slowed CPU over slow 4G is 2.4 to 2.6 s). Accessibility, best practices
+and SEO 100 on both. Layout shift is effectively zero on phones; on desktop
+the name stretching to width registers about 0.02 (the budget is 0.1).
 
 The interlude adds about 1.8 MB uncompressed (three.js, the car, its
 textures, the Draco decoder), but only for readers who head down the page.
