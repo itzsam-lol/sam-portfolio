@@ -16,11 +16,12 @@ window.Motion = (function () {
      Hero masthead: fit to the column at any width-axis value
      ========================================================= */
   const Name = {
-    el: null, word: null, table: [], wd: 125, target: 125, busy: false,
+    el: null, word: null, avail: 0, table: [], wd: 125, target: 125, busy: false,
     finalWidth() { return innerWidth < 600 ? 86 : innerWidth < 861 ? 100 : 125; },
     measure() {
       this.el = $('#heroName'); this.word = $('#heroName .hn');
       if (!this.el) return;
+      this.avail = this.el.clientWidth;          // read once here, never inside an animation frame
       // natural width of the word at 100px for wdth 75…125
       const probe = this.word.cloneNode(true);
       // em letter-spacing is inherited as an absolute length, so restate it at the probe's size
@@ -45,11 +46,10 @@ window.Motion = (function () {
     apply(wd) {
       if (!this.el || !this.table.length) return;
       this.wd = wd;
-      const avail = this.el.clientWidth;
-      const fs = avail / this.widthAt(wd) * 100;
+      const fs = this.avail / this.widthAt(wd) * 100;
+      // only the name itself: its box, the portrait and the lights are laid out from the final size
       this.el.style.setProperty('--hn-wd', wd.toFixed(2) + '%');
       this.el.style.setProperty('--hn-fs', fs.toFixed(2) + 'px');
-      document.documentElement.style.setProperty('--hn-fs', fs.toFixed(2) + 'px');
     },
   };
 
@@ -80,6 +80,7 @@ window.Motion = (function () {
     // five reds, one every 0.2 s, a held beat, then lights out: the name launches on that instant
     const OUT = 0.25 + 5 * 0.2 + 0.5;
     if (firstVisit) {
+      placeLights();
       tl.set('#lights', { opacity: 1 });
       lights.forEach((l, i) => tl.call(() => l.classList.add('on'), null, 0.25 + i * 0.2));
       tl.call(() => lights.forEach((l) => l.classList.remove('on')), null, OUT);
@@ -93,13 +94,16 @@ window.Motion = (function () {
     tl.to(st, { wd: Name.target, duration: 1.6, ease: 'power3.inOut', onUpdate: () => Name.apply(st.wd) }, t0)
       // y:0 matters: GSAP reads the stylesheet's translateY(104%) as pixels and would keep it
       .fromTo('.hn-ch', { yPercent: 104, y: 0 }, { yPercent: 0, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.045 }, t0)
-      .fromTo('.hero-portrait', { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.25, ease: 'expo.out' }, t0 + 0.12)
-      .fromTo('.hero-portrait img', { scale: 1.1, yPercent: 4 }, { scale: 1, yPercent: 0, duration: 1.7, ease: 'expo.out' }, t0 + 0.12)
       .fromTo('.hero .boot', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.07 }, t0 + 0.55)
-      .fromTo('.hdr', { opacity: 0 }, { opacity: 1, duration: 0.8 }, t0 + 0.7)
       // hand back to the stylesheet: drop the boot class first, then the inline values
       .call(() => document.documentElement.classList.remove('motion'))
-      .set(['.hn-ch', '.hn', '.hero .boot', '.hero-portrait', '.hero-portrait img', '.hdr'], { clearProps: 'transform,opacity,clipPath' });
+      .set(['.hn-ch', '.hn', '.hero .boot'], { clearProps: 'transform,opacity' });
+  }
+
+  // the start lights hang over the middle of the masthead, wherever this layout puts it
+  function placeLights() {
+    const l = $('#lights'), h = Name.el;
+    if (l && h) l.style.top = (h.offsetTop + h.offsetHeight / 2) + 'px';
   }
 
   function heroScroll() {
@@ -115,6 +119,30 @@ window.Motion = (function () {
   }
 
   /* =========================================================
+     One-shot reveals ride an IntersectionObserver (one per edge):
+     nothing is measured while the page boots, unlike a ScrollTrigger
+     per element. ScrollTrigger is kept for what scrubs with scroll.
+     `edge` is where the element's top has to reach, from the bottom.
+     ========================================================= */
+  const viewers = {};
+  function onView(el, fn, edge = '-10%') {
+    if (!el) return;
+    if (!('IntersectionObserver' in window)) { fn(); return; }
+    let v = viewers[edge];
+    if (!v) {
+      v = viewers[edge] = new IntersectionObserver((es) => es.forEach((e) => {
+        if (!e.isIntersecting) return;
+        v.unobserve(e.target);
+        const fns = e.target.__onView || [];
+        e.target.__onView = null;
+        fns.forEach((f) => f());
+      }), { rootMargin: `0px 0px ${edge} 0px` });
+    }
+    (el.__onView = el.__onView || []).push(fn);
+    v.observe(el);
+  }
+
+  /* =========================================================
      Reveals shared by every section
      ========================================================= */
   // big titles: characters rise out of a mask while the width axis opens up
@@ -123,16 +151,20 @@ window.Motion = (function () {
       if (calm || !has('SplitText')) return;
       // words first, so a line can only ever break between words
       const split = new SplitText(el, { type: 'words,chars', mask: 'chars', charsClass: 'tc', wordsClass: 'tw' });
-      const tl = G.timeline({ scrollTrigger: { trigger: el, start: 'top 86%', once: true } });
-      tl.fromTo(el, { '--wd': '82%' }, { '--wd': '125%', duration: 1.4, ease: 'power4.out' }, 0)
-        .from(split.chars, { yPercent: 105, duration: 1.05, ease: 'expo.out', stagger: 0.035 }, 0);
+      G.set(el, { '--wd': '82%' });
+      G.set(split.chars, { yPercent: 105 });
+      onView(el, () => G.timeline()
+        .to(el, { '--wd': '125%', duration: 1.4, ease: 'power4.out' }, 0)
+        .to(split.chars, { yPercent: 0, duration: 1.05, ease: 'expo.out', stagger: 0.035 }, 0), '-14%');
     });
     // section rows: the rule draws across, then the labels settle on it
     $$('.sec-row').forEach((row) => {
       if (calm) return;
-      const tl = G.timeline({ scrollTrigger: { trigger: row, start: 'top 92%', once: true } });
-      tl.fromTo(row, { '--rw': 0 }, { '--rw': 1, duration: 1.2, ease: 'expo.inOut' }, 0)
-        .from(row.children, { opacity: 0, y: 8, duration: 0.6, ease: 'power3.out', stagger: 0.06 }, 0.35);
+      G.set(row, { '--rw': 0 });
+      G.set(row.children, { opacity: 0, y: 8 });
+      onView(row, () => G.timeline()
+        .to(row, { '--rw': 1, duration: 1.2, ease: 'expo.inOut' }, 0)
+        .to(row.children, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.06 }, 0.35), '-8%');
     });
   }
 
@@ -141,8 +173,8 @@ window.Motion = (function () {
     $$('.machine-line').forEach((el) => {
       if (calm || !has('SplitText')) return;
       const split = new SplitText(el, { type: 'lines', mask: 'lines', linesClass: 'split-line' });
-      G.from(split.lines, { yPercent: 110, duration: 1.1, ease: 'expo.out', stagger: 0.1,
-        scrollTrigger: { trigger: el, start: 'top 85%', once: true } });
+      G.set(split.lines, { yPercent: 110 });
+      onView(el, () => G.to(split.lines, { yPercent: 0, duration: 1.1, ease: 'expo.out', stagger: 0.1 }), '-15%');
     });
   }
 
@@ -156,16 +188,16 @@ window.Motion = (function () {
       '.udyox-head > *, .udyox-nums li, .udyox-text, .udyox-stack',
       '.st-cap', '.aw, .course-list, .langs',
     ].join(', ');
-    $$(sel).forEach((el) => {
-      G.from(el, { opacity: 0, y: 22, duration: 0.95, ease: 'expo.out',
-        scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
-    });
+    const els = $$(sel);
+    G.set(els, { opacity: 0, y: 22 });
+    els.forEach((el) => onView(el, () => G.to(el, { opacity: 1, y: 0, duration: 0.95, ease: 'expo.out', clearProps: 'opacity,transform' })));
     // list rows arrive in a quick stagger, per list
-    ['.jobs', '.ot-list', '.og-list', '.ar-list', '.quant-grid', '.tk-grid', '.contact-links'].forEach((sel) => {
-      const list = $(sel);
-      if (!list || calm) return;
-      G.from(list.children, { opacity: 0, y: 26, duration: 0.9, ease: 'expo.out', stagger: 0.06,
-        scrollTrigger: { trigger: list, start: 'top 85%', once: true } });
+    ['.jobs', '.ot-list', '.og-list', '.ar-list', '.quant-grid', '.tk-grid', '.contact-links'].forEach((s) => {
+      const list = $(s);
+      if (!list) return;
+      const kids = [...list.children];
+      G.set(kids, { opacity: 0, y: 26 });
+      onView(list, () => G.to(kids, { opacity: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.06, clearProps: 'opacity,transform' }), '-15%');
     });
   }
 
@@ -175,12 +207,13 @@ window.Motion = (function () {
   function introFill() {
     const el = $('#introText');
     if (!el || calm || !has('SplitText')) return;
-    const split = new SplitText(el, { type: 'words', wordsClass: 'word' });
-    G.fromTo(split.words, { opacity: 0.13 }, {
-      opacity: 1, ease: 'none', stagger: 0.1,
+    const split = new SplitText(el, { type: 'words', wordsClass: 'word', aria: 'none' });
+    G.fromTo(split.words, { '--k': 0 }, {
+      '--k': 1, ease: 'none', stagger: 0.1,
       scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 52%', scrub: 0.6 },
     });
-    G.from('.intro-k', { opacity: 0, x: -10, duration: 0.8, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 80%', once: true } });
+    G.set('.intro-k', { opacity: 0, x: -10 });
+    onView(el, () => G.to('.intro-k', { opacity: 1, x: 0, duration: 0.8, ease: 'expo.out' }), '-20%');
   }
 
   /* =========================================================
@@ -202,8 +235,9 @@ window.Motion = (function () {
     });
     G.to('.machine-copy', { opacity: 0, y: -40, ease: 'none',
       scrollTrigger: { trigger: sec, start: '78% bottom', end: 'bottom bottom', scrub: true } });
-    G.from('.machine-note, .machine-cap, .machine-meter', { opacity: 0, y: 14, duration: 0.9, stagger: 0.08, ease: 'expo.out',
-      scrollTrigger: { trigger: sec, start: 'top 40%', once: true } });
+    const copy = $$('.machine-note, .machine-cap, .machine-meter');
+    G.set(copy, { opacity: 0, y: 14 });
+    onView(sec, () => G.to(copy, { opacity: 1, y: 0, duration: 0.9, stagger: 0.08, ease: 'expo.out' }), '-60%');
   }
 
   /* =========================================================
@@ -213,7 +247,7 @@ window.Motion = (function () {
     const list = $$('.sheet');
     if (!list.length || calm) return;
     const mm = G.matchMedia();
-    mm.add('(min-width: 1025px) and (min-height: 721px)', () => {
+    mm.add('(min-width: 1025px) and (min-height: 860px)', () => {
       list.forEach((s, i) => {
         const next = list[i + 1];
         if (!next) return;
@@ -228,52 +262,86 @@ window.Motion = (function () {
       const t = s.querySelector('.sheet-title');
       if (!t || !has('SplitText')) return;
       const split = new SplitText(t, { type: 'words,chars', mask: 'chars' });
-      G.from(split.chars, { yPercent: 105, duration: 1, ease: 'expo.out', stagger: 0.025,
-        scrollTrigger: { trigger: s, start: 'top 68%', once: true } });
+      G.set(split.chars, { yPercent: 105 });
+      onView(s, () => G.to(split.chars, { yPercent: 0, duration: 1, ease: 'expo.out', stagger: 0.025 }), '-32%');
     });
   }
 
   /* =========================================================
-     Figures: draw on first sight, then run while visible
+     Sheets: an approval stamp lands on each title block
      ========================================================= */
-  function figures() {
-    $$('.fig').forEach((fig) => {
-      const svg = fig.querySelector('.fig-svg');
-      if (!svg) return;
-      const id = fig.dataset.fig;
-      const loop = window.Figures.play(id, svg);
-
-      if (calm) { if (loop) loop.progress(0.999).pause(); return; }
-
-      const strokes = $$('.f-draw:not(.f-dash):not(.f-tray):not(.f-curve), .f-axis, .f-bar, .f-road', svg);
-      const soft = $$('text, .f-dash, .f-tray, .f-curve, .f-grid, .f-dot, .f-junction, .f-qr, .f-bit, .f-cell, .f-rule, .f-slot, .f-tier-sat, .f-tier-mid, .f-tier-res, .f-pt, .f-ci, .f-head, .f-ship', svg);
-      const bars = $$('.f-bar', svg);
-      const tl = G.timeline({ paused: true });
-      if (has('DrawSVGPlugin')) {
-        tl.fromTo(strokes.filter((e) => !e.classList.contains('f-bar')), { drawSVG: '0%' },
-          { drawSVG: '100%', duration: 1.1, ease: 'power2.inOut', stagger: { each: 0.012, from: 'start' },
-            onComplete: () => G.set(strokes, { clearProps: 'strokeDasharray,strokeDashoffset' }) }, 0);
-      }
-      tl.fromTo(soft, { opacity: 0 }, { opacity: 1, duration: 0.6, stagger: { each: 0.006 }, ease: 'power1.out' }, 0.25);
-      bars.forEach((b) => {
-        // bars grow from their baseline (left for horizontal, bottom for vertical)
-        const vertical = +b.getAttribute('height') > +b.getAttribute('width');
-        const neg = b.dataset.neg === '1';
-        G.set(b, { transformOrigin: vertical ? '50% 100%' : (neg ? '100% 50%' : '0% 50%') });
-        tl.fromTo(b, vertical ? { scaleY: 0 } : { scaleX: 0 }, { scaleY: 1, scaleX: 1, duration: 1, ease: 'expo.out' }, 0.45);
-      });
-
-      let drawn = false;
-      ScrollTrigger.create({
-        trigger: fig, start: 'top 82%', end: 'bottom 10%',
-        onToggle: (s) => {
-          if (s.isActive) {
-            if (!drawn) { drawn = true; tl.play(); if (loop) G.delayedCall(1.2, () => s.isActive && loop.play()); }
-            else if (loop) loop.play();
-          } else if (loop) loop.pause();
-        },
-      });
+  function stamps() {
+    if (calm) return;
+    $$('.sheet').forEach((sheet) => {
+      const st = sheet.querySelector('.stamp');
+      if (!st) return;
+      G.set(st, { opacity: 0 });
+      onView(sheet, () => G.timeline()
+        .fromTo(st, { opacity: 0, scale: 1.9, rotation: -16 }, { opacity: 1, scale: 1, rotation: -7, duration: 0.3, ease: 'power4.in' })
+        // the sheet takes the hit
+        .to(sheet.querySelector('.tblock'), { y: 2, duration: 0.05, yoyo: true, repeat: 1, ease: 'power1.inOut' }, 0.28), '-58%');
     });
+  }
+
+  /* =========================================================
+     Numbers: they roll up like a timing screen, once
+     ========================================================= */
+  // reels sit over the real text (made transparent), so nothing moves when they go
+  function roll(el) {
+    const txt = el.textContent;
+    const box = document.createElement('span');
+    box.className = 'nr-box';
+    box.setAttribute('aria-hidden', 'true');
+    const reels = [];
+    [...txt].forEach((c, i, all) => {
+      if (/\d/.test(c)) {
+        const turns = 1 + ((all.length - i) % 2);
+        let h = '';
+        for (let t = 0; t < turns; t++) for (let k = 0; k < 10; k++) h += `<i>${k}</i>`;
+        for (let k = 0; k <= +c; k++) h += `<i>${k}</i>`;
+        const w = document.createElement('span');
+        w.className = 'nr';
+        w.innerHTML = `<span>${h}</span>`;
+        box.appendChild(w);
+        reels.push([w.firstChild, turns * 10 + +c]);
+      } else {
+        const s = document.createElement('span');
+        s.className = 'nr-s';
+        s.textContent = c;
+        box.appendChild(s);
+      }
+    });
+    el.classList.add('nr-on');
+    el.appendChild(box);
+    const tl = G.timeline({ onComplete: () => { box.remove(); el.classList.remove('nr-on'); } });
+    reels.forEach(([col, n], i) => {
+      tl.fromTo(col, { yPercent: 0 }, { yPercent: -100 * n / (n + 1), duration: 0.9 + i * 0.14, ease: 'power3.out' }, i * 0.05);
+    });
+  }
+  function rolls() {
+    if (calm) return;
+    $$('.num-roll').forEach((el) => {
+      if (!/\d/.test(el.textContent)) return;
+      onView(el, () => roll(el));
+    });
+  }
+
+  /* =========================================================
+     Back to the grid: the lights go out once more
+     ========================================================= */
+  function relaunch() {
+    if (calm || !G || Name.busy) return;
+    const lights = $$('#lights i');
+    const OUT = 0.2 + 5 * 0.18 + 0.4;
+    const st = { wd: 75 };
+    const tl = G.timeline({ onComplete: () => { Name.busy = false; Name.apply(Name.target); } });
+    placeLights();
+    tl.set('#lights', { opacity: 1 });
+    lights.forEach((l, i) => tl.call(() => l.classList.add('on'), null, 0.2 + i * 0.18));
+    tl.call(() => { lights.forEach((l) => l.classList.remove('on')); Name.busy = true; }, null, OUT)
+      .to('#lights', { opacity: 0, duration: 0.25 }, OUT + 0.05)
+      .fromTo(st, { wd: 75 }, { wd: Name.target, duration: 1.3, ease: 'power3.inOut', onUpdate: () => Name.apply(st.wd) }, OUT)
+      .fromTo('.hn-ch', { yPercent: 0 }, { yPercent: -7, duration: 0.2, yoyo: true, repeat: 1, ease: 'power2.out', stagger: 0.035 }, OUT);
   }
 
   /* =========================================================
@@ -284,16 +352,17 @@ window.Motion = (function () {
     const sheet = $('.paper-sheet');
     if (sheet) {
       // it lands once, then turns slowly with the scroll, as if being picked up off the desk
-      G.fromTo(sheet, { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 1.4, ease: 'expo.out',
-        scrollTrigger: { trigger: '#research-paper', start: 'top 80%', once: true } });
+      G.set(sheet, { y: 60, opacity: 0 });
+      onView($('#research-paper'), () => G.to(sheet, { y: 0, opacity: 1, duration: 1.4, ease: 'expo.out' }), '-20%');
       G.fromTo(sheet, { rotation: -3 }, { rotation: 0.6, ease: 'none',
         scrollTrigger: { trigger: '#research-paper', start: 'top 80%', end: 'bottom 60%', scrub: 1 } });
-      G.to('.hl', { '--hl': '100%', duration: 0.9, ease: 'power2.inOut', stagger: 0.5,
-        scrollTrigger: { trigger: sheet, start: 'top 45%', once: true } });
+      onView(sheet, () => G.to('.hl', { '--hl': '100%', duration: 0.9, ease: 'power2.inOut', stagger: 0.5 }), '-55%');
     }
     const rows = $$('.ds-table tbody tr');
-    if (rows.length) G.from(rows, { opacity: 0, x: -12, duration: 0.6, stagger: 0.05, ease: 'expo.out',
-      scrollTrigger: { trigger: '.ds-table', start: 'top 85%', once: true } });
+    if (rows.length) {
+      G.set(rows, { opacity: 0, x: -12 });
+      onView($('.ds-table'), () => G.to(rows, { opacity: 1, x: 0, duration: 0.6, stagger: 0.05, ease: 'expo.out', clearProps: 'opacity,transform' }), '-15%');
+    }
   }
 
   /* =========================================================
@@ -305,7 +374,9 @@ window.Motion = (function () {
     const tl = G.timeline({ scrollTrigger: { trigger: chart, start: 'top 82%', end: 'bottom 45%', scrub: 0.8 } });
     // the timeline's clock is the chart's own x axis: each bar starts where it starts
     $$('.stint', chart).forEach((s) => {
-      const l = parseFloat(s.style.left) / 100, w = parseFloat(s.style.width) / 100;
+      // an open stint's width is a calc() against "now", so read what was drawn
+      const track = s.parentElement.offsetWidth || 1;
+      const l = parseFloat(s.style.left) / 100, w = s.offsetWidth / track;
       tl.fromTo(s.querySelector('.stint-bar'), { clipPath: 'inset(0% 100% 0% 0%)' },
         { clipPath: 'inset(0% 0% 0% 0%)', duration: Math.max(0.04, w), ease: 'none' }, l);
       const out = s.querySelector(':scope > .stint-t');
@@ -340,18 +411,24 @@ window.Motion = (function () {
       backgroundPosition: '112px 0px, 126px 14px', ease: 'none',
       scrollTrigger: { trigger: '.contact', start: 'top bottom', end: 'bottom bottom', scrub: 0.5 },
     });
-    G.from('.mail, .copy, .contact-open', { opacity: 0, y: 24, duration: 1, stagger: 0.08, ease: 'expo.out',
-      scrollTrigger: { trigger: '.contact-grid', start: 'top 85%', once: true } });
+    const copy = $$('.mail, .copy, .contact-open');
+    G.set(copy, { opacity: 0, y: 24 });
+    onView($('.contact-grid'), () => G.to(copy, { opacity: 1, y: 0, duration: 1, stagger: 0.08, ease: 'expo.out' }), '-15%');
   }
 
   /* ---------- public ---------- */
   return {
     Name,
     intro,
-    init() {
+    relaunch,
+    // one task per part, so building the scroll choreography never stalls a frame for long
+    async init() {
       if (!G) return;
-      titles(); lines(); reveals(); introFill(); machine();
-      sheets(); figures(); research(); stints(); contact();
+      const breathe = () => new Promise((r) => (window.scheduler && scheduler.yield ? scheduler.yield().then(r) : setTimeout(r, 0)));
+      for (const fn of [titles, lines, reveals, introFill, machine, sheets, stamps, rolls, research, stints, contact]) {
+        fn();
+        await breathe();
+      }
     },
     refit() { Name.measure(); if (!Name.busy) Name.apply(Name.target); },
   };

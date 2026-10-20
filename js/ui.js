@@ -1,6 +1,7 @@
 /* ============================================================
    UI: interactions that must work with or without GSAP.
    clock · theme · header · menu · copy · archive filter · toolkit
+   · stint-chart cursor · section ticks on the progress rail
    ============================================================ */
 
 window.initUI = function initUI(opts) {
@@ -129,7 +130,8 @@ window.initUI = function initUI(opts) {
     if (!el && id !== 'top') return;
     e.preventDefault();
     if (document.body.classList.contains('menu-open')) setMenu(false);
-    scrollTo(id === 'top' ? 0 : el);
+    const relaunch = a.id === 'toGrid' && window.Motion ? () => window.Motion.relaunch() : null;
+    scrollTo(id === 'top' ? 0 : el, relaunch);
     history.replaceState(null, '', id === 'top' ? location.pathname : '#' + id);
     // keyboard and screen-reader users continue from where they landed
     const target = id === 'top' ? document.getElementById('main') : el;
@@ -218,5 +220,49 @@ window.initUI = function initUI(opts) {
     });
   });
 
-  return { onScroll, setTheme };
+  /* ---------- experience chart: a telemetry cursor under the pointer ---------- */
+  const chart = $('.st-chart');
+  if (chart && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const label = chart.querySelector('.st-cursor span');
+    const bars = $$('.stint', chart);
+    const ymv = (s) => { const [y, m] = s.split('-').map(Number); return y * 12 + m - 1; };
+    const a = ymv(chart.dataset.from), b = ymv(chart.dataset.to) + 1;
+    const now = new Date(), nowM = now.getFullYear() * 12 + now.getMonth();
+    const month = (m) => new Date(Math.floor(m / 12), m % 12, 1).toLocaleString('en-GB', { month: 'short', year: 'numeric' });
+    let lab = 132;
+    chart.addEventListener('pointerenter', () => { lab = parseFloat(getComputedStyle(chart).getPropertyValue('--lab')) || 132; });
+    chart.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const r = chart.getBoundingClientRect();
+      const x = (e.clientX - r.left - lab) / (r.width - lab);
+      if (x < 0 || x > 1) { chart.classList.remove('is-scrub'); return; }
+      // snap to the middle of the month under the pointer, and light every stint running then
+      const m = Math.min(b - 1, Math.floor(a + x * (b - a)));
+      chart.style.setProperty('--cx', ((m - a + 0.5) / (b - a)).toFixed(4));
+      label.textContent = month(m) + (m > nowM ? ' · ahead' : '');
+      chart.classList.add('is-scrub');
+      bars.forEach((s) => {
+        const f = ymv(s.dataset.from), t = s.dataset.to ? ymv(s.dataset.to) : nowM;
+        s.classList.toggle('is-at', m >= f && m <= t);
+      });
+    });
+    chart.addEventListener('pointerleave', () => chart.classList.remove('is-scrub'));
+  }
+
+  /* ---------- the progress rail: a tick where each section starts ---------- */
+  function ticks() {
+    const track = rail && rail.parentElement;
+    if (!track) return;
+    track.querySelectorAll('b').forEach((t) => t.remove());
+    const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const t = document.createElement('b');
+      t.style.left = (Math.min(1, (el.getBoundingClientRect().top + scrollY) / max) * 100).toFixed(2) + '%';
+      track.appendChild(t);
+    });
+  }
+
+  return { onScroll, setTheme, ticks, ready: ticks };
 };

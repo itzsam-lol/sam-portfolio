@@ -6,17 +6,25 @@
 <title>Satyam · Computer Science &amp; AI, IIIT-Delhi</title>
 <meta name="description" content="Satyam is a final-year Computer Science and AI student at IIIT-Delhi who builds ML systems and backends and does quantitative research. Dell Technologies intern, bioRxiv preprint author, teaching assistant." />
 <meta name="author" content="Satyam" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
 <link rel="canonical" href="https://itzsam-lol.github.io/sam-portfolio/" />
 
 <meta property="og:type" content="profile" />
+<meta property="og:site_name" content="Satyam" />
+<meta property="og:locale" content="en_IN" />
 <meta property="og:title" content="Satyam · Computer Science & AI, IIIT-Delhi" />
-<meta property="og:description" content="ML systems, backends and quantitative research. Selected work, a bioRxiv preprint, and everything else." />
+<meta property="og:description" content="ML systems, backends and quantitative research. Six projects with working drawings you can run, a bioRxiv preprint, and everything else." />
 <meta property="og:url" content="https://itzsam-lol.github.io/sam-portfolio/" />
 <meta property="og:image" content="https://itzsam-lol.github.io/sam-portfolio/assets/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="Satyam, in a red race suit, beside his name set large" />
+<meta property="profile:first_name" content="Satyam" />
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Satyam · Computer Science & AI, IIIT-Delhi" />
+<meta name="twitter:description" content="ML systems, backends and quantitative research. Six projects with working drawings you can run, a bioRxiv preprint, and everything else." />
+<meta name="twitter:image" content="https://itzsam-lol.github.io/sam-portfolio/assets/og.png" />
+<meta name="twitter:image:alt" content="Satyam, in a red race suit, beside his name set large" />
 
 <meta name="theme-color" content="#EFEDE7" id="themeColor" />
 <meta name="color-scheme" content="light dark" />
@@ -26,43 +34,72 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Satyam",
-  "url": "https://itzsam-lol.github.io/sam-portfolio/",
-  "image": "https://itzsam-lol.github.io/sam-portfolio/assets/portrait.webp",
-  "jobTitle": "B.Tech student, Computer Science and Artificial Intelligence",
-  "affiliation": { "@type": "CollegeOrUniversity", "name": "Indraprastha Institute of Information Technology Delhi" },
-  "address": { "@type": "PostalAddress", "addressLocality": "New Delhi", "addressCountry": "IN" },
-  "email": "mailto:satyam23495@iiitd.ac.in",
-  "sameAs": [
-    "https://github.com/itzsam-lol",
-    "https://linkedin.com/in/satyam564774288",
-    "https://leetcode.com/u/samuraiiii",
-    "https://www.kaggle.com/samuraiiii",
-    "https://www.instagram.com/sam_r.py/"
+  "@graph": [
+    {
+      "@type": "ProfilePage",
+      "@id": "https://itzsam-lol.github.io/sam-portfolio/#page",
+      "url": "https://itzsam-lol.github.io/sam-portfolio/",
+      "name": "Satyam · Computer Science & AI, IIIT-Delhi",
+      "inLanguage": "en",
+      "dateModified": "2026-10-20",
+      "isPartOf": { "@id": "https://itzsam-lol.github.io/sam-portfolio/#website" },
+      "mainEntity": { "@id": "https://itzsam-lol.github.io/sam-portfolio/#person" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://itzsam-lol.github.io/sam-portfolio/#person",
+      "name": "Satyam",
+      "url": "https://itzsam-lol.github.io/sam-portfolio/",
+      "image": "https://itzsam-lol.github.io/sam-portfolio/assets/portrait.webp",
+      "description": "Final-year Computer Science and AI student at IIIT-Delhi who builds machine learning systems and backends and does quantitative research.",
+      "jobTitle": "B.Tech student, Computer Science and Artificial Intelligence",
+      "affiliation": {
+        "@type": "CollegeOrUniversity",
+        "name": "Indraprastha Institute of Information Technology Delhi",
+        "alternateName": "IIIT-Delhi",
+        "url": "https://www.iiitd.ac.in/"
+      },
+      "address": { "@type": "PostalAddress", "addressLocality": "New Delhi", "addressCountry": "IN" },
+      "email": "mailto:satyam23495@iiitd.ac.in",
+      "knowsLanguage": ["en", "hi"],
+      "knowsAbout": ["Machine learning", "AI agents", "Backend engineering", "Quantitative research", "Single-cell perturbation modelling", "LLM inference benchmarking", "Python", "FastAPI", "PostgreSQL", "RISC-V"],
+      "sameAs": [
+        "https://github.com/itzsam-lol",
+        "https://linkedin.com/in/satyam564774288",
+        "https://leetcode.com/u/samuraiiii",
+        "https://www.kaggle.com/samuraiiii",
+        "https://www.instagram.com/sam_r.py/"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://itzsam-lol.github.io/sam-portfolio/#website",
+      "url": "https://itzsam-lol.github.io/sam-portfolio/",
+      "name": "Satyam",
+      "inLanguage": "en"
+    }
   ]
 }
 </script>
 
-<!-- theme before first paint: saved choice wins, then the OS setting -->
+<!-- before first paint: the saved theme (else the OS one), and hide what the intro will reveal -->
 <script>
   (function () {
-    var t = null;
+    var d = document.documentElement, t = null;
     try { t = localStorage.getItem('theme'); } catch (e) {}
     if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    document.documentElement.dataset.theme = t;
+    d.dataset.theme = t;
     document.getElementById('themeColor').content = t === 'dark' ? '#0F0F0E' : '#EFEDE7';
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('motion');
   })();
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Hubot+Sans:wdth,wght@75..125,400..900&family=Mona+Sans:wdth,wght@100..125,300..900&family=Martian+Mono:wdth,wght@87.5..100,300..600&family=STIX+Two+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
-
+<link rel="preload" href="assets/fonts/mona-sans.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="assets/fonts/hubot-sans.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="assets/fonts/martian-mono.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" as="image" href="assets/portrait.avif" type="image/avif" fetchpriority="high"
       imagesrcset="assets/portrait-640.avif 640w, assets/portrait.avif 900w" imagesizes="(max-width: 760px) 92vw, 44vw" />
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
 
 <script type="importmap">
 {
@@ -76,16 +113,16 @@
 
 <link rel="stylesheet" href="css/main.css" />
 </head>
-<body class="is-booting">
+<body>
 
 <a class="skip" href="#main">Skip to content</a>
 
 <header class="hdr" id="hdr">
-  <a class="hdr-mark" href="#top" aria-label="Satyam, back to the top">
+  <a class="hdr-mark" href="#top" aria-label="Satyam 04, back to the top">
     <span class="hdr-name">Satyam</span>
     <span class="hdr-num" aria-hidden="true">04</span>
   </a>
-  <nav class="hdr-nav" id="nav" aria-label="Sections"></nav>
+  <nav class="hdr-nav" id="nav" aria-label="Sections"><!--prerender:nav--><a href="#work" data-sec="work">Work</a><a href="#research" data-sec="research">Research</a><a href="#experience" data-sec="experience">Experience</a><a href="#about" data-sec="about">About</a><a href="#contact" data-sec="contact">Contact</a><!--/prerender:nav--></nav>
   <div class="hdr-side">
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to night mode">
       <span class="theme-ico" aria-hidden="true"></span><span class="theme-txt">Night</span>
@@ -96,36 +133,957 @@
 </header>
 
 <div class="menu" id="menu" hidden>
-  <nav class="menu-nav" id="menuNav" aria-label="Sections"></nav>
-  <div class="menu-foot" id="menuFoot"></div>
+  <nav class="menu-nav" id="menuNav" aria-label="Sections"><!--prerender:menuNav--><a href="#work" data-sec="work"><span class="mn-i">01</span>Work</a><a href="#research" data-sec="research"><span class="mn-i">02</span>Research</a><a href="#experience" data-sec="experience"><span class="mn-i">03</span>Experience</a><a href="#about" data-sec="about"><span class="mn-i">04</span>About</a><a href="#contact" data-sec="contact"><span class="mn-i">05</span>Contact</a><!--/prerender:menuNav--></nav>
+  <div class="menu-foot" id="menuFoot"><!--prerender:menuFoot--><a href="mailto:satyam23495@iiitd.ac.in">satyam23495@iiitd.ac.in</a><a href="https://github.com/itzsam-lol" target="_blank" rel="noopener">GitHub</a><a href="https://linkedin.com/in/satyam564774288" target="_blank" rel="noopener">LinkedIn</a><a href="https://leetcode.com/u/samuraiiii" target="_blank" rel="noopener">LeetCode</a><!--/prerender:menuFoot--></div>
 </div>
 
-<main id="main" tabindex="-1"></main>
+<main id="main" tabindex="-1" data-sig="ey4gbj"><!--prerender:main-->
+    <section class="hero" id="top" aria-label="Introduction">
+      <div class="hero-meta">
+        <p class="hero-role">Computer Science &amp; AI<br>IIIT-Delhi, class of 2027</p>
+        <p class="hero-where"><span>New Delhi</span> <time class="clock" id="clock">--:--</time> <span class="hero-tz">IST</span></p>
+      </div>
 
-<noscript>
-  <div class="nojs">
-    <h1>Satyam</h1>
-    <p>Final-year Computer Science and AI student at IIIT-Delhi. I build machine learning systems and backends, and I do quantitative research.</p>
-    <p>This page draws itself with JavaScript. Reach me at
-      <a href="mailto:satyam23495@iiitd.ac.in">satyam23495@iiitd.ac.in</a>, or see my work on
-      <a href="https://github.com/itzsam-lol">GitHub</a> and
-      <a href="https://linkedin.com/in/satyam564774288">LinkedIn</a>.</p>
-  </div>
-</noscript>
+      <div class="hero-stage">
+        <h1 class="hero-name" id="heroName" aria-label="Satyam">
+          <span class="hn" aria-hidden="true"><span class="hn-ch">S</span><span class="hn-ch">A</span><span class="hn-ch">T</span><span class="hn-ch">Y</span><span class="hn-ch">A</span><span class="hn-ch">M</span></span>
+        </h1>
+        <picture class="hero-portrait" id="portrait">
+          <source type="image/avif" srcset="assets/portrait-640.avif 640w, assets/portrait.avif 900w" sizes="(max-width: 760px) 92vw, 44vw">
+          <source type="image/webp" srcset="assets/portrait-640.webp 640w, assets/portrait.webp 900w" sizes="(max-width: 760px) 92vw, 44vw">
+          <img src="assets/portrait.webp" width="900" height="1191" alt="Satyam in a red race suit, arms crossed, smiling" fetchpriority="high" decoding="async">
+        </picture>
+        <div class="hero-plate boot" aria-hidden="true">
+          <span class="hp-bar"></span><span class="hp-code">SAT</span><span class="hp-num">04</span>
+        </div>
+      </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/SplitText.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/DrawSVGPlugin.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/Flip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"></script>
+      <p class="hero-lede boot">Final-year Computer Science and AI student at IIIT-Delhi. I build machine learning systems and backends, and I do quantitative research.</p>
+      <ul class="hero-facts boot" aria-label="At a glance">
+      <li class="hf">
+        <span class="hf-k">Summer 2026</span>
+        <b class="hf-v">Dell Technologies</b>
+        <span class="hf-d">LLM inference benchmarking on PowerEdge AI servers</span>
+      </li>
+      <li class="hf">
+        <span class="hf-k">Preprint, 2026</span>
+        <b class="hf-v">bioRxiv</b>
+        <span class="hf-d">Forecasting non-additivity before the experiment</span>
+      </li>
+      <li class="hf">
+        <span class="hf-k">Since Jan 2026</span>
+        <b class="hf-v">Teaching assistant</b>
+        <span class="hf-d">Data Structures and Computer Networks, 100+ students</span>
+      </li>
+      <li class="hf">
+        <span class="hf-k">Co-founder</span>
+        <b class="hf-v">Ignite Room</b>
+        <span class="hf-d">Student tech community of 10,000+ members</span>
+      </li></ul>
 
-<script src="js/data.js"></script>
-<script src="js/figures.js"></script>
-<script src="js/dom.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/motion.js"></script>
-<script src="js/main.js"></script>
+      <div class="lights" id="lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    </section>
+    <section class="intro" id="intro" aria-label="In short">
+      <div class="intro-grid">
+        <p class="intro-k">In short</p>
+        <p class="intro-text" id="introText">I like problems that have to be measured before they can be solved. At Dell I benchmarked LLM inference on PowerEdge AI servers, changing one configuration at a time until the numbers explained themselves. My preprint asks whether a gene perturbation is worth running before anyone runs it. SecondAsk prices every payment retry before it makes one. Same instinct, different track.</p>
+      </div>
+    </section>
+    <section class="machine" id="machine" aria-label="Interlude">
+      <div class="machine-stage">
+        <canvas class="machine-canvas" id="machineCanvas" aria-hidden="true"></canvas>
+        <img class="machine-fallback" id="machineFallback" data-src="assets/car-drawing.webp" alt="" width="1217" height="318" decoding="async">
+        <div class="machine-scan" id="machineScan" aria-hidden="true">
+          <span class="ms-l">Machine</span><span class="ms-r">Drawing</span>
+        </div>
+        <div class="machine-copy">
+          <h2 class="machine-line split">Drawn first, then built.</h2>
+          <p class="machine-note">Keep scrolling. The red line sweeps across the car, and behind it the drawing has become the machine.</p>
+        </div>
+        <p class="machine-cap machine-cap-live">Fig. 0  Single-seater, rendered live in WebGL from a 269 KB Draco-compressed mesh of 122,000 triangles. Right of the red line is an ink drawing made from the car’s own normals and depth; left of it, the lit car.</p>
+        <p class="machine-cap machine-cap-still">Fig. 0  Single-seater, drawn from the car’s own normals and depth. This is a still; in a browser with WebGL the drawing turns into the lit car as you scroll.</p>
+        <div class="machine-meter" aria-hidden="true"><span id="machineDeg">000°</span><i><b id="machineBar"></b></i><span id="machinePct">0%</span></div>
+      </div>
+    </section>
+    <section class="work" id="work">
+      
+      <header class="sec-head">
+        <div class="sec-row"><span class="sec-label">Selected work</span><span class="sec-aside">06 of 20 projects</span></div>
+        <div class="sec-main is-short">
+          <h2 class="sec-title split">Work</h2>
+          <p class="sec-intro reveal">Six projects I would happily walk an engineer through. Each sheet has a working drawing of how the thing works: run it, poke at it, inspect any part. Everything else is in the archive.</p>
+        </div>
+      </header>
+      <div class="sheets">
+      <div class="anchor" id="careeros"></div>
+      <article class="sheet" style="--i:0" aria-labelledby="t-careeros">
+        <div class="sheet-in">
+          <header class="sheet-top">
+            <span class="sheet-n">01</span>
+            <span class="sheet-area">AI agents, full-stack</span>
+            <span class="sheet-status">Deployed</span>
+            <span class="sheet-links"><a class="lnk" href="https://github.com/itzsam-lol/careeros" target="_blank" rel="noopener" aria-label="CareerOS: Repository">Repository<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+          </header>
+          <div class="sheet-body">
+            <div class="sheet-text">
+              <h3 class="sheet-title" id="t-careeros">CareerOS</h3>
+              <p class="sheet-line">A career agent that finds openings, matches them to a verified profile and tailors each application, without acting until a person signs off.</p>
+              <p class="sheet-desc">A FastAPI and SQLAlchemy backend on <a class="xref" href="#fig-careeros" data-fig="careeros" data-part="db">PostgreSQL with pgvector</a>, a Next.js web app and an Expo mobile app, all in one pnpm monorepo that shares a <a class="xref" href="#fig-careeros" data-fig="careeros" data-part="client">typed OpenAPI client</a>. <a class="xref" href="#fig-careeros" data-fig="careeros" data-part="validate">Validators</a> reject any claim the profile cannot back up, and anything that would leave the system waits at an <a class="xref" href="#fig-careeros" data-fig="careeros" data-part="gate">approval gate</a>. It runs on a Google Cloud VM.</p>
+              <ul class="sheet-points"><li>Designed, built and deployed end to end</li><li>Tests, linting and type-checking in the workflow</li><li>80+ commits across the monorepo</li></ul>
+              <dl class="metrics">
+      <div class="metric"><dt>Web and mobile, one typed client</dt><dd><span class="m-v num-roll">2</span><span class="m-u">apps</span></dd></div>
+      <div class="metric"><dt>Commits in the monorepo</dt><dd><span class="m-v num-roll">80+</span></dd></div>
+    </dl>
+            </div>
+            <figure class="fig sheet-fig" data-fig="careeros" id="fig-careeros">
+        <div class="fig-plate is-pending" style="--ar:600/520"><p class="fig-alt">CareerOS pipeline: openings are matched, tailored, validated against the verified profile and approved by a person before anything is sent. Below, the monorepo: web and mobile apps share a typed OpenAPI client in front of a FastAPI service on PostgreSQL with pgvector.</p></div>
+        <figcaption><span class="fig-n">Fig. 1</span>Applications move left to right. The red ones made a claim the profile could not support, so the validator stops them. Nothing leaves until the approval gate opens.</figcaption>
+      </figure>
+          </div>
+          <footer class="tblock">
+            <div class="tb"><span>Project</span><b>CareerOS</b></div>
+            <div class="tb tb-wide"><span>Stack</span><b>Python · FastAPI · SQLAlchemy · PostgreSQL · pgvector · Next.js · React Native · Docker Compose · Google Cloud · OpenAPI</b></div>
+            <div class="tb"><span>Sheet</span><b>1 of 6</b></div>
+            <div class="tb tb-stamp"><span>Status</span><b class="stamp"><span>Deployed</span></b></div>
+          </footer>
+        </div>
+      </article>
+      <div class="anchor" id="secondask"></div>
+      <article class="sheet" style="--i:1" aria-labelledby="t-secondask">
+        <div class="sheet-in">
+          <header class="sheet-top">
+            <span class="sheet-n">02</span>
+            <span class="sheet-area">Fintech, ML, agents</span>
+            <span class="sheet-status">Razorpay AI Buildathon</span>
+            <span class="sheet-links"><a class="lnk" href="https://github.com/itzsam-lol/SecondAsk" target="_blank" rel="noopener" aria-label="SecondAsk: Repository">Repository<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+          </header>
+          <div class="sheet-body">
+            <div class="sheet-text">
+              <h3 class="sheet-title" id="t-secondask">SecondAsk</h3>
+              <p class="sheet-line">A failed-payment recovery agent that prices every retry and reminder before it makes one.</p>
+              <p class="sheet-desc">It decides when and how to retry a failed payment. <a class="xref" href="#fig-secondask" data-fig="secondask" data-part="model">One logistic regression per recovery action</a> estimates the chance it works; each action is then checked against <a class="xref" href="#fig-secondask" data-fig="secondask" data-part="rules">22 compliance rules</a> that fail closed, so a rule that cannot be satisfied <a class="xref" href="#fig-secondask" data-fig="secondask" data-part="act">blocks the action</a> instead of waving it through.</p>
+              <ul class="sheet-points"><li>Evaluated on 12,000 simulated payments</li><li>Calibrated probabilities, not just rankings</li><li>Zero compliance violations in simulation</li></ul>
+              <dl class="metrics">
+      <div class="metric"><dt>Value recovered, against 8.6% for a fixed schedule</dt><dd><span class="m-v num-roll">18.2</span><span class="m-u">%</span></dd></div>
+      <div class="metric"><dt>Held-out AUC</dt><dd><span class="m-v num-roll">0.82</span></dd></div>
+      <div class="metric"><dt>Expected calibration error</dt><dd><span class="m-v num-roll">0.022</span></dd></div>
+    </dl>
+            </div>
+            <figure class="fig sheet-fig" data-fig="secondask" id="fig-secondask">
+        <div class="fig-plate is-pending" style="--ar:600/520"><p class="fig-alt">SecondAsk: a failed payment fans out to candidate actions, each scored by its own logistic regression and priced; the highest-priced action must then pass 22 compliance rules that fail closed. Value recovered over 12,000 simulated payments: 18.2% against 8.6% for a fixed retry schedule, 2.1 times as much.</p></div>
+        <figcaption><span class="fig-n">Fig. 2</span>Each candidate action gets its own model and a price. All 22 rules must pass; one failure and the action is dropped. Right: value recovered across the same 12,000 simulated payments.</figcaption>
+      </figure>
+          </div>
+          <footer class="tblock">
+            <div class="tb"><span>Project</span><b>SecondAsk</b></div>
+            <div class="tb tb-wide"><span>Stack</span><b>Python · FastAPI · Logistic regression · AI agents · LLM applications · Simulation</b></div>
+            <div class="tb"><span>Sheet</span><b>2 of 6</b></div>
+            <div class="tb tb-stamp"><span>Status</span><b class="stamp"><span>0 violations</span></b></div>
+          </footer>
+        </div>
+      </article>
+      <div class="anchor" id="codeforge"></div>
+      <article class="sheet" style="--i:2" aria-labelledby="t-codeforge">
+        <div class="sheet-in">
+          <header class="sheet-top">
+            <span class="sheet-n">03</span>
+            <span class="sheet-area">Backend, security</span>
+            <span class="sheet-status">Completed</span>
+            <span class="sheet-links"><a class="lnk" href="https://github.com/itzsam-lol/CodeForge" target="_blank" rel="noopener" aria-label="CodeForge: Repository">Repository<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+          </header>
+          <div class="sheet-body">
+            <div class="sheet-text">
+              <h3 class="sheet-title" id="t-codeforge">CodeForge</h3>
+              <p class="sheet-line">A self-hosted, white-label coding assessment platform with sandboxed execution.</p>
+              <p class="sheet-desc">Organisations write tests and invite candidates through expiring links. Every submission goes through a <a class="xref" href="#fig-codeforge" data-fig="codeforge" data-part="queue">BullMQ queue on Redis</a> to workers that run it inside a <a class="xref" href="#fig-codeforge" data-fig="codeforge" data-part="sandbox">Judge0 sandbox</a>. <a class="xref" href="#fig-codeforge" data-fig="codeforge" data-part="api">The timer lives on the server</a>, so a paused tab or a changed clock buys nothing, and a <a class="xref" href="#fig-codeforge" data-fig="codeforge" data-part="prints">winnowing fingerprint engine</a> flags likely plagiarism.</p>
+              <ul class="sheet-points"><li>Load-tested, security-reviewed, end-to-end tested with Playwright</li><li>Zero WCAG A/AA accessibility violations</li><li>Results auto-scored and ready for review</li></ul>
+              <dl class="metrics">
+      <div class="metric"><dt>WCAG A/AA accessibility violations</dt><dd><span class="m-v num-roll">0</span></dd></div>
+    </dl>
+            </div>
+            <figure class="fig sheet-fig" data-fig="codeforge" id="fig-codeforge">
+        <div class="fig-plate is-pending" style="--ar:600/530"><p class="fig-alt">CodeForge: a candidate submission passes through the Express API, a BullMQ queue on Redis and a pool of workers into a Judge0 sandbox, with results stored in PostgreSQL. Below, winnowing: a window slides over the hashes of the document&#39;s 5-grams and keeps the smallest hash in each window as a fingerprint.</p></div>
+        <figcaption><span class="fig-n">Fig. 3</span>Top: submissions queue up and workers pull them into the sandbox. Bottom: winnowing slides a window over hashed k-grams and keeps the smallest hash in each window as a fingerprint.</figcaption>
+      </figure>
+          </div>
+          <footer class="tblock">
+            <div class="tb"><span>Project</span><b>CodeForge</b></div>
+            <div class="tb tb-wide"><span>Stack</span><b>TypeScript · Express · Next.js · Prisma · PostgreSQL · Redis · BullMQ · Judge0 · Docker · Playwright</b></div>
+            <div class="tb"><span>Sheet</span><b>3 of 6</b></div>
+            <div class="tb tb-stamp"><span>Status</span><b class="stamp"><span>Security reviewed</span></b></div>
+          </footer>
+        </div>
+      </article>
+      <div class="anchor" id="synchropulse"></div>
+      <article class="sheet" style="--i:3" aria-labelledby="t-synchropulse">
+        <div class="sheet-in">
+          <header class="sheet-top">
+            <span class="sheet-n">04</span>
+            <span class="sheet-area">ML, optimisation, cloud</span>
+            <span class="sheet-status">Four-person team</span>
+            <span class="sheet-links"><a class="lnk" href="https://github.com/itzsam-lol/synchroo" target="_blank" rel="noopener" aria-label="SynchroPulse AI: Repository">Repository<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+          </header>
+          <div class="sheet-body">
+            <div class="sheet-text">
+              <h3 class="sheet-title" id="t-synchropulse">SynchroPulse AI</h3>
+              <p class="sheet-line">Forecasts traffic congestion up to three hours ahead, then plans where traffic personnel and barricades should go.</p>
+              <p class="sheet-desc">Congestion is predicted on <a class="xref" href="#fig-synchropulse" data-fig="synchropulse" data-part="roads">real road networks</a> built with OSMnx and NetworkX. Google OR-Tools turns each forecast into a <a class="xref" href="#fig-synchropulse" data-fig="synchropulse" data-part="crew">deployment plan</a>, and a FastAPI and React dashboard serves it from AWS EC2 under Docker Compose. Built over five staged project reviews.</p>
+              <ul class="sheet-points"><li>Three-hour-ahead congestion forecasts</li><li>OR-Tools deployment optimisation</li><li>Deployed on AWS EC2 with Docker Compose</li></ul>
+              <dl class="metrics">
+      <div class="metric"><dt>Forecast horizon</dt><dd><span class="m-v num-roll">3</span><span class="m-u">h</span></dd></div>
+      <div class="metric"><dt>Staged project reviews</dt><dd><span class="m-v num-roll">5</span></dd></div>
+    </dl>
+            </div>
+            <figure class="fig sheet-fig" data-fig="synchropulse" id="fig-synchropulse">
+        <div class="fig-plate is-pending" style="--ar:600/530"><p class="fig-alt">SynchroPulse, illustrative: as the forecast clock moves from now to three hours ahead, congestion builds along two corridors, and the deployment plan moves traffic personnel and a barricade to the worst roads.</p></div>
+        <figcaption><span class="fig-n">Fig. 4</span>An illustrative network, not real data. As the forecast clock runs from now to three hours out, roads heat up and the plan moves crews and barricades to where they will matter.</figcaption>
+      </figure>
+          </div>
+          <footer class="tblock">
+            <div class="tb"><span>Project</span><b>SynchroPulse AI</b></div>
+            <div class="tb tb-wide"><span>Stack</span><b>Python · OSMnx · NetworkX · OR-Tools · FastAPI · React · Streamlit · AWS · Docker</b></div>
+            <div class="tb"><span>Sheet</span><b>4 of 6</b></div>
+            <div class="tb tb-stamp"><span>Status</span><b class="stamp"><span>Deployed on EC2</span></b></div>
+          </footer>
+        </div>
+      </article>
+      <div class="anchor" id="campusfind"></div>
+      <article class="sheet" style="--i:4" aria-labelledby="t-campusfind">
+        <div class="sheet-in">
+          <header class="sheet-top">
+            <span class="sheet-n">05</span>
+            <span class="sheet-area">Full-stack, AI matching</span>
+            <span class="sheet-status">Live</span>
+            <span class="sheet-links"><a class="lnk" href="https://campusfind2.vercel.app/" target="_blank" rel="noopener" aria-label="CampusFind: Live site">Live site<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a><a class="lnk" href="https://github.com/itzsam-lol/campusfind" target="_blank" rel="noopener" aria-label="CampusFind: Repository">Repository<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+          </header>
+          <div class="sheet-body">
+            <div class="sheet-text">
+              <h3 class="sheet-title" id="t-campusfind">CampusFind</h3>
+              <p class="sheet-line">A lost-and-found platform for Delhi colleges, with university-email sign-in and QR-verified handoffs.</p>
+              <p class="sheet-desc">You sign in with a <a class="xref" href="#fig-campusfind" data-fig="campusfind" data-part="signin">one-time code sent to your university email</a>. An <a class="xref" href="#fig-campusfind" data-fig="campusfind" data-part="llm">LLM matches lost reports against found ones</a>, and the handoff is confirmed by <a class="xref" href="#fig-campusfind" data-fig="campusfind" data-part="qr">scanning a QR code</a>, so an item only closes when it reaches the right person. <a class="xref" href="#fig-campusfind" data-fig="campusfind" data-part="rls">Supabase row-level security</a> guards both data and storage. Built with a student from IGDTUW.</p>
+              <ul class="sheet-points"><li>University-email OTP sign-in and admin portals</li><li>LLM matching of lost and found reports</li><li>Row-level security on data and storage</li></ul>
+              <dl class="metrics">
+      <div class="metric"><dt>Verified handoffs</dt><dd><span class="m-v num-roll">QR</span></dd></div>
+      <div class="metric"><dt>Row-level security throughout</dt><dd><span class="m-v num-roll">RLS</span></dd></div>
+    </dl>
+            </div>
+            <figure class="fig sheet-fig" data-fig="campusfind" id="fig-campusfind">
+        <div class="fig-plate is-pending" style="--ar:600/520"><p class="fig-alt">CampusFind: sign-in by university email code; a lost report and a found report are matched by an LLM; the item is handed over by scanning a QR code and the case closes; data and storage sit behind Supabase row-level security.</p></div>
+        <figcaption><span class="fig-n">Fig. 5</span>A lost report and a found report meet at the matcher. The item only changes hands when the QR code is scanned, and every row is fenced by Supabase row-level security.</figcaption>
+      </figure>
+          </div>
+          <footer class="tblock">
+            <div class="tb"><span>Project</span><b>CampusFind</b></div>
+            <div class="tb tb-wide"><span>Stack</span><b>Next.js · React · Supabase · PostgreSQL · Tailwind CSS · Groq · Vercel</b></div>
+            <div class="tb"><span>Sheet</span><b>5 of 6</b></div>
+            <div class="tb tb-stamp"><span>Status</span><b class="stamp"><span>Live</span></b></div>
+          </footer>
+        </div>
+      </article>
+      <div class="anchor" id="riscv"></div>
+      <article class="sheet" style="--i:5" aria-labelledby="t-riscv">
+        <div class="sheet-in">
+          <header class="sheet-top">
+            <span class="sheet-n">06</span>
+            <span class="sheet-area">Systems, computer architecture</span>
+            <span class="sheet-status">Completed</span>
+            <span class="sheet-links"><a class="lnk" href="https://github.com/itzsam-lol/RISCV_Assembler_Simulator" target="_blank" rel="noopener" aria-label="RISC-V Toolchain: Repository">Repository<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+          </header>
+          <div class="sheet-body">
+            <div class="sheet-text">
+              <h3 class="sheet-title" id="t-riscv">RISC-V Toolchain</h3>
+              <p class="sheet-line">A complete RV32I assembler and simulator in Python, checked against a real RTL core.</p>
+              <p class="sheet-desc">A <a class="xref" href="#fig-riscv" data-fig="riscv" data-part="pass1">two-pass assembler</a> resolves labels and forward references, then encodes. A <a class="xref" href="#fig-riscv" data-fig="riscv" data-part="sim">cycle-accurate simulator</a> runs the result. Both are checked against the <a class="xref" href="#fig-riscv" data-fig="riscv" data-part="rtl">PicoRV32 core</a> through a <a class="xref" href="#fig-riscv" data-fig="riscv" data-part="checks">differential harness and SymbiYosys formal verification</a>.</p>
+              <ul class="sheet-points"><li>Two-pass assembly with forward references</li><li>Differential testing against PicoRV32</li><li>Formal checks with SymbiYosys</li></ul>
+              <dl class="metrics">
+      <div class="metric"><dt>Passing tests</dt><dd><span class="m-v num-roll">147</span></dd></div>
+      <div class="metric"><dt>Base integer ISA</dt><dd><span class="m-v num-roll">RV32I</span></dd></div>
+    </dl>
+            </div>
+            <figure class="fig sheet-fig" data-fig="riscv" id="fig-riscv">
+        <div class="fig-plate is-pending" style="--ar:600/520"><p class="fig-alt">RISC-V: an I-type instruction such as addi x5, x0, 42 split into its fields (immediate, source register, funct3, destination register and the OP-IMM opcode) and encoded bit by bit, giving 0x02A00293. Below, the toolchain: two assembler passes, the cycle-accurate simulator, and differential and formal checks against the PicoRV32 core.</p></div>
+        <figcaption><span class="fig-n">Fig. 6</span>One instruction, end to end: addi x5, x0, 42 is split into I-type fields, encoded bit by bit, and comes out as 0x02A00293.</figcaption>
+      </figure>
+          </div>
+          <footer class="tblock">
+            <div class="tb"><span>Project</span><b>RISC-V Toolchain</b></div>
+            <div class="tb tb-wide"><span>Stack</span><b>Python · RISC-V · SymbiYosys · Verilator</b></div>
+            <div class="tb"><span>Sheet</span><b>6 of 6</b></div>
+            <div class="tb tb-stamp"><span>Status</span><b class="stamp"><span>147 tests pass</span></b></div>
+          </footer>
+        </div>
+      </article></div>
+    </section>
+    <section class="research" id="research">
+      
+      <header class="sec-head">
+        <div class="sec-row"><span class="sec-label">Research</span><span class="sec-aside">A preprint, a field study, four quant projects</span></div>
+        <div class="sec-main ">
+          <h2 class="sec-title split">Research</h2>
+          <p class="sec-intro reveal">The questions I keep coming back to are about deciding before spending: which experiment to run, which retry to make, which signal to trust.</p>
+        </div>
+      </header>
+
+      <div class="paper" id="research-paper">
+        <div class="paper-sheet-wrap">
+          <article class="paper-sheet" aria-label="First page of the preprint">
+            <p class="ps-run"><span>Preprint, not peer reviewed</span></p>
+            <h3 class="ps-title">Forecasting Non-Additivity Before the Experiment: A Pre-Experimental Triage for Single-Cell Perturbation Modeling</h3>
+            <p class="ps-auth">Satyam<sup>1</sup></p>
+            <p class="ps-aff"><sup>1</sup>Department of Computer Science and Engineering, IIIT-Delhi</p>
+            <p class="ps-abs-h">Abstract</p>
+            <p class="ps-abs">Deep models for single-cell perturbation response are frequently reported to be no better, in aggregate, than a simple additive or mean-based baseline. We ask the complementary, experiment-facing question: can we predict, before running a perturbation, whether it will be saturated (an additive baseline suffices) or resistant (non-additive, worth the modeling and measurement cost)? On the genome-scale Replogle K562 essential screen the triage achieves Random Forest <mark class="hl">Spearman ρ 0.65</mark> (95% CI [0.61, 0.69]) and <mark class="hl">ROC-AUC 0.86</mark>.</p>
+            <p class="ps-foot"><span>bioRxiv preprint, 2026</span><span>1</span></p>
+          </article>
+        </div>
+        <div class="paper-side">
+          <p class="paper-kicker">bioRxiv preprint, 2026 · first author</p>
+          <p class="paper-plain">Single-cell CRISPR screens are expensive, and for many perturbations a <a class="xref" href="#fig-pgip" data-fig="pgip" data-part="baseline">simple additive model</a> already explains the result. This work <a class="xref" href="#fig-pgip" data-fig="pgip" data-part="stage1">predicts which ones those are</a> before the experiment is run, so compute and follow-up go to the perturbations where <a class="xref" href="#fig-pgip" data-fig="pgip" data-part="stage2">a deep model can actually learn something</a>.</p>
+          <figure class="fig " data-fig="pgip" id="fig-pgip">
+        <div class="fig-plate is-pending" style="--ar:600/450"><p class="fig-alt">PGIP: before an experiment, gene-intrinsic features (baseline expression, STRING connectivity, Gene Ontology, an ESM-2 embedding) feed a Stage 1 model that predicts Baseline Saturation. Stage 2 sends predicted-saturated perturbations (0.66 and above) to the free baseline and predicted-resistant ones (below 0.33) to a costlier model.</p></div>
+        <figcaption><span class="fig-n">Fig. 7</span>Two-stage triage. Stage 1 predicts Baseline Saturation from features known before the experiment; Stage 2 sends each perturbation to the free baseline or the costly model. Drag the prediction to see where it goes.</figcaption>
+      </figure>
+          <dl class="results">
+      <div class="res is-primary">
+        <dt>Spearman <span class="gr">ρ</span></dt>
+        <dd><span class="res-v num-roll">0.65</span><span class="res-ci">95% CI 0.61 to 0.69</span><span class="res-d">Random forest, Replogle K562, 1,086 single-gene perturbations</span></dd>
+      </div>
+      <div class="res is-primary">
+        <dt>ROC-AUC</dt>
+        <dd><span class="res-v num-roll">0.86</span><span class="res-d">Same screen; label-permutation p = 0.003</span></dd>
+      </div>
+      <div class="res ">
+        <dt>Spearman <span class="gr">ρ</span></dt>
+        <dd><span class="res-v num-roll">0.58</span><span class="res-d">Ridge regression, the conservative model, same screen</span></dd>
+      </div>
+      <div class="res ">
+        <dt>ROC-AUC</dt>
+        <dd><span class="res-v num-roll">0.77</span><span class="res-d">Gene-pair triage, Wessels CaRPool-seq, 158 doubles (ρ = 0.50)</span></dd>
+      </div></dl>
+          <figure class="fig " data-fig="pgipres" id="fig-pgipres">
+        <div class="fig-plate is-pending" style="--ar:600/420"><p class="fig-alt">PGIP results from the preprint: Spearman correlation and ROC-AUC per screen with 95% intervals; the drop in correlation when each feature group is left out; and the share of saturated, frontier and resistant perturbations per screen.</p></div>
+        <figcaption><span class="fig-n">Fig. 8</span>The results, four ways, all from the preprint: accuracy per screen with 95% bootstrap intervals, ROC-AUC, which feature group matters most on each screen, and how much of each screen is saturated.</figcaption>
+      </figure>
+          <div class="ds">
+            <table class="ds-table">
+              <caption>The six screens used, with scored perturbations</caption>
+              <thead><tr><th scope="col">Dataset</th><th scope="col">Cell line</th><th scope="col">Perturbation</th><th scope="col">Unit</th><th scope="col" class="num">Scored</th></tr></thead>
+              <tbody>
+      <tr><th scope="row">Norman19</th><td>K562</td><td>CRISPRa</td><td>double</td><td class="num">124</td></tr>
+      <tr><th scope="row">Adamson16</th><td>K562</td><td>CRISPRi (UPR)</td><td>single</td><td class="num">86</td></tr>
+      <tr><th scope="row">Replogle22 K562</th><td>K562</td><td>CRISPRi essential</td><td>single</td><td class="num">1,086</td></tr>
+      <tr><th scope="row">Replogle22 RPE1</th><td>RPE1</td><td>CRISPRi essential</td><td>single</td><td class="num">1,533</td></tr>
+      <tr><th scope="row">Wessels23</th><td>THP-1</td><td>Cas13 CaRPool-seq</td><td>double</td><td class="num">158</td></tr>
+      <tr><th scope="row">Sunshine23</th><td>Calu-3</td><td>Cas9 host factors</td><td>single</td><td class="num">178</td></tr></tbody>
+            </table>
+          </div>
+          <p class="paper-meta"><span>Methods</span>Ridge regression, Random forests, Permutation nulls, Bootstrap confidence intervals, Feature-group ablation</p>
+          <p class="paper-links"><a class="lnk" href="https://github.com/itzsam-lol/PGIP" target="_blank" rel="noopener" aria-label="Preprint: Code and data">Code and data<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></p>
+        </div>
+      </div>
+
+      <div class="udyox" id="udyox">
+        <div class="udyox-head">
+          <p class="udyox-kind">B.Tech project with Dr. Pankaj Vajpayee</p>
+          <h3 class="udyox-title">Udyox AI</h3>
+          <p class="udyox-line">How do small shop owners in Delhi actually adopt AI? We went and asked, then built from what we found.</p>
+          <p class="udyox-links"><a class="lnk" href="https://udyox-ai.web.app" target="_blank" rel="noopener" aria-label="Udyox AI: Prototype">Prototype<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a><a class="lnk" href="https://github.com/itzsam-lol/udyoxAI" target="_blank" rel="noopener" aria-label="Udyox AI: Repository">Repository<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></p>
+        </div>
+        <div class="udyox-body">
+          <ul class="udyox-nums"><li><b class="num-roll">20+</b><span>Businesses visited</span></li><li><b class="num-roll">58</b><span>Survey responses, 8 markets</span></li><li><b class="num-roll">18</b><span>Shop owners in the field test</span></li><li><b class="num-roll">3</b><span>Adoption tiers</span></li></ul>
+          <p class="udyox-text">Field research across Delhi markets produced an 8-factor AI Readiness Framework that sorts businesses into three adoption tiers. From the findings we built a Hindi and Hinglish voice assistant (speech to text, an LLM, a FastAPI backend and a React front end), field-tested it with shop owners and compared it against a smart-speaker prototype. Two-person team; the phase 2 report is complete.</p>
+          <p class="udyox-stack">React · TypeScript · FastAPI · Python · Firebase · SQLite · Groq</p>
+        </div>
+      </div>
+
+      <div class="quant">
+        <div class="quant-head"><h3 class="sub-title">Quant and data</h3><p class="sub-note">Four questions, answered with public data.</p></div>
+        <div class="quant-grid">
+      <article class="qcard" id="macro">
+        <header class="qcard-top"><span class="qcard-n">a</span><h4 class="qcard-title">Macro Event Study</h4>
+          <a class="lnk lnk-sm" href="https://github.com/itzsam-lol/macro-event-study-framework" target="_blank" rel="noopener" aria-label="Macro Event Study repository">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></header>
+        <p class="qcard-q">How do CPI, payrolls, PMI and FOMC releases move markets?</p>
+        <figure class="fig qfig" data-fig="macro" id="fig-macro">
+        <div class="fig-plate is-pending" style="--ar:300/178"><p class="fig-alt">Average reactions after macro releases: long bonds (TLT) up 0.15% on the event day and down 0.29% the next; VIX down 1.63% one week after positive surprises.</p></div>
+        
+      </figure>
+        <p class="qcard-body">Release data from FRED and prices from yfinance; reactions measured in equities, FX, rates and volatility at T+0, T+1, T+2 and one week, with significance tests across regimes and a seven-panel dashboard.</p>
+        <ul class="qcard-finds"><li>FOMC rate surprise: β = 0.303 on next-day equity variance (R² = 0.05). Small, but economically meaningful.</li><li>Long bonds buy the rumour and sell the news.</li><li>VIX compresses after positive surprises, most at one week.</li></ul>
+      </article>
+      <article class="qcard" id="ledgerlens">
+        <header class="qcard-top"><span class="qcard-n">b</span><h4 class="qcard-title">LedgerLens</h4>
+          <a class="lnk lnk-sm" href="https://github.com/itzsam-lol/LedgerLens" target="_blank" rel="noopener" aria-label="LedgerLens repository">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></header>
+        <p class="qcard-q">Do company filings follow Benford’s Law?</p>
+        <figure class="fig qfig" data-fig="benford" id="fig-benford">
+        <div class="fig-plate is-pending" style="--ar:300/178"><p class="fig-alt">Benford’s first-digit law: a leading 1 appears about 30.1% of the time, falling to about 4.6% for a leading 9, against 11.1% each if digits were uniform.</p></div>
+        
+      </figure>
+        <p class="qcard-body">Ten years of 10-K reports for 30 US companies in five sectors, scraped from SEC EDGAR, tested against the first-digit law, ranked by a suspicion score and written up as automated PDF audit reports.</p>
+        <ul class="qcard-finds"><li>Retail filings deviated most, likely because prices cluster at points such as $9.99.</li></ul>
+      </article>
+      <article class="qcard" id="splm">
+        <header class="qcard-top"><span class="qcard-n">c</span><h4 class="qcard-title">SPLM India</h4>
+          <a class="lnk lnk-sm" href="https://github.com/itzsam-lol/SPLM" target="_blank" rel="noopener" aria-label="SPLM India repository">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></header>
+        <p class="qcard-q">Can free satellite imagery anticipate revenue surprises for Indian retailers?</p>
+        <figure class="fig qfig" data-fig="splm" id="fig-splm">
+        <div class="fig-plate is-pending" style="--ar:300/178"><p class="fig-alt">SPLM: parking-lot activity from Sentinel-2 imagery and analyst momentum feed a divergence engine that outputs a signal between minus one and plus one.</p></div>
+        
+      </figure>
+        <p class="qcard-body">Sentinel-2 imagery at 10 m through Google Earth Engine, an NDBI index over the flagship stores of 12 listed retailers such as DMART, TRENT and JUBLFOOD, and a divergence engine that compares physical activity with analyst momentum. Validated point-in-time against look-ahead bias, with a test suite.</p>
+        <ul class="qcard-finds"><li>A research framework aimed at ACM ICAIF, not a live trading signal.</li></ul>
+      </article>
+      <article class="qcard" id="oceanic">
+        <header class="qcard-top"><span class="qcard-n">d</span><h4 class="qcard-title">Oceanic Edge</h4>
+          <a class="lnk lnk-sm" href="https://github.com/itzsam-lol/Oceanic-Edge" target="_blank" rel="noopener" aria-label="Oceanic Edge repository">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></header>
+        <p class="qcard-q">Does port congestion show up in ship-tracking data before it shows up in prices?</p>
+        <figure class="fig qfig" data-fig="oceanic" id="fig-oceanic">
+        <div class="fig-plate is-pending" style="--ar:300/178"><p class="fig-alt">Oceanic Edge, illustrative: ships inside a port geofence are timed, and dwell time becomes a congestion index.</p></div>
+        
+      </figure>
+        <p class="qcard-body">An AIS vessel pipeline that computes geofenced dwell-time congestion indices for six global ports, a backtested signal and an XGBoost model, plus YOLOv8 detection of ships and container stacks in satellite images.</p>
+        
+      </article></div>
+      </div>
+
+      <div class="ongoing">
+        <h3 class="sub-title">On the bench</h3>
+        <ul class="og-list">
+      <li class="og"><b>TVC-GRPO</b><span>Reinforcement-learning fine-tuning for LLMs: GRPO extended with tri-vector reward decomposition and Lagrangian safety constraints, designed to fit Kaggle hardware.</span><i class="og-tag">Ongoing</i></li>
+      <li class="og"><b>Bank Sentinel</b><span>Bank failure prediction from FDIC Call Report ratios and signals a retrieval-augmented LangChain agent extracts from SEC filings, with walk-forward backtesting.</span><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/Bank-Sentinel" target="_blank" rel="noopener" aria-label="Bank Sentinel: Repository">Repository<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></li>
+      <li class="og"><b>Foodoscope</b><span>Research at CoSY Lab with Prof. Ganesh Bagler on the Foodoscope computational gastronomy platform.</span><i class="og-tag">Ongoing</i></li></ul>
+      </div>
+    </section>
+    <section class="experience" id="experience">
+      
+      <header class="sec-head">
+        <div class="sec-row"><span class="sec-label">Experience</span><span class="sec-aside">August 2023 to graduation, 2027</span></div>
+        <div class="sec-main ">
+          <h2 class="sec-title split">Experience</h2>
+          <p class="sec-intro reveal">Two internships, a teaching role, a research stint and a lot of hackathon logistics, laid out the way a race engineer would read them.</p>
+        </div>
+      </header>
+      
+      <figure class="stints" id="stints">
+        <div class="st-scroll" id="stScroll">
+          <div class="st-chart" style="--now:80.851%" data-from="2023-08" data-to="2027-06">
+            <div class="st-axis"><span class="st-year" style="left:10.638%">2024</span><span class="st-year" style="left:36.170%">2025</span><span class="st-year" style="left:61.702%">2026</span><span class="st-year" style="left:87.234%">2027</span></div>
+            <div class="st-row st-head" aria-hidden="true"><span class="st-label"></span><span></span></div>
+            
+      <div class="st-row">
+        <span class="st-label">Education</span>
+        <div class="st-track">
+          <div class="stint c-h  " style="left:0.000%;width:100.000%" tabindex="0"
+                      data-from="2023-08" data-to="2027-06" role="img" aria-label="B.Tech, Computer Science &amp; AI, IIIT-Delhi, Aug 2023 to Jun 2027">
+                <span class="stint-bar"><span class="tyre" aria-hidden="true">H</span><span class="stint-t">IIIT-Delhi</span></span>
+                
+                <span class="stint-tip" role="tooltip"><b>B.Tech, Computer Science &amp; AI</b><span>IIIT-Delhi</span><span class="stint-when">Aug 2023 to Jun 2027</span></span>
+              </div>
+        </div>
+      </div>
+      <div class="st-row">
+        <span class="st-label">Internships</span>
+        <div class="st-track">
+          <div class="stint c-s  is-narrow" style="left:21.277%;width:6.383%" tabindex="0"
+                      data-from="2024-06" data-to="2024-08" role="img" aria-label="Software testing intern, Fam, Jun 2024 to Aug 2024">
+                <span class="stint-bar"><span class="tyre" aria-hidden="true">S</span></span>
+                <span class="stint-t">Fam</span>
+                <span class="stint-tip" role="tooltip"><b>Software testing intern</b><span>Fam</span><span class="stint-when">Jun 2024 to Aug 2024</span></span>
+              </div><div class="stint c-s  is-narrow" style="left:72.340%;width:6.383%" tabindex="0"
+                      data-from="2026-06" data-to="2026-08" role="img" aria-label="Summer intern, SPA team, Dell Technologies, Jun 2026 to Aug 2026">
+                <span class="stint-bar"><span class="tyre" aria-hidden="true">S</span></span>
+                <span class="stint-t">Dell Technologies</span>
+                <span class="stint-tip" role="tooltip"><b>Summer intern, SPA team</b><span>Dell Technologies</span><span class="stint-when">Jun 2026 to Aug 2026</span></span>
+              </div>
+        </div>
+      </div>
+      <div class="st-row">
+        <span class="st-label">Research</span>
+        <div class="st-track">
+          <div class="stint c-m  is-narrow" style="left:44.681%;width:6.383%" tabindex="0"
+                      data-from="2025-05" data-to="2025-07" role="img" aria-label="Research intern, Foodoscope, CoSY Lab, May 2025 to Jul 2025">
+                <span class="stint-bar"><span class="tyre" aria-hidden="true">M</span></span>
+                <span class="stint-t">CoSY Lab</span>
+                <span class="stint-tip" role="tooltip"><b>Research intern, Foodoscope</b><span>CoSY Lab</span><span class="stint-when">May 2025 to Jul 2025</span></span>
+              </div>
+        </div>
+      </div>
+      <div class="st-row">
+        <span class="st-label">Teaching</span>
+        <div class="st-track">
+          <div class="stint c-i is-open " style="left:61.702%;width:calc(max(1.4%, var(--now) - 61.702%))" tabindex="0"
+                      data-from="2026-01" data-to="" role="img" aria-label="Teaching assistant, DSA and Networks, IIIT-Delhi, Jan 2026 to now">
+                <span class="stint-bar"><span class="tyre" aria-hidden="true">I</span><span class="stint-t">IIIT-Delhi</span></span>
+                
+                <span class="stint-tip" role="tooltip"><b>Teaching assistant, DSA and Networks</b><span>IIIT-Delhi</span><span class="stint-when">Jan 2026 to now</span></span>
+              </div>
+        </div>
+      </div>
+      <div class="st-row">
+        <span class="st-label">Community</span>
+        <div class="st-track">
+          <div class="stint c-w  " style="left:31.915%;width:21.277%" tabindex="0"
+                      data-from="2024-11" data-to="2025-08" role="img" aria-label="Vice chairperson, IEEE-IIITD, Nov 2024 to Aug 2025">
+                <span class="stint-bar"><span class="tyre" aria-hidden="true">W</span><span class="stint-t">IEEE-IIITD</span></span>
+                
+                <span class="stint-tip" role="tooltip"><b>Vice chairperson</b><span>IEEE-IIITD</span><span class="stint-when">Nov 2024 to Aug 2025</span></span>
+              </div><div class="stint c-w  is-narrow" style="left:53.191%;width:8.511%" tabindex="0"
+                      data-from="2025-09" data-to="2025-12" role="img" aria-label="Lead organiser, Hack The Flame, Sept 2025 to Dec 2025">
+                <span class="stint-bar"><span class="tyre" aria-hidden="true">W</span></span>
+                <span class="stint-t">Hack The Flame</span>
+                <span class="stint-tip" role="tooltip"><b>Lead organiser</b><span>Hack The Flame</span><span class="stint-when">Sept 2025 to Dec 2025</span></span>
+              </div>
+        </div>
+      </div>
+            <div class="st-now" aria-hidden="true"><span>Now</span></div>
+            <div class="st-future" aria-hidden="true"></div>
+            <div class="st-cursor" aria-hidden="true"><span></span></div>
+          </div>
+        </div>
+        <figcaption class="st-cap">
+          <ul class="st-legend">
+      <li class="lg c-h"><span class="tyre" aria-hidden="true">H</span><span><b>Education</b> <i>hard</i></span></li>
+      <li class="lg c-s"><span class="tyre" aria-hidden="true">S</span><span><b>Internships</b> <i>soft</i></span></li>
+      <li class="lg c-m"><span class="tyre" aria-hidden="true">M</span><span><b>Research</b> <i>medium</i></span></li>
+      <li class="lg c-i"><span class="tyre" aria-hidden="true">I</span><span><b>Teaching</b> <i>intermediate</i></span></li>
+      <li class="lg c-w"><span class="tyre" aria-hidden="true">W</span><span><b>Community</b> <i>wet</i></span></li></ul>
+          <p>Read it like a tyre-strategy graphic: one row per kind of work, one bar per stint, compound by type. Hatched area is still to come.</p>
+        </figcaption>
+      </figure>
+      <ol class="jobs">
+      <li class="job">
+        <div class="job-when"><span>Jun – Aug 2026</span><span class="job-where">Bengaluru</span></div>
+        <div class="job-main">
+          <h3 class="job-org">Dell Technologies</h3>
+          <p class="job-role">Summer Intern, SPA team</p>
+          <p class="job-d">Performance testing of large language models on Dell PowerEdge AI servers.</p>
+          <ul class="job-points"><li>Benchmarked server and model configurations with NVIDIA AIPerf and worked out which settings improved inference performance.</li><li>Isolated performance problems by changing one configuration at a time.</li><li>Automated the repetitive benchmarking steps and widened data collection, so results were faster to produce and reproducible.</li><li>Presented findings to the team in regular reviews with managers and mentors.</li></ul>
+          <p class="job-tags">NVIDIA AIPerf · PowerEdge · LLM inference · Python</p>
+        </div>
+      </li>
+      <li class="job">
+        <div class="job-when"><span>Jan 2026 – now</span><span class="job-where">New Delhi</span></div>
+        <div class="job-main">
+          <h3 class="job-org">IIIT-Delhi</h3>
+          <p class="job-role">Teaching Assistant</p>
+          <p class="job-d">Data Structures and Algorithms, and Computer Networks: two core undergraduate courses, 100+ students.</p>
+          <ul class="job-points"><li>Run lab sessions for students with very different levels of experience.</li><li>Review, debug and grade student code.</li><li>Wrote debugging walkthroughs that are now course reference material.</li><li>Received the Dean’s Award for Best Teaching Assistant.</li></ul>
+          <p class="job-tags">Data structures · Algorithms · Computer networks</p>
+        </div>
+      </li>
+      <li class="job">
+        <div class="job-when"><span>Jun – Aug 2024</span><span class="job-where">Hybrid</span></div>
+        <div class="job-main">
+          <h3 class="job-org">Fam (formerly FamPay)</h3>
+          <p class="job-role">Software Testing Intern</p>
+          <p class="job-d">Release testing for a consumer payments app on Android and iOS.</p>
+          <ul class="job-points"><li>Tested every sprint’s release builds with regression, unit and integration tests.</li><li>Traced payment and card-management defects to their root cause.</li><li>Wrote each defect up as a reproducible report for engineers.</li></ul>
+          <p class="job-tags">Android · iOS · Regression testing · Agile</p>
+        </div>
+      </li></ol>
+    </section>
+    <section class="about" id="about">
+      
+      <header class="sec-head">
+        <div class="sec-row"><span class="sec-label">About</span><span class="sec-aside">Community, teaching and the rest</span></div>
+        <div class="sec-main ">
+          <h2 class="sec-title split">Off track</h2>
+          <p class="sec-intro reveal">Most of what I have learned about running things came from organising events for people who did not have to show up.</p>
+        </div>
+      </header>
+      <ol class="ot-list">
+      <li class="ot">
+        <div class="ot-main">
+          <p class="ot-role">Co-founder, website maintainer</p>
+          <h3 class="ot-org"><a class="lnk lnk-quiet" href="https://igniteroom.in" target="_blank" rel="noopener">Ignite Room<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></h3>
+          <p class="ot-d">A student tech community I co-founded. I also keep igniteroom.in running on AWS (EC2, App Runner, S3).</p>
+        </div>
+        <p class="ot-num"><b class="num-roll">10,000+</b><span>members</span></p>
+      </li>
+      <li class="ot">
+        <div class="ot-main">
+          <p class="ot-role">Main organiser</p>
+          <h3 class="ot-org">HackArena <span class="dg">2.0</span></h3>
+          <p class="ot-d">Ran it end to end: zonal rounds in six cities, then a final in New Delhi.</p>
+        </div>
+        <p class="ot-num"><b class="num-roll">6</b><span>cities</span></p>
+      </li>
+      <li class="ot">
+        <div class="ot-main">
+          <p class="ot-role">Lead organiser</p>
+          <h3 class="ot-org">Hack The Flame</h3>
+          <p class="ot-d">A national hackathon: logistics, sponsor deliverables, vendors and the event floor.</p>
+        </div>
+        <p class="ot-num"><b class="num-roll">500+</b><span>participants</span></p>
+      </li>
+      <li class="ot">
+        <div class="ot-main">
+          <p class="ot-role">Vice chairperson</p>
+          <h3 class="ot-org">IEEE-IIITD Student Branch</h3>
+          <p class="ot-d">Helped lead the branch and mentored teams at five hackathons. Nov 2024 to Aug 2025.</p>
+        </div>
+        <p class="ot-num"><b class="num-roll">50+</b><span>volunteers</span></p>
+      </li>
+      <li class="ot">
+        <div class="ot-main">
+          <p class="ot-role">Website maintainer</p>
+          <h3 class="ot-org">CiPD, IIIT-Delhi</h3>
+          <p class="ot-d">I build and maintain the site for the Centre for Innovation, Prototyping and Design.</p>
+        </div>
+        <p class="ot-num ot-num-none" aria-hidden="true"></p>
+      </li></ol>
+
+      <div class="about-split">
+        <div class="awards">
+          <h3 class="sub-title">Recognition</h3>
+          <ul class="aw-list">
+      <li class="aw"><b>Dean’s Award for Best Teaching Assistant</b><span>IIIT-Delhi, for TA work across DSA and Computer Networks</span></li>
+      <li class="aw"><b>Academic Scholar Award</b></li>
+      <li class="aw"><b>Creative Student Award</b></li>
+      <li class="aw"><b><a class="lnk lnk-quiet" href="https://leetcode.com/u/samuraiiii" target="_blank" rel="noopener">About 360 LeetCode problems<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></b><span>351 in C++ and 9 in SQL, with the 2025 100 Days badge</span></li></ul>
+          <p class="langs"><span>Languages</span>English and Hindi; learning French and Japanese.</p>
+        </div>
+        <div class="courses">
+          <h3 class="sub-title">Coursework</h3>
+          <p class="course-list"><span>Data Structures and Algorithms</span><span>Algorithm Design and Analysis</span><span>Operating Systems</span><span>Database Management Systems</span><span>Computer Networks</span><span>Computer Architecture</span><span>Artificial Intelligence</span><span>Machine Learning</span><span>Statistical Machine Learning</span><span>Big Data Analytics</span><span>Collaborative Filtering</span><span>Convex Optimization</span><span>Human-AI Interaction</span></p>
+        </div>
+      </div>
+
+      <div class="toolkit" id="toolkit">
+        <div class="tk-head">
+          <h3 class="sub-title">Toolkit</h3>
+          <p class="tk-readout" id="tkReadout" aria-live="polite">The small number is how many projects on this page use it. Pick one to see them in the archive.</p>
+        </div>
+        <div class="tk-grid">
+      <div class="tk-group">
+        <h4 class="tk-h">Languages</h4>
+        <ul class="tk-list"><li><button class="tk" type="button" data-tool="Python" 
+                    aria-label="Python, used in 12 projects">Python<sup>12</sup></button></li><li><button class="tk" type="button" data-tool="C++" data-none
+                    aria-label="C++">C++</button></li><li><button class="tk" type="button" data-tool="Java" data-none
+                    aria-label="Java">Java</button></li><li><button class="tk" type="button" data-tool="TypeScript" 
+                    aria-label="TypeScript, used in 2 projects">TypeScript<sup>2</sup></button></li><li><button class="tk" type="button" data-tool="JavaScript" data-none
+                    aria-label="JavaScript">JavaScript</button></li><li><button class="tk" type="button" data-tool="SQL" data-none
+                    aria-label="SQL">SQL</button></li><li><button class="tk" type="button" data-tool="SystemVerilog" 
+                    aria-label="SystemVerilog, used in 1 project">SystemVerilog<sup>1</sup></button></li></ul>
+      </div>
+      <div class="tk-group">
+        <h4 class="tk-h">Backend</h4>
+        <ul class="tk-list"><li><button class="tk" type="button" data-tool="FastAPI" 
+                    aria-label="FastAPI, used in 7 projects">FastAPI<sup>7</sup></button></li><li><button class="tk" type="button" data-tool="Express" 
+                    aria-label="Express, used in 1 project">Express<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Node.js" 
+                    aria-label="Node.js, used in 1 project">Node.js<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="SQLAlchemy" 
+                    aria-label="SQLAlchemy, used in 1 project">SQLAlchemy<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Prisma" 
+                    aria-label="Prisma, used in 1 project">Prisma<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="BullMQ" 
+                    aria-label="BullMQ, used in 1 project">BullMQ<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="REST APIs" 
+                    aria-label="REST APIs, used in 1 project">REST APIs<sup>1</sup></button></li></ul>
+      </div>
+      <div class="tk-group">
+        <h4 class="tk-h">Frontend</h4>
+        <ul class="tk-list"><li><button class="tk" type="button" data-tool="React" 
+                    aria-label="React, used in 3 projects">React<sup>3</sup></button></li><li><button class="tk" type="button" data-tool="Next.js" 
+                    aria-label="Next.js, used in 3 projects">Next.js<sup>3</sup></button></li><li><button class="tk" type="button" data-tool="Tailwind CSS" 
+                    aria-label="Tailwind CSS, used in 1 project">Tailwind CSS<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Streamlit" 
+                    aria-label="Streamlit, used in 3 projects">Streamlit<sup>3</sup></button></li></ul>
+      </div>
+      <div class="tk-group">
+        <h4 class="tk-h">Data stores</h4>
+        <ul class="tk-list"><li><button class="tk" type="button" data-tool="PostgreSQL" 
+                    aria-label="PostgreSQL, used in 3 projects">PostgreSQL<sup>3</sup></button></li><li><button class="tk" type="button" data-tool="pgvector" 
+                    aria-label="pgvector, used in 1 project">pgvector<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Redis" 
+                    aria-label="Redis, used in 1 project">Redis<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="SQLite" 
+                    aria-label="SQLite, used in 1 project">SQLite<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Supabase" 
+                    aria-label="Supabase, used in 1 project">Supabase<sup>1</sup></button></li></ul>
+      </div>
+      <div class="tk-group">
+        <h4 class="tk-h">Cloud and DevOps</h4>
+        <ul class="tk-list"><li><button class="tk" type="button" data-tool="AWS" 
+                    aria-label="AWS, used in 1 project">AWS<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Google Cloud" 
+                    aria-label="Google Cloud, used in 1 project">Google Cloud<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Docker" 
+                    aria-label="Docker, used in 2 projects">Docker<sup>2</sup></button></li><li><button class="tk" type="button" data-tool="Docker Compose" 
+                    aria-label="Docker Compose, used in 1 project">Docker Compose<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Playwright" 
+                    aria-label="Playwright, used in 1 project">Playwright<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Git" data-none
+                    aria-label="Git">Git</button></li></ul>
+      </div>
+      <div class="tk-group">
+        <h4 class="tk-h">ML and AI</h4>
+        <ul class="tk-list"><li><button class="tk" type="button" data-tool="scikit-learn" 
+                    aria-label="scikit-learn, used in 2 projects">scikit-learn<sup>2</sup></button></li><li><button class="tk" type="button" data-tool="XGBoost" 
+                    aria-label="XGBoost, used in 3 projects">XGBoost<sup>3</sup></button></li><li><button class="tk" type="button" data-tool="TensorFlow" 
+                    aria-label="TensorFlow, used in 1 project">TensorFlow<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="LLM applications" 
+                    aria-label="LLM applications, used in 7 projects">LLM applications<sup>7</sup></button></li><li><button class="tk" type="button" data-tool="AI agents" 
+                    aria-label="AI agents, used in 2 projects">AI agents<sup>2</sup></button></li><li><button class="tk" type="button" data-tool="RAG" 
+                    aria-label="RAG, used in 2 projects">RAG<sup>2</sup></button></li><li><button class="tk" type="button" data-tool="LangChain" 
+                    aria-label="LangChain, used in 1 project">LangChain<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="YOLOv8" 
+                    aria-label="YOLOv8, used in 1 project">YOLOv8<sup>1</sup></button></li></ul>
+      </div>
+      <div class="tk-group">
+        <h4 class="tk-h">Data and statistics</h4>
+        <ul class="tk-list"><li><button class="tk" type="button" data-tool="pandas" 
+                    aria-label="pandas, used in 2 projects">pandas<sup>2</sup></button></li><li><button class="tk" type="button" data-tool="NumPy" 
+                    aria-label="NumPy, used in 1 project">NumPy<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="SciPy" 
+                    aria-label="SciPy, used in 1 project">SciPy<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Event studies" 
+                    aria-label="Event studies, used in 1 project">Event studies<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Backtesting" 
+                    aria-label="Backtesting, used in 3 projects">Backtesting<sup>3</sup></button></li><li><button class="tk" type="button" data-tool="Monte Carlo" 
+                    aria-label="Monte Carlo, used in 1 project">Monte Carlo<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Bootstrap and permutation tests" 
+                    aria-label="Bootstrap and permutation tests, used in 1 project">Bootstrap and permutation tests<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Probability calibration" 
+                    aria-label="Probability calibration, used in 1 project">Probability calibration<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Plotly" 
+                    aria-label="Plotly, used in 2 projects">Plotly<sup>2</sup></button></li><li><button class="tk" type="button" data-tool="Matplotlib" 
+                    aria-label="Matplotlib, used in 2 projects">Matplotlib<sup>2</sup></button></li></ul>
+      </div>
+      <div class="tk-group">
+        <h4 class="tk-h">Optimisation</h4>
+        <ul class="tk-list"><li><button class="tk" type="button" data-tool="OR-Tools" 
+                    aria-label="OR-Tools, used in 1 project">OR-Tools<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Linear programming" data-none
+                    aria-label="Linear programming">Linear programming</button></li><li><button class="tk" type="button" data-tool="Convex optimisation" data-none
+                    aria-label="Convex optimisation">Convex optimisation</button></li></ul>
+      </div>
+      <div class="tk-group">
+        <h4 class="tk-h">Systems and hardware</h4>
+        <ul class="tk-list"><li><button class="tk" type="button" data-tool="RISC-V" 
+                    aria-label="RISC-V, used in 1 project">RISC-V<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="SymbiYosys" 
+                    aria-label="SymbiYosys, used in 2 projects">SymbiYosys<sup>2</sup></button></li><li><button class="tk" type="button" data-tool="Verilator" 
+                    aria-label="Verilator, used in 1 project">Verilator<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="Computer architecture" 
+                    aria-label="Computer architecture, used in 1 project">Computer architecture<sup>1</sup></button></li></ul>
+      </div>
+      <div class="tk-group">
+        <h4 class="tk-h">Finance data</h4>
+        <ul class="tk-list"><li><button class="tk" type="button" data-tool="FRED" 
+                    aria-label="FRED, used in 1 project">FRED<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="yfinance" 
+                    aria-label="yfinance, used in 2 projects">yfinance<sup>2</sup></button></li><li><button class="tk" type="button" data-tool="SEC EDGAR" 
+                    aria-label="SEC EDGAR, used in 2 projects">SEC EDGAR<sup>2</sup></button></li><li><button class="tk" type="button" data-tool="FDIC Call Reports" 
+                    aria-label="FDIC Call Reports, used in 1 project">FDIC Call Reports<sup>1</sup></button></li><li><button class="tk" type="button" data-tool="NSE data" 
+                    aria-label="NSE data, used in 1 project">NSE data<sup>1</sup></button></li></ul>
+      </div></div>
+      </div>
+    </section>
+    <section class="archive" id="archive">
+      
+      <header class="sec-head">
+        <div class="sec-row"><span class="sec-label">Archive</span><span class="sec-aside">All 20 projects</span></div>
+        <div class="sec-main is-short">
+          <h2 class="sec-title split">Archive</h2>
+          <p class="sec-intro reveal">Everything I have built, strongest first. Names with a link jump to the full write-up above.</p>
+        </div>
+      </header>
+      <div class="flt-bar" role="toolbar" aria-label="Filter projects">
+      <button class="flt is-on" type="button" data-area="all" aria-pressed="true">
+        All<sup>20</sup></button>
+      <button class="flt " type="button" data-area="ai" aria-pressed="false">
+        AI and agents<sup>9</sup></button>
+      <button class="flt " type="button" data-area="ml" aria-pressed="false">
+        Machine learning<sup>5</sup></button>
+      <button class="flt " type="button" data-area="quant" aria-pressed="false">
+        Quant and data<sup>5</sup></button>
+      <button class="flt " type="button" data-area="systems" aria-pressed="false">
+        Systems<sup>3</sup></button>
+      <button class="flt " type="button" data-area="web" aria-pressed="false">
+        Full-stack<sup>7</sup></button>
+      <button class="flt " type="button" data-area="research" aria-pressed="false">
+        Research<sup>4</sup></button>
+        <button class="flt flt-tool" type="button" id="toolChip" hidden></button>
+      </div>
+      <div class="ar-head" aria-hidden="true"><span>#</span><span>Project</span><span>What it is</span><span>Area</span><span>Status</span><span>Links</span></div>
+      <ul class="ar-list" id="arList">
+        <li class="ar" data-area="ai web" data-stack="python|fastapi|sqlalchemy|postgresql|pgvector|next.js|react native|docker compose|google cloud|ai agents|llm applications">
+          <span class="ar-n">01</span>
+          <span class="ar-name"><a class="ar-jump" href="#careeros">CareerOS</a></span>
+          <span class="ar-d">Career agent with validators and human approval gates.</span>
+          <span class="ar-area">AI and agents, Full-stack</span>
+          <span class="ar-status s-deployed">Deployed</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/careeros" target="_blank" rel="noopener" aria-label="CareerOS: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="research ai web" data-stack="react|typescript|fastapi|python|firebase|sqlite|groq|llm applications">
+          <span class="ar-n">02</span>
+          <span class="ar-name"><a class="ar-jump" href="#udyox">Udyox AI</a></span>
+          <span class="ar-d">AI adoption research and a Hindi/Hinglish voice assistant for small businesses.</span>
+          <span class="ar-area">Research, AI and agents, Full-stack</span>
+          <span class="ar-status s-b-tech-project">B.Tech project</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://udyox-ai.web.app" target="_blank" rel="noopener" aria-label="Udyox AI: Live">Live<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/udyoxAI" target="_blank" rel="noopener" aria-label="Udyox AI: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="ai ml" data-stack="python|fastapi|ai agents|llm applications|probability calibration">
+          <span class="ar-n">03</span>
+          <span class="ar-name"><a class="ar-jump" href="#secondask">SecondAsk</a></span>
+          <span class="ar-d">Failed-payment recovery agent with a 22-rule compliance layer.</span>
+          <span class="ar-area">AI and agents, Machine learning</span>
+          <span class="ar-status s-buildathon">Buildathon</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/SecondAsk" target="_blank" rel="noopener" aria-label="SecondAsk: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="systems web" data-stack="typescript|express|node.js|next.js|prisma|postgresql|redis|bullmq|docker|playwright">
+          <span class="ar-n">04</span>
+          <span class="ar-name"><a class="ar-jump" href="#codeforge">CodeForge</a></span>
+          <span class="ar-d">Self-hosted coding assessments with sandboxed execution.</span>
+          <span class="ar-area">Systems, Full-stack</span>
+          <span class="ar-status s-completed">Completed</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/CodeForge" target="_blank" rel="noopener" aria-label="CodeForge: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="ml web" data-stack="python|networkx|or-tools|fastapi|react|streamlit|aws|docker">
+          <span class="ar-n">05</span>
+          <span class="ar-name"><a class="ar-jump" href="#synchropulse">SynchroPulse AI</a></span>
+          <span class="ar-d">Three-hour congestion forecasts and OR-Tools deployment plans.</span>
+          <span class="ar-area">Machine learning, Full-stack</span>
+          <span class="ar-status s-completed">Completed</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/synchroo" target="_blank" rel="noopener" aria-label="SynchroPulse AI: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="web ai" data-stack="next.js|react|supabase|postgresql|tailwind css|groq|llm applications">
+          <span class="ar-n">06</span>
+          <span class="ar-name"><a class="ar-jump" href="#campusfind">CampusFind</a></span>
+          <span class="ar-d">Lost and found for Delhi colleges with QR-verified handoffs.</span>
+          <span class="ar-area">Full-stack, AI and agents</span>
+          <span class="ar-status s-live">Live</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://campusfind2.vercel.app/" target="_blank" rel="noopener" aria-label="CampusFind: Live">Live<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/campusfind" target="_blank" rel="noopener" aria-label="CampusFind: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="quant research" data-stack="python|backtesting|yfinance|nse data">
+          <span class="ar-n">07</span>
+          <span class="ar-name"><a class="ar-jump" href="#splm">SPLM India</a></span>
+          <span class="ar-d">Satellite parking-lot activity versus analyst momentum for Indian retailers.</span>
+          <span class="ar-area">Quant and data, Research</span>
+          <span class="ar-status s-research">Research</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/SPLM" target="_blank" rel="noopener" aria-label="SPLM India: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="quant" data-stack="python|pandas|numpy|scipy|fred|yfinance|matplotlib|event studies">
+          <span class="ar-n">08</span>
+          <span class="ar-name"><a class="ar-jump" href="#macro">Macro Event Study</a></span>
+          <span class="ar-d">Cross-asset reactions to CPI, NFP, PMI and FOMC releases.</span>
+          <span class="ar-area">Quant and data</span>
+          <span class="ar-status s-completed">Completed</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/macro-event-study-framework" target="_blank" rel="noopener" aria-label="Macro Event Study: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="quant" data-stack="python|sec edgar|plotly|matplotlib">
+          <span class="ar-n">09</span>
+          <span class="ar-name"><a class="ar-jump" href="#ledgerlens">LedgerLens</a></span>
+          <span class="ar-d">Benford’s Law audit analytics on SEC 10-K filings.</span>
+          <span class="ar-area">Quant and data</span>
+          <span class="ar-status s-completed">Completed</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/LedgerLens" target="_blank" rel="noopener" aria-label="LedgerLens: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="quant ml" data-stack="python|pandas|xgboost|yolov8|backtesting">
+          <span class="ar-n">10</span>
+          <span class="ar-name"><a class="ar-jump" href="#oceanic">Oceanic Edge</a></span>
+          <span class="ar-d">Port congestion from AIS data and satellite computer vision.</span>
+          <span class="ar-area">Quant and data, Machine learning</span>
+          <span class="ar-status s-completed">Completed</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/Oceanic-Edge" target="_blank" rel="noopener" aria-label="Oceanic Edge: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="quant ai" data-stack="python|xgboost|langchain|rag|fastapi|streamlit|fdic call reports|sec edgar|backtesting">
+          <span class="ar-n">11</span>
+          <span class="ar-name">Bank Sentinel</span>
+          <span class="ar-d">Bank failure prediction from Call Reports and RAG-extracted filing signals.</span>
+          <span class="ar-area">Quant and data, AI and agents</span>
+          <span class="ar-status s-in-progress">In progress</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/Bank-Sentinel" target="_blank" rel="noopener" aria-label="Bank Sentinel: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="research ml" data-stack="python|scikit-learn|bootstrap and permutation tests">
+          <span class="ar-n">12</span>
+          <span class="ar-name"><a class="ar-jump" href="#research">PGIP</a></span>
+          <span class="ar-d">Predicting baseline saturation before a perturbation experiment.</span>
+          <span class="ar-area">Research, Machine learning</span>
+          <span class="ar-status s-preprint">Preprint</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/PGIP" target="_blank" rel="noopener" aria-label="PGIP: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="ml" data-stack="python|xgboost|scikit-learn|streamlit|plotly|tensorflow|monte carlo">
+          <span class="ar-n">13</span>
+          <span class="ar-name">F<span class="dg">1</span> <span class="dg">2026</span> Season Predictor</span>
+          <span class="ar-d">Stacking-ensemble race predictor and Monte Carlo season simulator.</span>
+          <span class="ar-area">Machine learning</span>
+          <span class="ar-status s-completed">Completed</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/F1-PREDICTION-APP" target="_blank" rel="noopener" aria-label="F1 2026 Season Predictor: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="systems" data-stack="python|risc-v|symbiyosys|verilator|computer architecture">
+          <span class="ar-n">14</span>
+          <span class="ar-name"><a class="ar-jump" href="#riscv">RISC-V Toolchain</a></span>
+          <span class="ar-d">RV32I assembler and simulator, verified against PicoRV32.</span>
+          <span class="ar-area">Systems</span>
+          <span class="ar-status s-completed">Completed</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/RISCV_Assembler_Simulator" target="_blank" rel="noopener" aria-label="RISC-V Toolchain: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="systems" data-stack="systemverilog|symbiyosys">
+          <span class="ar-n">15</span>
+          <span class="ar-name">RR Arbiter</span>
+          <span class="ar-d">Round-robin bus arbiter with an unbounded formal proof by k-induction.</span>
+          <span class="ar-area">Systems</span>
+          <span class="ar-status s-completed">Completed</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/itzsam-lol/rr-arbiter-formal" target="_blank" rel="noopener" aria-label="RR Arbiter: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li>
+        <li class="ar" data-area="ai research" data-stack="llm applications">
+          <span class="ar-n">16</span>
+          <span class="ar-name">TVC-GRPO</span>
+          <span class="ar-d">Constrained GRPO fine-tuning with tri-vector rewards.</span>
+          <span class="ar-area">AI and agents, Research</span>
+          <span class="ar-status s-in-research">In research</span>
+          <span class="ar-links"><span class="ar-nolink">No link yet</span></span>
+        </li>
+        <li class="ar" data-area="web ai" data-stack="fastapi|llm applications">
+          <span class="ar-n">17</span>
+          <span class="ar-name">MirrorHire</span>
+          <span class="ar-d">An applicant-tracking-system simulator, for Human-AI Interaction.</span>
+          <span class="ar-area">Full-stack, AI and agents</span>
+          <span class="ar-status s-course-project">Course project</span>
+          <span class="ar-links"><span class="ar-nolink">No link yet</span></span>
+        </li>
+        <li class="ar" data-area="ai" data-stack="fastapi">
+          <span class="ar-n">18</span>
+          <span class="ar-name">Colonist.io Review</span>
+          <span class="ar-d">Engine-style post-game review for online Catan, built on an MCTS simulator.</span>
+          <span class="ar-area">AI and agents</span>
+          <span class="ar-status s-side-project">Side project</span>
+          <span class="ar-links"><span class="ar-nolink">No link yet</span></span>
+        </li>
+        <li class="ar" data-area="ai" data-stack="rag|llm applications">
+          <span class="ar-n">19</span>
+          <span class="ar-name">DocMind</span>
+          <span class="ar-d">Retrieval-augmented document chatbot.</span>
+          <span class="ar-area">AI and agents</span>
+          <span class="ar-status s-completed">Completed</span>
+          <span class="ar-links"><span class="ar-nolink">No link yet</span></span>
+        </li>
+        <li class="ar" data-area="web" data-stack="rest apis">
+          <span class="ar-n">20</span>
+          <span class="ar-name">Ignite Hub</span>
+          <span class="ar-d">Backend platform for the Ignite Room community.</span>
+          <span class="ar-area">Full-stack</span>
+          <span class="ar-status s-completed">Completed</span>
+          <span class="ar-links"><a class="lnk lnk-sm" href="https://github.com/Ignite-Room/ignite-hub" target="_blank" rel="noopener" aria-label="Ignite Hub: Code">Code<svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></span>
+        </li></ul>
+    </section>
+    <section class="contact" id="contact">
+      <div class="sec-row"><span class="sec-label">Contact</span><span class="sec-aside"><span class="radio-dot" aria-hidden="true"></span>Team radio
+        <span class="wave" aria-hidden="true"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i><i style="--k:5"></i><i style="--k:6"></i><i style="--k:7"></i><i style="--k:8"></i><i style="--k:9"></i><i style="--k:10"></i><i style="--k:11"></i><i style="--k:12"></i><i style="--k:13"></i></span></span></div>
+      <h2 class="contact-title split">Radio&rsquo;s open.</h2>
+      <div class="contact-grid">
+        <p class="contact-open">Open to software, ML and quantitative research roles from 2027, and to research collaborations now. Email is the quickest way to reach me.</p>
+        <div class="contact-mail">
+          <a class="mail" href="mailto:satyam23495@iiitd.ac.in" id="mail">satyam23495@iiitd.ac.in</a>
+          <button class="copy" type="button" id="copyMail" data-copy="satyam23495@iiitd.ac.in"><span>Copy</span></button>
+        </div>
+        <ul class="contact-links">
+      <li><a class="cl" href="https://github.com/itzsam-lol" target="_blank" rel="noopener"><span class="cl-l">GitHub</span><span class="cl-h">itzsam-lol</span><svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></li>
+      <li><a class="cl" href="https://linkedin.com/in/satyam564774288" target="_blank" rel="noopener"><span class="cl-l">LinkedIn</span><span class="cl-h">satyam564774288</span><svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></li>
+      <li><a class="cl" href="https://leetcode.com/u/samuraiiii" target="_blank" rel="noopener"><span class="cl-l">LeetCode</span><span class="cl-h">samuraiiii</span><svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></li>
+      <li><a class="cl" href="https://www.kaggle.com/samuraiiii" target="_blank" rel="noopener"><span class="cl-l">Kaggle</span><span class="cl-h">samuraiiii</span><svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></li>
+      <li><a class="cl" href="https://www.instagram.com/sam_r.py/" target="_blank" rel="noopener"><span class="cl-l">Instagram</span><span class="cl-h">sam_r.py</span><svg class="ico-ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4"/></svg></a></li></ul>
+        
+      </div>
+      <footer class="foot">
+        <p class="foot-c">&copy; <span id="year">2026</span> Satyam</p>
+        <p class="foot-col">Set in Hubot Sans, Mona Sans, Martian Mono and STIX Two Text. Built by hand with GSAP, Lenis and three.js; no framework, no build step.</p>
+        <a class="foot-top lnk" href="#top" id="toGrid">Back to the grid</a>
+      </footer>
+      <div class="flag" aria-hidden="true"></div>
+    </section><!--/prerender:main--></main>
+
+<script defer src="assets/vendor/gsap.min.js"></script>
+<script defer src="assets/vendor/ScrollTrigger.min.js"></script>
+<script defer src="assets/vendor/SplitText.min.js"></script>
+<script defer src="assets/vendor/DrawSVGPlugin.min.js"></script>
+<script defer src="assets/vendor/Flip.min.js"></script>
+<script defer src="assets/vendor/lenis.min.js"></script>
+
+<script defer src="js/data.js"></script>
+<script defer src="js/figures.js"></script>
+<script defer src="js/figkit.js"></script>
+<script defer src="js/dom.js"></script>
+<script defer src="js/ui.js"></script>
+<script defer src="js/motion.js"></script>
+<script defer src="js/main.js"></script>
 <script type="module" src="js/scene.js"></script>
 
 </body>

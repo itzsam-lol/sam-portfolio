@@ -1,7 +1,8 @@
 /* ============================================================
    MAIN: boot order.
-   1 capabilities · 2 build · 3 smooth scroll · 4 UI · 5 intro
-   Survives a blocked CDN, no WebGL and prefers-reduced-motion.
+   1 capabilities · 2 page · 3 smooth scroll · 4 UI · 5 figures
+   6 intro. Survives a blocked CDN, no WebGL and
+   prefers-reduced-motion.
    ============================================================ */
 
 (function () {
@@ -16,12 +17,12 @@
       .map((n) => window[n]).filter(Boolean));
     G.config({ nullTargetWarn: false });
   }
-  // hide hero parts only when something is going to reveal them
-  if (animate) root.classList.add('motion');
+  // the head script hid the hero parts that the intro reveals; give them back if nothing will
+  root.classList.toggle('motion', animate);
 
-  /* ---------- 2. build ---------- */
+  /* ---------- 2. page: the shipped HTML, or a fresh render if the content changed ---------- */
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  window.buildDOM();
+  window.Page.mount();
 
   /* ---------- 3. smooth scroll ---------- */
   let lenis = null;
@@ -34,11 +35,11 @@
   }
   // every section carries ~15vh of top padding, so landing its edge at the very top
   // leaves the section rule comfortably below the header whether or not it is showing
-  function scrollTo(target) {
+  function scrollTo(target, done) {
     const el = typeof target === 'string' ? document.querySelector(target) : target;
     const y = el === 0 || el == null ? 0 : el;
-    if (lenis) lenis.scrollTo(y, { offset: 0, duration: 1.5, easing: (t) => (t < 0.5 ? 16 * t ** 5 : 1 - (-2 * t + 2) ** 5 / 2) });
-    else scrollTo.native(y === 0 ? 0 : y.getBoundingClientRect().top + scrollY);
+    if (lenis) lenis.scrollTo(y, { offset: 0, duration: 1.5, easing: (t) => (t < 0.5 ? 16 * t ** 5 : 1 - (-2 * t + 2) ** 5 / 2), onComplete: done });
+    else { scrollTo.native(typeof y === 'number' ? y : y.getBoundingClientRect().top + scrollY); if (done) setTimeout(done, calm ? 0 : 900); }
   }
   scrollTo.native = (top) => window.scrollTo({ top, behavior: calm ? 'auto' : 'smooth' });
   window.__scrollTo = scrollTo;
@@ -50,7 +51,10 @@
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(read); } }, { passive: true });
   read();
 
-  /* ---------- 5. wait for type and the portrait, then go ---------- */
+  /* ---------- 5. figures: mounted one per task, starting now ---------- */
+  const figures = window.FigKit ? window.FigKit.init() : Promise.resolve();
+
+  /* ---------- 6. wait for type and the portrait, then go ---------- */
   const img = document.querySelector('#portrait img');
   // fonts.ready can resolve before a face has even started loading, so ask for the ones the intro measures
   const F = document.fonts;
@@ -58,17 +62,21 @@
     F && F.load ? Promise.all([F.load('800 100px "Hubot Sans"', 'SATYAM'), F.load('400 16px "Mona Sans"'), F.load('400 16px "Martian Mono"')]).catch(() => {}) : Promise.resolve(),
     img && img.decode ? img.decode().catch(() => {}) : Promise.resolve(),
   ]).then(() => F && F.ready);
-  const cap = new Promise((r) => setTimeout(r, 2600));
+  const cap = new Promise((r) => setTimeout(r, 2200));
 
-  Promise.race([ready, cap]).then(() => {
+  Promise.race([ready, cap]).then(async () => {
     window.scrollTo(0, 0);
-    window.Motion.intro(() => document.dispatchEvent(new CustomEvent('launched')));
-    if (G) window.Motion.init();
+    root.classList.add('booted');
+    window.Motion.intro(() => { document.dispatchEvent(new CustomEvent('launched')); ui.ready(); });
+    // the scroll choreography, then the figures, each built a slice at a time behind the intro
+    if (G) await window.Motion.init();
+    await figures;
     if (window.ScrollTrigger) ScrollTrigger.refresh();
-    // honour a deep link once everything has a height
+    ui.ticks();
+    // honour a deep link once everything has its final height
     if (location.hash.length > 1) {
       const el = document.getElementById(location.hash.slice(1));
-      if (el) setTimeout(() => scrollTo(el), animate ? 900 : 0);
+      if (el) setTimeout(() => scrollTo(el), animate ? 400 : 0);
     }
   });
 
@@ -79,8 +87,13 @@
     rt = setTimeout(() => {
       window.Motion.refit();
       if (window.ScrollTrigger) ScrollTrigger.refresh();
+      ui.ticks();
     }, 180);
   });
   if (document.fonts) document.fonts.addEventListener('loadingdone', () => { window.Motion.refit(); window.ScrollTrigger && ScrollTrigger.refresh(); });
-  addEventListener('load', () => window.ScrollTrigger && ScrollTrigger.refresh());
+  addEventListener('load', () => { window.ScrollTrigger && ScrollTrigger.refresh(); ui.ticks(); });
+
+  /* ---------- for anyone reading the console ---------- */
+  console.log('%cSatyam 04%c  Built by hand: no framework, no build step. The source is at github.com/itzsam-lol/sam-portfolio',
+    'background:#D50A1D;color:#fff;font:700 12px system-ui;padding:3px 6px', 'font:12px system-ui;color:inherit');
 })();

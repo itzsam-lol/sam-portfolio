@@ -6,25 +6,25 @@
 <title>DNF · Satyam</title>
 <meta name="robots" content="noindex" />
 <link rel="icon" href="/sam-portfolio/assets/favicon.svg" type="image/svg+xml" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Hubot+Sans:wdth,wght@75..125,700..900&family=Mona+Sans:wght@400..600&family=Martian+Mono:wght@400&display=swap" rel="stylesheet" />
 <style>
+  @font-face { font-family: 'Hubot Sans'; src: url(/sam-portfolio/assets/fonts/hubot-sans.woff2) format('woff2'); font-weight: 600 800; font-stretch: 75% 125%; font-display: swap; }
+  @font-face { font-family: 'Mona Sans'; src: url(/sam-portfolio/assets/fonts/mona-sans.woff2) format('woff2'); font-weight: 400 800; font-stretch: 100% 118%; font-display: swap; }
+  @font-face { font-family: 'Martian Mono'; src: url(/sam-portfolio/assets/fonts/martian-mono.woff2) format('woff2'); font-weight: 400 600; font-stretch: 87.5% 100%; font-display: swap; }
   :root { --paper:#EFEDE7; --ink:#131312; --ink-2:#47443F; --ink-3:#6D6962; --red:#E30B1F; --rule:rgba(19,19,18,.14); }
   @media (prefers-color-scheme: dark) { :root { --paper:#0F0F0E; --ink:#EDEBE6; --ink-2:#B6B2A9; --ink-3:#8E8A81; --red:#FF2B3B; --rule:rgba(237,235,230,.12); } }
   * { box-sizing:border-box; margin:0; padding:0; }
   html, body { height:100%; background:var(--paper); color:var(--ink); font-family:'Mona Sans', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
   body { display:grid; grid-template-rows:auto 1fr auto; padding:20px clamp(20px,4vw,64px); }
-  header, footer { display:flex; justify-content:space-between; font-size:14px; color:var(--ink-2); }
+  header, footer { display:flex; justify-content:space-between; font-size:15px; color:var(--ink-2); }
   header a { font-family:'Hubot Sans', sans-serif; font-weight:800; font-stretch:118%; font-size:20px; color:var(--ink); text-decoration:none; }
   main { align-self:center; }
-  .k { font-family:'Martian Mono', monospace; font-size:12px; color:var(--red); max-width:none; }
+  .k { font-family:'Martian Mono', monospace; font-size:13px; color:var(--red); max-width:none; }
   h1 { font-family:'Hubot Sans', sans-serif; font-weight:800; font-stretch:125%; font-size:clamp(96px, 28vw, 420px); line-height:.78; letter-spacing:-.05em; margin:18px 0 26px -.04em; }
   p { font-size:clamp(18px, 1.6vw, 24px); line-height:1.35; max-width:30ch; }
-  p + p { margin-top:14px; color:var(--ink-2); font-size:16px; }
+  p + p { margin-top:14px; color:var(--ink-2); font-size:17px; }
   a.home { color:var(--ink); text-decoration:none; background:linear-gradient(var(--red),var(--red)) 0 100%/100% 2px no-repeat; padding-bottom:2px; }
   a.home:hover { color:var(--red); }
-  footer { border-top:1px solid var(--rule); padding-top:14px; font-family:'Martian Mono', monospace; font-size:12px; color:var(--ink-3); }
+  footer { border-top:1px solid var(--rule); padding-top:14px; font-family:'Martian Mono', monospace; font-size:13px; color:var(--ink-3); }
 </style>
 </head>
 <body>

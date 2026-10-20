@@ -5,6 +5,9 @@
    Source of truth is portfolio.json (kept out of git: it holds
    private notes). Claims that file flags under "verify" are left
    out until they are confirmed.
+
+   In project text, {words|part} links the words to a part of that
+   project's figure: hovering one points at the other.
    ============================================================ */
 
 window.DATA = {
@@ -65,8 +68,9 @@ window.DATA = {
       title: 'CareerOS',
       area: 'AI agents, full-stack',
       status: 'Deployed',
+      stamp: 'Deployed',
       line: 'A career agent that finds openings, matches them to a verified profile and tailors each application, without acting until a person signs off.',
-      body: 'A FastAPI and SQLAlchemy backend on PostgreSQL with pgvector, a Next.js web app and an Expo mobile app, all in one pnpm monorepo that shares a typed OpenAPI client. Validators reject any claim the profile cannot back up, and anything that would leave the system waits at an approval gate. It runs on a Google Cloud VM.',
+      body: 'A FastAPI and SQLAlchemy backend on {PostgreSQL with pgvector|db}, a Next.js web app and an Expo mobile app, all in one pnpm monorepo that shares a {typed OpenAPI client|client}. {Validators|validate} reject any claim the profile cannot back up, and anything that would leave the system waits at an {approval gate|gate}. It runs on a Google Cloud VM.',
       points: [
         'Designed, built and deployed end to end',
         'Tests, linting and type-checking in the workflow',
@@ -86,8 +90,9 @@ window.DATA = {
       title: 'SecondAsk',
       area: 'Fintech, ML, agents',
       status: 'Razorpay AI Buildathon',
+      stamp: '0 violations',
       line: 'A failed-payment recovery agent that prices every retry and reminder before it makes one.',
-      body: 'It decides when and how to retry a failed payment. One logistic regression per recovery action estimates the chance it works; each action is then checked against 22 compliance rules that fail closed, so a rule that cannot be satisfied blocks the action instead of waving it through.',
+      body: 'It decides when and how to retry a failed payment. {One logistic regression per recovery action|model} estimates the chance it works; each action is then checked against {22 compliance rules|rules} that fail closed, so a rule that cannot be satisfied {blocks the action|act} instead of waving it through.',
       points: [
         'Evaluated on 12,000 simulated payments',
         'Calibrated probabilities, not just rankings',
@@ -108,8 +113,9 @@ window.DATA = {
       title: 'CodeForge',
       area: 'Backend, security',
       status: 'Completed',
+      stamp: 'Security reviewed',
       line: 'A self-hosted, white-label coding assessment platform with sandboxed execution.',
-      body: 'Organisations write tests and invite candidates through expiring links. Every submission goes through a BullMQ queue on Redis to workers that run it inside a Judge0 sandbox. The timer lives on the server, so a paused tab or a changed clock buys nothing, and a winnowing fingerprint engine flags likely plagiarism.',
+      body: 'Organisations write tests and invite candidates through expiring links. Every submission goes through a {BullMQ queue on Redis|queue} to workers that run it inside a {Judge0 sandbox|sandbox}. {The timer lives on the server|api}, so a paused tab or a changed clock buys nothing, and a {winnowing fingerprint engine|prints} flags likely plagiarism.',
       points: [
         'Load-tested, security-reviewed, end-to-end tested with Playwright',
         'Zero WCAG A/AA accessibility violations',
@@ -128,8 +134,9 @@ window.DATA = {
       title: 'SynchroPulse AI',
       area: 'ML, optimisation, cloud',
       status: 'Four-person team',
+      stamp: 'Deployed on EC2',
       line: 'Forecasts traffic congestion up to three hours ahead, then plans where traffic personnel and barricades should go.',
-      body: 'Congestion is predicted on real road networks built with OSMnx and NetworkX. Google OR-Tools turns each forecast into a deployment plan, and a FastAPI and React dashboard serves it from AWS EC2 under Docker Compose. Built over five staged project reviews.',
+      body: 'Congestion is predicted on {real road networks|roads} built with OSMnx and NetworkX. Google OR-Tools turns each forecast into a {deployment plan|crew}, and a FastAPI and React dashboard serves it from AWS EC2 under Docker Compose. Built over five staged project reviews.',
       points: [
         'Three-hour-ahead congestion forecasts',
         'OR-Tools deployment optimisation',
@@ -149,8 +156,9 @@ window.DATA = {
       title: 'CampusFind',
       area: 'Full-stack, AI matching',
       status: 'Live',
+      stamp: 'Live',
       line: 'A lost-and-found platform for Delhi colleges, with university-email sign-in and QR-verified handoffs.',
-      body: 'You sign in with a one-time code sent to your university email. An LLM matches lost reports against found ones, and the handoff is confirmed by scanning a QR code, so an item only closes when it reaches the right person. Supabase row-level security guards both data and storage. Built with a student from IGDTUW.',
+      body: 'You sign in with a {one-time code sent to your university email|signin}. An {LLM matches lost reports against found ones|llm}, and the handoff is confirmed by {scanning a QR code|qr}, so an item only closes when it reaches the right person. {Supabase row-level security|rls} guards both data and storage. Built with a student from IGDTUW.',
       points: [
         'University-email OTP sign-in and admin portals',
         'LLM matching of lost and found reports',
@@ -173,8 +181,9 @@ window.DATA = {
       title: 'RISC-V Toolchain',
       area: 'Systems, computer architecture',
       status: 'Completed',
+      stamp: '147 tests pass',
       line: 'A complete RV32I assembler and simulator in Python, checked against a real RTL core.',
-      body: 'A two-pass assembler resolves labels and forward references, then encodes. A cycle-accurate simulator runs the result. Both are checked against the PicoRV32 core through a differential harness and SymbiYosys formal verification.',
+      body: 'A {two-pass assembler|pass1} resolves labels and forward references, then encodes. A {cycle-accurate simulator|sim} runs the result. Both are checked against the {PicoRV32 core|rtl} through a {differential harness and SymbiYosys formal verification|checks}.',
       points: [
         'Two-pass assembly with forward references',
         'Differential testing against PicoRV32',
@@ -199,7 +208,7 @@ window.DATA = {
     venue: 'bioRxiv preprint, 2026',
     note: 'Preprint, not peer reviewed',
     abstract: 'Deep models for single-cell perturbation response are frequently reported to be no better, in aggregate, than a simple additive or mean-based baseline. We ask the complementary, experiment-facing question: can we predict, before running a perturbation, whether it will be saturated (an additive baseline suffices) or resistant (non-additive, worth the modeling and measurement cost)?',
-    plain: 'Single-cell CRISPR screens are expensive, and for many perturbations a simple additive model already explains the result. This work predicts which ones those are before the experiment is run, so compute and follow-up go to the perturbations where a deep model can actually learn something.',
+    plain: 'Single-cell CRISPR screens are expensive, and for many perturbations a {simple additive model|baseline} already explains the result. This work {predicts which ones those are|stage1} before the experiment is run, so compute and follow-up go to the perturbations where {a deep model can actually learn something|stage2}.',
     results: [
       { k: 'Spearman ρ', v: '0.65', ci: [0.61, 0.69], d: 'Random forest, Replogle K562, 1,086 single-gene perturbations', primary: true },
       { k: 'ROC-AUC', v: '0.86', d: 'Same screen; label-permutation p = 0.003', primary: true },
@@ -217,6 +226,37 @@ window.DATA = {
       { name: 'Sunshine23',     cell: 'Calu-3', kind: 'Cas9 host factors', unit: 'single', n: '178' },
     ],
     links: [{ label: 'Code and data', href: 'https://github.com/itzsam-lol/PGIP' }],
+
+    // the figures below draw these, straight from the preprint (Table 2, sections 4.2 to 4.7)
+    rho: [
+      { set: 'Adamson', model: 'Ridge', unit: 'single', n: '86', v: 0.559, ci: [0.38, 0.70] },
+      { set: 'Replogle K562', model: 'Random forest', unit: 'single', n: '1,086', v: 0.650, ci: [0.609, 0.688], primary: true },
+      { set: 'Replogle K562', model: 'Ridge', unit: 'single', n: '1,086', v: 0.580, ci: [0.534, 0.620] },
+      { set: 'Replogle RPE1', model: 'Ridge = random forest', unit: 'single', n: '1,533', v: 0.353, ci: [0.31, 0.40] },
+      { set: 'Wessels gene pairs', model: 'Ridge', unit: 'double', n: '158', v: 0.502, ci: [0.378, 0.609] },
+      { set: 'Wessels gene pairs', model: 'Random forest', unit: 'double', n: '158', v: 0.510, ci: [0.383, 0.620] },
+    ],
+    auc: [
+      { set: 'Adamson', task: 'saturated versus not', v: 0.739, ci: [0.67, 0.86] },
+      { set: 'Replogle K562', task: 'saturated versus not', v: 0.863, ci: [0.833, 0.892], primary: true },
+      { set: 'Replogle RPE1', task: 'saturated versus not', v: null, ci: [0.66, 0.72] },
+      { set: 'Wessels gene pairs', task: 'resistant versus not', v: 0.774, ci: null },
+    ],
+    // drop in Spearman ρ when one feature group is left out
+    ablation: [
+      { set: 'Adamson (UPR)', lead: 'The transcription-factor flag in Gene Ontology leads.', groups: [['GO', 0.13], ['STRING', 0.06], ['Expression', 0.03], ['ESM-2', 0.03]] },
+      { set: 'Replogle K562', lead: 'Expression dominates; GO barely matters. ESM-2 was not used here.', groups: [['Expression', 0.362], ['STRING', 0.062], ['GO', 0.005]] },
+      { set: 'Replogle RPE1', lead: 'STRING connectivity leads. The other groups are not reported.', groups: [['STRING', 0.116]] },
+      { set: 'Wessels gene pairs', lead: 'The fold-change relationship of the two singles carries the signal; GO and STRING are negligible.', groups: [['Fold-change', 0.269]] },
+    ],
+    // share of perturbations in each tier: saturated, frontier, resistant (%)
+    tiers: [
+      { set: 'Adamson', v: [64, 30, 6] },
+      { set: 'Replogle K562', v: [19, 28, 54] },
+      { set: 'Replogle RPE1', v: [44, 27, 29] },
+      { set: 'Wessels doubles', v: [53, 32, 15] },
+      { set: 'Source study, all', v: [55, 24, 21], note: '10,993 held-out conditions across nine datasets in Kalygina et al.' },
+    ],
   },
 
   udyox: {
@@ -436,6 +476,108 @@ window.DATA = {
     { id: 'web', label: 'Full-stack' },
     { id: 'research', label: 'Research' },
   ],
+
+  /* ---------- figures: what each part of a drawing is, in balloon order ----------
+     Shown when a reader hovers, taps or arrows onto a part.             */
+  figures: {
+    careeros: {
+      openings: ['Openings', 'New openings come in from job sources.'],
+      match:    ['Match', 'Each opening is matched against the verified profile with a pgvector similarity search.'],
+      tailor:   ['Tailor', 'An LLM drafts an application tailored to that opening.'],
+      validate: ['Validate', 'Validators check every claim against the profile and reject any it cannot back up.'],
+      tray:     ['Rejected', 'An application with an unsupported claim stops here. It never reaches a person, let alone an employer.'],
+      approve:  ['Approve', 'A person reads the application and signs it off. Click it, or press Sign off, to be that person.'],
+      gate:     ['Approval gate', 'Anything that would leave the system waits here until it is signed off.'],
+      send:     ['Send', 'Only signed-off applications leave the system.'],
+      web:      ['Next.js web app', 'The web front end, one package in the pnpm monorepo.'],
+      mobile:   ['Expo mobile app', 'The React Native app, in the same monorepo.'],
+      client:   ['Typed OpenAPI client', 'One typed client that both apps share, so web and mobile call the API the same way.'],
+      api:      ['FastAPI service', 'The backend: FastAPI with SQLAlchemy.'],
+      db:       ['PostgreSQL', 'The database, with pgvector for the similarity search behind Match.'],
+      vm:       ['Deployment', 'One pnpm monorepo, running on a Google Cloud VM.'],
+    },
+    secondask: {
+      payment:    ['Failed payment', 'A payment has failed. The agent decides what to do next, and when.'],
+      retrynow:   ['Retry now', 'Try the payment again straight away.'],
+      retrylater: ['Retry later', 'Wait, then try again at a better moment.'],
+      reminder:   ['Reminder', 'Remind the customer instead of retrying.'],
+      hold:       ['Hold', 'Do nothing for now.'],
+      model:      ['Logistic regressions', 'One logistic regression per action estimates the chance that action works. The probabilities are calibrated: expected calibration error 0.022, held-out AUC 0.82.'],
+      price:      ['Price', 'Each action is priced before it is taken: the chance it works times the value recovered, minus its cost. The highest price wins. The prices drawn here are illustrative.'],
+      rules:      ['22 compliance rules', 'The chosen action must pass all 22. Click any rule, or use Break rule, and watch what happens to the next action.'],
+      act:        ['Act', 'The action runs only when every rule passes. One failure blocks it: the system fails closed. Zero violations in simulation.'],
+      ours:       ['SecondAsk', '18.2% of the value recovered across 12,000 simulated payments.'],
+      fixed:      ['Fixed schedule', 'The baseline, a fixed retry schedule: 8.6% on the same payments.'],
+      ratio:      ['2.1 times as much', 'SecondAsk recovers 2.1 times the value of the fixed schedule (18.2 ÷ 8.6).'],
+    },
+    codeforge: {
+      candidate: ['Candidate', 'Opens the test from an expiring invite link and submits code.'],
+      api:       ['Express API', 'Accepts the submission. The test timer lives here, on the server, so a paused tab or a changed clock buys nothing.'],
+      queue:     ['BullMQ queue', 'Submissions wait in a BullMQ queue on Redis until a worker is free, so a rush of candidates queues up instead of overloading the graders.'],
+      workers:   ['Workers', 'Workers take submissions off the queue one at a time and hand each to the sandbox.'],
+      sandbox:   ['Judge0 sandbox', 'Untrusted code runs inside Judge0, isolated from everything else.'],
+      db:        ['PostgreSQL', 'Verdicts are stored through Prisma, auto-scored and ready for review.'],
+      text:      ['The document', 'The submission with whitespace removed. Every run of k = 5 characters is a k-gram.'],
+      hashes:    ['Hashes', 'One hash per 5-gram. The same run of text always gets the same hash, which is what lets copies be found.'],
+      window:    ['Window', 'A window of w hashes slides along. In each window the smallest hash is kept, the rightmost one if there is a tie.'],
+      prints:    ['Fingerprints', 'The hashes that were kept. Comparing fingerprints instead of whole files still catches every shared run of w + k − 1 characters or more.'],
+    },
+    synchropulse: {
+      roads:     ['Road network', 'An illustrative network, junctions and road segments as OSMnx and NetworkX describe a real one. Colour is forecast congestion: grey free, amber slowing, red jammed.'],
+      crew:      ['Traffic personnel', 'Where the OR-Tools plan sends people at the forecast time: the roads that will need them most.'],
+      barricade: ['Barricade', 'Placed by the same plan, on the worst segment.'],
+      clock:     ['Forecast horizon', 'From now to three hours ahead. Drag along it to move through the forecast.'],
+    },
+    campusfind: {
+      signin: ['University email sign-in', 'You sign in with a one-time code sent to your university email address.'],
+      lost:   ['Lost report', 'The owner describes what they lost, and where.'],
+      found:  ['Found report', 'Whoever finds it files a report too.'],
+      llm:    ['LLM matching', 'An LLM compares lost reports with found ones and suggests likely matches.'],
+      qr:     ['QR handoff', 'The handoff is confirmed by scanning a QR code, so an item only closes when it reaches the right person. This code is drawn for the figure; it is not a real one.'],
+      closed: ['Closed', 'The case closes once the scan confirms the handoff.'],
+      rls:    ['Row-level security', 'Supabase row-level security guards both the data and the file storage.'],
+    },
+    riscv: {
+      asm:    ['The instruction', 'Click it to change the operation, or use the controls below. Drag the immediate sideways to scrub it. Everything else is computed from it.'],
+      imm:    ['imm[11:0]', 'The 12-bit immediate, in two’s complement: from −2048 to 2047.'],
+      rs1:    ['rs1', 'The source register, x0 to x31. x0 always reads as zero.'],
+      funct3: ['funct3', 'Picks the operation within OP-IMM: addi, slti, sltiu, xori, ori or andi.'],
+      rd:     ['rd', 'The destination register, x0 to x31.'],
+      opcode: ['opcode', '0010011, OP-IMM: arithmetic between a register and an immediate.'],
+      hex:    ['Machine code', 'The 32 bits as hexadecimal, which is what the assembler writes out.'],
+      pass1:  ['Pass 1', 'The first pass builds the symbol table, so a label can be used before it is defined.'],
+      pass2:  ['Pass 2', 'The second pass encodes every instruction, with every label resolved.'],
+      sim:    ['Simulator', 'A cycle-accurate simulator runs the program.'],
+      rtl:    ['PicoRV32', 'A real RTL core that the simulator is checked against.'],
+      checks: ['Checks', 'A differential harness compares the simulator with PicoRV32, and SymbiYosys runs formal checks. 147 tests pass.'],
+    },
+    pgip: {
+      candidate: ['Candidate perturbation', 'A gene someone is thinking of perturbing. Nothing about its response has been measured yet.'],
+      expr:      ['Baseline expression', 'From control cells only: the target gene’s mean expression, detection rate and variance.'],
+      string:    ['STRING network', 'Protein-protein interaction connectivity: degree, weighted degree, clustering and mean edge confidence.'],
+      go:        ['Gene Ontology', 'Counts of process, function and component annotations, plus a transcription-factor flag.'],
+      esm:       ['ESM-2 embedding', 'A frozen protein language model embedding (esm2_t12_35M, 480 dimensions) of the target protein. Used on the Adamson screen.'],
+      stage1:    ['Stage 1', 'Predicts Baseline Saturation from those features alone, before the experiment. Random forest Spearman ρ 0.65 on Replogle K562.'],
+      scale:     ['Baseline Saturation', 'How much of the reproducible signal a simple baseline already captures. Saturated from 0.66, resistant below 0.33. Drag the marker.'],
+      baseline:  ['Free baseline', 'For predicted-saturated perturbations: the additive or mean baseline already does the job.'],
+      stage2:    ['Stage 2 model', 'For predicted-resistant perturbations: a costlier model, and the experiment, where there is still something to learn.'],
+    },
+    macro: {
+      m0: ['TLT, event day', 'Long bonds rise 0.15% on the day of a release, on average.'],
+      m1: ['TLT, next day', 'Then fall 0.29% the day after: buy the rumour, sell the news.'],
+      m2: ['VIX, one week', 'Volatility falls 1.63% a week after positive surprises; the compression is strongest at one week.'],
+    },
+    splm: {
+      sat:      ['Sentinel-2', 'Free 10 m satellite imagery through Google Earth Engine, with an NDBI index over the flagship stores of 12 listed retailers.'],
+      analysts: ['Analyst momentum', 'What the analysts already expect.'],
+      diverge:  ['Divergence engine', 'Compares physical activity at the stores with analyst momentum, point-in-time, so nothing from the future leaks in.'],
+      signal:   ['Signal', 'A score from −1 to +1. A research framework aimed at ACM ICAIF, not a live trading signal.'],
+    },
+    oceanic: {
+      fence: ['Geofence', 'A boundary around the port. The time each vessel spends inside it is its dwell time.'],
+      ships: ['Vessels', 'Positions from AIS ship-tracking data. Long dwell times inside the fence mean congestion. The positions drawn here are illustrative.'],
+    },
+  },
 
   nav: [
     { id: 'work', label: 'Work' },

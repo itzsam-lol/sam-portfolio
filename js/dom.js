@@ -1,7 +1,9 @@
 /* ============================================================
    DOM: builds the page from window.DATA.
-   Plain template strings; everything lands in <main> before
-   any motion runs, so the page is complete without GSAP.
+   Plain template strings. Page.render() returns the markup (the
+   prerender script in tools/ writes it into index.html for search
+   engines and a fast first paint); Page.mount() puts it in the page
+   when the shipped HTML is missing or out of date.
    ============================================================ */
 
 (function () {
@@ -20,6 +22,20 @@
   const greek = (s) => esc(s).replace(/ρ/g, '<span class="gr">ρ</span>');
   // Hubot's zero carries a notch that reads as θ at display sizes; set digits in Mona
   const dg = (s) => esc(s).replace(/\d[\d.,]*/g, '<span class="dg">$&</span>');
+  // {words|part} in data.js: words that point at a part of a figure
+  const xref = (s, fig) => esc(s).replace(/\{([^|{}]+)\|([a-z0-9]+)\}/g,
+    (m, t, k) => `<a class="xref" href="#fig-${fig}" data-fig="${fig}" data-part="${k}">${t}</a>`);
+
+  // a figure waits as a described placeholder until figkit draws it
+  const AR = { careeros: '600/520', secondask: '600/520', codeforge: '600/530', synchropulse: '600/530', campusfind: '600/520',
+    riscv: '600/520', pgip: '600/450', pgipres: '600/420', macro: '300/178', benford: '300/178', splm: '300/178', oceanic: '300/178' };
+  function figure(id, n, caption, cls = '') {
+    const spec = window.Figures && window.Figures.get(id);
+    return `<figure class="fig ${cls}" data-fig="${id}" id="fig-${id}">
+        <div class="fig-plate is-pending" style="--ar:${AR[id] || '3/2'}"><p class="fig-alt">${esc(spec ? spec.label : '')}</p></div>
+        ${caption ? `<figcaption>${n ? `<span class="fig-n">Fig. ${n}</span>` : ''}${caption}</figcaption>` : ''}
+      </figure>`;
+  }
 
   // a section header: hairline row (label + aside), then the big title
   function head(label, title, aside, intro) {
@@ -47,9 +63,9 @@
 
     return `
     <section class="hero" id="top" aria-label="Introduction">
-      <div class="hero-meta boot">
+      <div class="hero-meta">
         <p class="hero-role">${esc(P.role)}<br>${esc(P.school)}, class of ${esc(P.classOf)}</p>
-        <p class="hero-where"><span>${esc(P.city)}</span> <time class="clock" id="clock">00:00</time> <span class="hero-tz">IST</span></p>
+        <p class="hero-where"><span>${esc(P.city)}</span> <time class="clock" id="clock">--:--</time> <span class="hero-tz">IST</span></p>
       </div>
 
       <div class="hero-stage">
@@ -110,7 +126,7 @@
   function metricsDL(ms) {
     if (!ms || !ms.length) return '';
     return `<dl class="metrics">${ms.map((m) => `
-      <div class="metric"><dt>${esc(m.k)}</dt><dd><span class="m-v">${esc(m.v)}</span>${m.u ? `<span class="m-u">${esc(m.u)}</span>` : ''}</dd></div>`).join('')}
+      <div class="metric"><dt>${esc(m.k)}</dt><dd><span class="m-v num-roll">${esc(m.v)}</span>${m.u ? `<span class="m-u">${esc(m.u)}</span>` : ''}</dd></div>`).join('')}
     </dl>`;
   }
 
@@ -131,19 +147,17 @@
             <div class="sheet-text">
               <h3 class="sheet-title" id="t-${esc(w.id)}">${dg(w.title)}</h3>
               <p class="sheet-line">${esc(w.line)}</p>
-              <p class="sheet-desc">${esc(w.body)}</p>
+              <p class="sheet-desc">${xref(w.body, w.fig)}</p>
               <ul class="sheet-points">${w.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
               ${metricsDL(w.metrics)}
             </div>
-            <figure class="fig sheet-fig" data-fig="${esc(w.fig)}">
-              <div class="fig-plate">${window.Figures.render(w.fig)}</div>
-              <figcaption><span class="fig-n">Fig. ${i + 1}</span>${esc(w.caption)}</figcaption>
-            </figure>
+            ${figure(w.fig, i + 1, esc(w.caption), 'sheet-fig')}
           </div>
           <footer class="tblock">
             <div class="tb"><span>Project</span><b>${esc(w.title)}</b></div>
             <div class="tb tb-wide"><span>Stack</span><b>${esc(w.stack.join(' · '))}</b></div>
             <div class="tb"><span>Sheet</span><b>${i + 1} of ${total}</b></div>
+            <div class="tb tb-stamp"><span>Status</span>${w.stamp ? `<b class="stamp"><span>${esc(w.stamp)}</span></b>` : ''}</div>
           </footer>
         </div>
       </article>`).join('');
@@ -151,7 +165,7 @@
     return `
     <section class="work" id="work">
       ${head('Selected work', 'Work', `${pad(total)} of ${D.archive.length} projects`,
-        'Six projects I would happily walk an engineer through. Each sheet has a drawing of how the thing actually works; everything else is in the archive.')}
+        'Six projects I would happily walk an engineer through. Each sheet has a working drawing of how the thing works: run it, poke at it, inspect any part. Everything else is in the archive.')}
       <div class="sheets">${sheets}</div>
     </section>`;
   }
@@ -164,7 +178,7 @@
     const results = R.results.map((r) => `
       <div class="res ${r.primary ? 'is-primary' : ''}">
         <dt>${greek(r.k)}</dt>
-        <dd><span class="res-v">${esc(r.v)}</span>${r.ci ? `<span class="res-ci">95% CI ${r.ci[0].toFixed(2)} to ${r.ci[1].toFixed(2)}</span>` : ''}<span class="res-d">${esc(r.d)}</span></dd>
+        <dd><span class="res-v num-roll">${esc(r.v)}</span>${r.ci ? `<span class="res-ci">95% CI ${r.ci[0].toFixed(2)} to ${r.ci[1].toFixed(2)}</span>` : ''}<span class="res-d">${esc(r.d)}</span></dd>
       </div>`).join('');
 
     const rows = R.datasets.map((d) => `
@@ -175,7 +189,7 @@
         <header class="qcard-top"><span class="qcard-n">${String.fromCharCode(97 + i)}</span><h4 class="qcard-title">${dg(q.title)}</h4>
           ${q.href ? `<a class="lnk lnk-sm" href="${esc(q.href)}" target="_blank" rel="noopener" aria-label="${esc(q.title)} repository">Code${ext}</a>` : ''}</header>
         <p class="qcard-q">${esc(q.q)}</p>
-        <figure class="fig qfig" data-fig="${esc(q.fig)}"><div class="fig-plate fig-plate-sm">${window.Figures.render(q.fig)}</div></figure>
+        ${figure(q.fig, 0, '', 'qfig')}
         <p class="qcard-body">${esc(q.body)}</p>
         ${q.finds.length ? `<ul class="qcard-finds">${q.finds.map((x) => `<li>${greek(x)}</li>`).join('')}</ul>` : ''}
       </article>`).join('');
@@ -202,16 +216,10 @@
         </div>
         <div class="paper-side">
           <p class="paper-kicker">${esc(R.venue)} · first author</p>
-          <p class="paper-plain">${esc(R.plain)}</p>
-          <figure class="fig" data-fig="pgip">
-            <div class="fig-plate">${window.Figures.render('pgip')}</div>
-            <figcaption><span class="fig-n">Fig. 7</span>Two-stage triage. Stage 1 predicts Baseline Saturation from features known before the experiment; Stage 2 routes each perturbation to the free baseline or the costly model.</figcaption>
-          </figure>
+          <p class="paper-plain">${xref(R.plain, 'pgip')}</p>
+          ${figure('pgip', 7, 'Two-stage triage. Stage 1 predicts Baseline Saturation from features known before the experiment; Stage 2 sends each perturbation to the free baseline or the costly model. Drag the prediction to see where it goes.')}
           <dl class="results">${results}</dl>
-          <figure class="fig" data-fig="pgipres">
-            <div class="fig-plate fig-plate-flat">${window.Figures.render('pgipres')}</div>
-            <figcaption><span class="fig-n">Fig. 8</span>Headline results with the 95% bootstrap interval for the random forest.</figcaption>
-          </figure>
+          ${figure('pgipres', 8, 'The results, four ways, all from the preprint: accuracy per screen with 95% bootstrap intervals, ROC-AUC, which feature group matters most on each screen, and how much of each screen is saturated.')}
           <div class="ds">
             <table class="ds-table">
               <caption>The six screens used, with scored perturbations</caption>
@@ -232,7 +240,7 @@
           <p class="udyox-links">${U.links.map((l) => extLink(l, 'lnk', U.title)).join('')}</p>
         </div>
         <div class="udyox-body">
-          <ul class="udyox-nums">${U.numbers.map((n) => `<li><b>${esc(n.v)}</b><span>${esc(n.k)}</span></li>`).join('')}</ul>
+          <ul class="udyox-nums">${U.numbers.map((n) => `<li><b class="num-roll">${esc(n.v)}</b><span>${esc(n.k)}</span></li>`).join('')}</ul>
           <p class="udyox-text">${esc(U.body)}</p>
           <p class="udyox-stack">${esc(U.stack.join(' · '))}</p>
         </div>
@@ -253,14 +261,17 @@
   /* ---------- 5. experience: stint chart + entries ---------- */
   const ym = (s) => { const [y, m] = s.split('-').map(Number); return y * 12 + (m - 1); };
   const monthName = (s) => new Date(s + '-01T00:00:00').toLocaleString('en-GB', { month: 'short', year: 'numeric' });
+  const nowYM = () => { const n = new Date(); return `${n.getFullYear()}-${pad(n.getMonth() + 1)}`; };
+  // where "now" falls on the chart, as a percentage; the page sets it again on load
+  function nowPct() {
+    const T = D.timeline, a = ym(T.from), b = ym(T.to) + 1;
+    return ((Math.min(Math.max(ym(nowYM()), a), b) - a) / (b - a)) * 100;
+  }
 
   function stints() {
     const T = D.timeline;
-    const now = new Date();
-    const nowYM = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
     const a = ym(T.from), b = ym(T.to) + 1, span = b - a;
     const pct = (s) => ((Math.min(Math.max(ym(s), a), b) - a) / span) * 100;
-    const nowPct = pct(nowYM);
 
     const years = [];
     for (let y = +T.from.slice(0, 4) + 1; y <= +T.to.slice(0, 4); y++) years.push(y);
@@ -272,15 +283,16 @@
         <div class="st-track">
           ${r.stints.map((s) => {
             const open = !s.to;
-            const end = open ? nowYM : s.to;
-            const l = pct(s.from), w = Math.max(1.4, pct(end) - l + (open ? 0 : 100 / span));
-            const months = ym(end) - ym(s.from) + 1;
-            const narrow = months <= 5;            // label rides outside short stints
+            const l = pct(s.from);
+            // an open stint runs to "now", which is a CSS variable the page keeps current
+            const width = open ? `calc(max(1.4%, var(--now) - ${l.toFixed(3)}%))` : `${Math.max(1.4, pct(s.to) - l + 100 / span).toFixed(3)}%`;
+            const months = ym(open ? nowYM() : s.to) - ym(s.from) + 1;
+            const narrow = !open && months <= 5;       // label rides outside short stints
             const C = D.compounds[s.c];
             const when = `${monthName(s.from)} to ${open ? 'now' : monthName(s.to)}`;
             const label = `<span class="stint-t">${esc(s.at)}</span>`;
-            return `<div class="stint c-${s.c} ${open ? 'is-open' : ''} ${narrow ? 'is-narrow' : ''}" style="left:${l.toFixed(3)}%;width:${w.toFixed(3)}%" tabindex="0"
-                      role="img" aria-label="${esc(`${s.t}, ${s.at}, ${when}`)}">
+            return `<div class="stint c-${s.c} ${open ? 'is-open' : ''} ${narrow ? 'is-narrow' : ''}" style="left:${l.toFixed(3)}%;width:${width}" tabindex="0"
+                      data-from="${s.from}" data-to="${s.to || ''}" role="img" aria-label="${esc(`${s.t}, ${s.at}, ${when}`)}">
                 <span class="stint-bar"><span class="tyre" aria-hidden="true">${esc(C.name[0])}</span>${narrow ? '' : label}</span>
                 ${narrow ? label : ''}
                 <span class="stint-tip" role="tooltip"><b>${esc(s.t)}</b><span>${esc(s.at)}</span><span class="stint-when">${esc(when)}</span></span>
@@ -295,12 +307,13 @@
     return `
       <figure class="stints" id="stints">
         <div class="st-scroll" id="stScroll">
-          <div class="st-chart" style="--now:${nowPct.toFixed(3)}%">
+          <div class="st-chart" style="--now:${nowPct().toFixed(3)}%" data-from="${T.from}" data-to="${T.to}">
             <div class="st-axis">${axis}</div>
             <div class="st-row st-head" aria-hidden="true"><span class="st-label"></span><span></span></div>
             ${rows}
             <div class="st-now" aria-hidden="true"><span>Now</span></div>
             <div class="st-future" aria-hidden="true"></div>
+            <div class="st-cursor" aria-hidden="true"><span></span></div>
           </div>
         </div>
         <figcaption class="st-cap">
@@ -341,7 +354,7 @@
           <h3 class="ot-org">${o.href ? `<a class="lnk lnk-quiet" href="${esc(o.href)}" target="_blank" rel="noopener">${dg(o.org)}${ext}</a>` : dg(o.org)}</h3>
           <p class="ot-d">${esc(o.d)}</p>
         </div>
-        ${o.v ? `<p class="ot-num"><b>${esc(o.v)}</b><span>${esc(o.k)}</span></p>` : '<p class="ot-num ot-num-none" aria-hidden="true"></p>'}
+        ${o.v ? `<p class="ot-num"><b class="num-roll">${esc(o.v)}</b><span>${esc(o.k)}</span></p>` : '<p class="ot-num ot-num-none" aria-hidden="true"></p>'}
       </li>`).join('');
 
     const awards = D.awards.map((a) => `
@@ -443,9 +456,9 @@
         ${P.resume ? `<p class="contact-cv"><a class="lnk" href="${esc(P.resume)}">Résumé (PDF)${ext}</a></p>` : ''}
       </div>
       <footer class="foot">
-        <p class="foot-c">&copy; ${new Date().getFullYear()} ${esc(P.name)}</p>
+        <p class="foot-c">&copy; <span id="year">${new Date().getFullYear()}</span> ${esc(P.name)}</p>
         <p class="foot-col">Set in Hubot Sans, Mona Sans, Martian Mono and STIX Two Text. Built by hand with GSAP, Lenis and three.js; no framework, no build step.</p>
-        <a class="foot-top lnk" href="#top">Back to the grid</a>
+        <a class="foot-top lnk" href="#top" id="toGrid">Back to the grid</a>
       </footer>
       <div class="flag" aria-hidden="true"></div>
     </section>`;
@@ -457,12 +470,42 @@
   const menuFoot = () => `<a href="mailto:${esc(P.email)}">${esc(P.email)}</a>` +
     P.links.slice(0, 3).map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('');
 
-  /* ---------- mount ---------- */
-  window.buildDOM = function buildDOM() {
-    document.getElementById('main').innerHTML =
-      hero() + intro() + machine() + work() + research() + experience() + about() + archive() + contact();
-    document.getElementById('nav').innerHTML = nav();
-    document.getElementById('menuNav').innerHTML = menuNav();
-    document.getElementById('menuFoot').innerHTML = menuFoot();
+  /* ---------- a fingerprint of the content, so a stale prerender is noticed ---------- */
+  function sig() {
+    const s = JSON.stringify(D);
+    let h = 0x811c9dc5;
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+    return (h >>> 0).toString(36);
+  }
+
+  /* ---------- public ---------- */
+  window.Page = {
+    sig,
+    render() {
+      return {
+        main: hero() + intro() + machine() + work() + research() + experience() + about() + archive() + contact(),
+        nav: nav(), menuNav: menuNav(), menuFoot: menuFoot(),
+      };
+    },
+    // keep the shipped HTML when it was built from this exact content; otherwise draw it now
+    mount() {
+      const main = document.getElementById('main');
+      const fresh = main.dataset.sig === sig() && main.children.length;
+      if (!fresh) {
+        const r = this.render();
+        main.innerHTML = r.main;
+        main.dataset.sig = sig();
+        document.getElementById('nav').innerHTML = r.nav;
+        document.getElementById('menuNav').innerHTML = r.menuNav;
+        document.getElementById('menuFoot').innerHTML = r.menuFoot;
+      }
+      // the parts that depend on today's date
+      const chart = main.querySelector('.st-chart');
+      if (chart) chart.style.setProperty('--now', nowPct().toFixed(3) + '%');
+      const yr = document.getElementById('year');
+      if (yr) yr.textContent = new Date().getFullYear();
+      return fresh;
+    },
   };
+  window.buildDOM = () => window.Page.mount();
 })();
