@@ -2,7 +2,7 @@
 
 My personal portfolio: a race engineer's dossier, basically.
 
-Live at → **[itzsam-lol.github.io/sam-portfolio](https://itzsam-lol.github.io/sam-portfolio)**
+Live at → **[samuraiiii.tech](https://samuraiiii.tech)**
 
 ---
 
@@ -59,6 +59,8 @@ A few things worth knowing about:
 index.html          shell, meta, structured data, and the prerendered page
 404.html            "DNF" page (GitHub Pages serves it automatically)
 sitemap.xml         one URL; written by tools/prerender.mjs
+robots.txt          points crawlers at the sitemap
+CNAME               the custom domain (GitHub writes it from Settings → Pages)
 css/main.css        every style, in numbered sections
 js/
   data.js           ← ALL CONTENT LIVES HERE (copy for figure notes too)
@@ -125,6 +127,15 @@ contact details and notes that should not end up on a public site.
 If the site moves to another address, change the canonical URL (and the
 og/twitter/JSON-LD URLs next to it) in `index.html`, then run the prerender
 so `sitemap.xml` follows.
+
+## the domain
+
+The site is served at `samuraiiii.tech`, published from `main` (root) by
+GitHub Pages. The domain is set in this repository's Settings → Pages and
+GitHub keeps it in the root `CNAME` file, so don't delete that file.
+`itzsam-lol.github.io/sam-portfolio` redirects to the domain, and
+`www.samuraiiii.tech` redirects to the bare domain. Because the site sits
+at the root of its domain, `404.html` uses root paths (`/assets/...`).
 
 ## stack
 
