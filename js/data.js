@@ -36,6 +36,7 @@ window.DATA = {
       { label: 'LinkedIn',     handle: 'satyam564774288', href: 'https://linkedin.com/in/satyam564774288' },
       { label: 'LeetCode',     handle: 'samuraiiii',      href: 'https://leetcode.com/u/samuraiiii' },
       { label: 'Kaggle',       handle: 'samuraiiii',      href: 'https://www.kaggle.com/samuraiiii' },
+      { label: 'Hugging Face', handle: 'samisonhf',       href: 'https://huggingface.co/samisonhf' },
       { label: 'Instagram',    handle: 'sam_r.py',        href: 'https://www.instagram.com/sam_r.py/' },
     ],
     languages: 'English and Hindi; learning French and Japanese.',
@@ -45,14 +46,14 @@ window.DATA = {
     lede: 'Final-year Computer Science and AI student at IIIT-Delhi. I build machine learning systems and backends, and I do quantitative research.',
     facts: [
       { k: 'Summer 2026',    v: 'Dell Technologies', d: 'LLM inference benchmarking on PowerEdge AI servers' },
-      { k: 'Preprint, 2026', v: 'bioRxiv',           d: 'Forecasting non-additivity before the experiment' },
+      { k: 'Open data, 2026', v: 'FinChrona',        d: 'U.S. Treasury rates, 1990 to 2026, with a Zenodo DOI' },
       { k: 'Since Jan 2026', v: 'Teaching assistant', d: 'Data Structures and Computer Networks, 100+ students' },
       { k: 'Co-founder',     v: 'Ignite Room',        d: 'Student tech community of 10,000+ members' },
     ],
   },
 
   // read word by word as you scroll
-  intro: 'I like problems that have to be measured before they can be solved. At Dell I benchmarked LLM inference on PowerEdge AI servers, changing one configuration at a time until the numbers explained themselves. My preprint asks whether a gene perturbation is worth running before anyone runs it. SecondAsk prices every payment retry before it makes one. Same instinct, different track.',
+  intro: 'I like problems that have to be measured before they can be solved. At Dell I benchmarked LLM inference on PowerEdge AI servers, changing one configuration at a time until the numbers explained themselves. BRDO measures how much of an Indian bond’s protection can be traced through public records, and writes down exactly where the trail stops. SecondAsk prices every payment retry before it makes one. Same instinct, different track.',
 
   machine: {
     line: 'Drawn first, then built.',
@@ -200,62 +201,96 @@ window.DATA = {
     },
   ],
 
-  /* ---------- research ---------- */
-  paper: {
-    title: 'Forecasting Non-Additivity Before the Experiment: A Pre-Experimental Triage for Single-Cell Perturbation Modeling',
-    authors: 'Satyam',
-    affiliation: 'Department of Computer Science and Engineering, IIIT-Delhi',
-    venue: 'bioRxiv preprint, 2026',
-    note: 'Preprint, not peer reviewed',
-    abstract: 'Deep models for single-cell perturbation response are frequently reported to be no better, in aggregate, than a simple additive or mean-based baseline. We ask the complementary, experiment-facing question: can we predict, before running a perturbation, whether it will be saturated (an additive baseline suffices) or resistant (non-additive, worth the modeling and measurement cost)?',
-    plain: 'Single-cell CRISPR screens are expensive, and for many perturbations a {simple additive model|baseline} already explains the result. This work {predicts which ones those are|stage1} before the experiment is run, so compute and follow-up go to the perturbations where {a deep model can actually learn something|stage2}.',
+  /* ---------- research ----------
+     FinChrona: from the v1.0.0 release, its README and quality report; the figure
+     draws the release itself (assets/data/finchrona-monthly.json, built from its Parquet).
+     BRDO: counts from the project’s README and observability report.            */
+  finchrona: {
+    title: 'FinChrona',
+    version: '1.0.0',
+    subtitle: 'Open Financial Time Series · U.S. Treasury Rates, 1990–2026',
+    creator: 'Satyam',
+    kind: 'Dataset, October 2026 · creator and maintainer',
+    line: 'Thirty-six years of U.S. Treasury rates in one consistent table, built from the Treasury’s own daily files and checked against them cell by cell.',
+    plain: 'The Treasury publishes its daily rates as yearly tables whose columns change over the decades. FinChrona puts them into one long table, a row per rate, and checks that every source cell arrives exactly once. The drawing below is the dataset itself: {the curve at every month-end since 1990|curve}, {real yields that went below zero|real}, and {every stretch when the curve was inverted|inv}.',
+    doi: '10.5281/zenodo.23730813',
+    cite: 'Satyam (2026). FinChrona v1.0.0: Open Financial Time Series | U.S. Treasury Rates, 1990–2026 [Dataset]. Zenodo.',
+    schema: [
+      ['observation_date', 'Treasury business date'],
+      ['curve_type', 'par_nominal · par_real · bill_rate'],
+      ['quote_basis', 'par_yield · bank_discount · coupon_equivalent'],
+      ['maturity_label', '4W to 30Y'],
+      ['maturity_value', 'a number, read with maturity_unit'],
+      ['maturity_unit', 'week · month · year'],
+      ['value_pct', '3.74 means 3.74%'],
+    ],
+    key: 'observation_date, curve_type, quote_basis, maturity_label',
+    licence: 'Data CC0 1.0 · code MIT',
+    source: 'U.S. Department of the Treasury, Daily Treasury Rates',
     results: [
-      { k: 'Spearman ρ', v: '0.65', ci: [0.61, 0.69], d: 'Random forest, Replogle K562, 1,086 single-gene perturbations', primary: true },
-      { k: 'ROC-AUC', v: '0.86', d: 'Same screen; label-permutation p = 0.003', primary: true },
-      { k: 'Spearman ρ', v: '0.58', d: 'Ridge regression, the conservative model, same screen' },
-      { k: 'ROC-AUC', v: '0.77', d: 'Gene-pair triage, Wessels CaRPool-seq, 158 doubles (ρ = 0.50)' },
+      { k: 'Rows', v: '180,815', d: 'Seven columns, one rate per row', primary: true },
+      { k: 'Years of daily nominal yields', v: '36', d: '2 January 1990 to 23 October 2026' },
+      { k: 'Nulls and duplicate keys', v: '0', d: 'All 180,815 non-null source cells reconciled to 180,815 rows' },
+      { k: 'Negative rates, kept', v: '5,032', d: '4,940 real yields and 92 bill rates, as published' },
     ],
-    features: ['Baseline expression', 'STRING network connectivity', 'Gene Ontology annotation', 'Frozen ESM-2 embedding'],
-    methods: ['Ridge regression', 'Random forests', 'Permutation nulls', 'Bootstrap confidence intervals', 'Feature-group ablation'],
-    datasets: [
-      { name: 'Norman19',       cell: 'K562',  kind: 'CRISPRa',           unit: 'double', n: '124' },
-      { name: 'Adamson16',      cell: 'K562',  kind: 'CRISPRi (UPR)',     unit: 'single', n: '86' },
-      { name: 'Replogle22 K562', cell: 'K562', kind: 'CRISPRi essential', unit: 'single', n: '1,086' },
-      { name: 'Replogle22 RPE1', cell: 'RPE1', kind: 'CRISPRi essential', unit: 'single', n: '1,533' },
-      { name: 'Wessels23',      cell: 'THP-1', kind: 'Cas13 CaRPool-seq', unit: 'double', n: '158' },
-      { name: 'Sunshine23',     cell: 'Calu-3', kind: 'Cas9 host factors', unit: 'single', n: '178' },
+    coverage: [
+      { series: 'par_nominal', d: 'Nominal par yields', from: '1990-01-02', to: '2026-10-23', rows: '99,894' },
+      { series: 'par_real', d: 'Real (TIPS) par yields', from: '2003-01-02', to: '2026-10-23', rows: '27,609' },
+      { series: 'bill_rate', d: 'Bill rates, in two quote conventions', from: '2002-01-02', to: '2026-10-23', rows: '53,312' },
     ],
-    links: [{ label: 'Code and data', href: 'https://github.com/itzsam-lol/PGIP' }],
+    note: 'A historical snapshot, not point-in-time: observation_date is the Treasury business date, not when the number became public. Blank source cells are left out, never filled.',
+    stack: ['Python', 'pandas', 'Apache Parquet', 'pytest', 'Zenodo', 'Kaggle', 'Hugging Face'],
+    links: [
+      { label: 'Zenodo (DOI)', href: 'https://doi.org/10.5281/zenodo.23730813' },
+      { label: 'Kaggle', href: 'https://www.kaggle.com/datasets/samuraiiii/finchrona-financial-time-series' },
+      { label: 'Hugging Face', href: 'https://huggingface.co/datasets/samisonhf/finchrona' },
+      { label: 'Repository', href: 'https://github.com/itzsam-lol/finchroma_01' },
+    ],
+  },
 
-    // the figures below draw these, straight from the preprint (Table 2, sections 4.2 to 4.7)
-    rho: [
-      { set: 'Adamson', model: 'Ridge', unit: 'single', n: '86', v: 0.559, ci: [0.38, 0.70] },
-      { set: 'Replogle K562', model: 'Random forest', unit: 'single', n: '1,086', v: 0.650, ci: [0.609, 0.688], primary: true },
-      { set: 'Replogle K562', model: 'Ridge', unit: 'single', n: '1,086', v: 0.580, ci: [0.534, 0.620] },
-      { set: 'Replogle RPE1', model: 'Ridge = random forest', unit: 'single', n: '1,533', v: 0.353, ci: [0.31, 0.40] },
-      { set: 'Wessels gene pairs', model: 'Ridge', unit: 'double', n: '158', v: 0.502, ci: [0.378, 0.609] },
-      { set: 'Wessels gene pairs', model: 'Random forest', unit: 'double', n: '158', v: 0.510, ci: [0.383, 0.620] },
+  brdo: {
+    title: 'Bondholder Rights & Disclosure Observatory',
+    short: 'BRDO',
+    kind: 'Open research · in progress since November 2026',
+    line: 'What does an Indian corporate bond promise its holders, and how much of what later happens to that promise can an outsider trace from public records?',
+    plain: 'A bond’s protections sit in its trust deed; what happens to them afterwards is scattered across trustees’ reports, issuers’ filings, exchange approvals and rating rationales. BRDO joins them up ISIN by ISIN, and every statement in the record says who made it and points to a hashed file, a page and the words relied on. Starting from {the breach reports trustees must publish|s0}, the trace can often reach {the clause in the trustee’s own words|s3}, and then breaks at the last step, for a reason of access rather than existence: {no contract could be retrieved|s7}, because the exchanges and platforms that hold them refuse automated readers.',
+    numbers: [
+      { v: '93', k: 'ISINs listed in trustees’ breach reports' },
+      { v: '1,254', k: 'Evidence anchors, each re-tested against its file' },
+      { v: '18', k: 'Discrepancies kept open' },
+      { v: '0', k: 'Contracts retrieved so far' },
     ],
-    auc: [
-      { set: 'Adamson', task: 'saturated versus not', v: 0.739, ci: [0.67, 0.86] },
-      { set: 'Replogle K562', task: 'saturated versus not', v: 0.863, ci: [0.833, 0.892], primary: true },
-      { set: 'Replogle RPE1', task: 'saturated versus not', v: null, ci: [0.66, 0.72] },
-      { set: 'Wessels gene pairs', task: 'resistant versus not', v: 0.774, ci: null },
+    caveat: 'Not investment advice, and no finding about anyone’s compliance: a recorded breach means a trustee reported one, and no report is not evidence that nothing happened.',
+    asof: 'Counts from the project’s observability report for the quarter to 30 June 2026, as of 4 November 2026.',
+    // how far each listed ISIN can be traced towards its contract; the stages are not nested
+    trace: [
+      ['Listed in a trustee’s breach report', 93],
+      ['Named in a notice to holders', 59],
+      ['Trust deed or agreement cited', 52],
+      ['Clause or required level printed', 44],
+      ['Issuer’s own statement names it', 17],
+      ['Linked to a transcribed clause', 14],
+      ['Contract located, not retrievable', 5],
+      ['Contract retrieved and hashed', 0],
     ],
-    // drop in Spearman ρ when one feature group is left out
-    ablation: [
-      { set: 'Adamson (UPR)', lead: 'The transcription-factor flag in Gene Ontology leads.', groups: [['GO', 0.13], ['STRING', 0.06], ['Expression', 0.03], ['ESM-2', 0.03]] },
-      { set: 'Replogle K562', lead: 'Expression dominates; GO barely matters. ESM-2 was not used here.', groups: [['Expression', 0.362], ['STRING', 0.062], ['GO', 0.005]] },
-      { set: 'Replogle RPE1', lead: 'STRING connectivity leads. The other groups are not reported.', groups: [['STRING', 0.116]] },
-      { set: 'Wessels gene pairs', lead: 'The fold-change relationship of the two singles carries the signal; GO and STRING are negligible.', groups: [['Fold-change', 0.269]] },
+    traceOf: 93,
+    // status per instrument for the quarter: a closed list, never merged
+    status: [
+      ['reported_breach', 90],
+      ['reported_no_breach', 0],
+      ['no_information_reported', 0],
+      ['no_report_found', 3],
+      ['inaccessible', 0],
+      ['ambiguous', 0],
+      ['conflicting', 2],
+      ['not_assessed', 1],
     ],
-    // share of perturbations in each tier: saturated, frontier, resistant (%)
-    tiers: [
-      { set: 'Adamson', v: [64, 30, 6] },
-      { set: 'Replogle K562', v: [19, 28, 54] },
-      { set: 'Replogle RPE1', v: [44, 27, 29] },
-      { set: 'Wessels doubles', v: [53, 32, 15] },
-      { set: 'Source study, all', v: [55, 24, 21], note: '10,993 held-out conditions across nine datasets in Kalygina et al.' },
+    anchors: { total: 1254, machine: 1147, visual: 107 },
+    stack: ['Python', 'JSON Schema', 'SQLite', 'pytest', 'uv'],
+    links: [
+      { label: 'Repository', href: 'https://github.com/itzsam-lol/bondholder-rights-observatory' },
+      { label: 'Research design', href: 'https://github.com/itzsam-lol/bondholder-rights-observatory/blob/main/docs/research-design.md' },
+      { label: 'Observability report', href: 'https://github.com/itzsam-lol/bondholder-rights-observatory/blob/main/docs/observability-report.md' },
     ],
   },
 
@@ -325,6 +360,8 @@ window.DATA = {
   ],
 
   ongoing: [
+    { title: 'Priced Curiosity', d: 'ARC Prize 2026, paper track. Should an ARC-AGI-3 agent explore where an extra action costs the least score? I derived that cost under the scorer, then pre-registered a test on 15 held-out games (975 runs). The primary comparison was inconclusive (+0.0008 RHAE percentage points, 95% CI −0.0042 to +0.0078), and the write-up reports it as that.', href: 'https://www.kaggle.com/code/samuraiiii/priced-curiosity-ec', label: 'Kaggle write-up' },
+    { title: 'MarketRule-ML', d: 'Do short-horizon order-flow signals survive a change in market rules? The design freezes models before the SEC Tick Size Pilot, then compares them across treated and control securities. The FINRA data audit is under way; there are no results yet.' },
     { title: 'TVC-GRPO', d: 'Reinforcement-learning fine-tuning for LLMs: GRPO extended with tri-vector reward decomposition and Lagrangian safety constraints, designed to fit Kaggle hardware.' },
     { title: 'Bank Sentinel', d: 'Bank failure prediction from FDIC Call Report ratios and signals a retrieval-augmented LangChain agent extracts from SEC filings, with walk-forward backtesting.', href: 'https://github.com/itzsam-lol/Bank-Sentinel', label: 'Repository' },
     { title: 'Foodoscope', d: 'Research at CoSY Lab with Prof. Ganesh Bagler on the Foodoscope computational gastronomy platform.' },
@@ -416,13 +453,13 @@ window.DATA = {
     { role: 'Main organiser', org: 'HackArena 2.0', d: 'Ran it end to end: zonal rounds in six cities, then a final in New Delhi.', v: '6', k: 'cities' },
     { role: 'Lead organiser', org: 'Hack The Flame', d: 'A national hackathon: logistics, sponsor deliverables, vendors and the event floor.', v: '500+', k: 'participants' },
     { role: 'Vice chairperson', org: 'IEEE-IIITD Student Branch', d: 'Helped lead the branch and mentored teams at five hackathons. Nov 2024 to Aug 2025.', v: '50+', k: 'volunteers', logo: 'assets/ieee.webp' },
-    { role: 'Website maintainer', org: 'CiPD, IIIT-Delhi', d: 'I build and maintain the site for the Centre for Innovation, Prototyping and Design.' },
+    { role: 'Website maintainer', org: 'CiPD, IIIT-Delhi', d: 'I build and maintain the site for the Centre for Intelligent Product Development: a public site and a CMS with a Medium-style editor, on React and FastAPI.' },
   ],
 
   awards: [
     { t: 'Dean’s Award for Best Teaching Assistant', d: 'IIIT-Delhi, for TA work across DSA and Computer Networks' },
-    { t: 'Academic Scholar Award', d: '' },
-    { t: 'Creative Student Award', d: '' },
+    { t: 'Academic Scholar Award', d: 'Mira Model School' },
+    { t: 'Creative Student Award', d: 'Mira Model School' },
     { t: 'About 360 LeetCode problems', d: '351 in C++ and 9 in SQL, with the 2025 100 Days badge', href: 'https://leetcode.com/u/samuraiiii' },
   ],
 
@@ -432,12 +469,13 @@ window.DATA = {
     { group: 'Backend',            items: ['FastAPI', 'Express', 'Node.js', 'SQLAlchemy', 'Prisma', 'BullMQ', 'REST APIs'] },
     { group: 'Frontend',           items: ['React', 'Next.js', 'Tailwind CSS', 'Streamlit'] },
     { group: 'Data stores',        items: ['PostgreSQL', 'pgvector', 'Redis', 'SQLite', 'Supabase'] },
-    { group: 'Cloud and DevOps',   items: ['AWS', 'Google Cloud', 'Docker', 'Docker Compose', 'Playwright', 'Git'] },
+    { group: 'Cloud and DevOps',   items: ['AWS', 'Google Cloud', 'Docker', 'Docker Compose', 'Playwright', 'pytest', 'Git'] },
     { group: 'ML and AI',          items: ['scikit-learn', 'XGBoost', 'TensorFlow', 'LLM applications', 'AI agents', 'RAG', 'LangChain', 'YOLOv8'] },
     { group: 'Data and statistics', items: ['pandas', 'NumPy', 'SciPy', 'Event studies', 'Backtesting', 'Monte Carlo', 'Bootstrap and permutation tests', 'Probability calibration', 'Plotly', 'Matplotlib'] },
     { group: 'Optimisation',       items: ['OR-Tools', 'Linear programming', 'Convex optimisation'] },
     { group: 'Systems and hardware', items: ['RISC-V', 'SymbiYosys', 'Verilator', 'Computer architecture'] },
-    { group: 'Finance data',       items: ['FRED', 'yfinance', 'SEC EDGAR', 'FDIC Call Reports', 'NSE data'] },
+    { group: 'Finance data',       items: ['FRED', 'yfinance', 'SEC EDGAR', 'FDIC Call Reports', 'NSE data', 'Treasury rates', 'Trustee disclosures'] },
+    { group: 'Open data',          items: ['Apache Parquet', 'JSON Schema', 'Zenodo', 'Kaggle Datasets', 'Hugging Face Datasets'] },
   ],
 
   coursework: ['Data Structures and Algorithms', 'Algorithm Design and Analysis', 'Operating Systems', 'Database Management Systems', 'Computer Networks', 'Computer Architecture', 'Artificial Intelligence', 'Machine Learning', 'Statistical Machine Learning', 'Big Data Analytics', 'Collaborative Filtering', 'Convex Optimization', 'Human-AI Interaction'],
@@ -446,6 +484,8 @@ window.DATA = {
      area: ai | ml | quant | systems | web | research               */
   archive: [
     { name: 'CareerOS', area: ['ai', 'web'], status: 'Deployed', d: 'Career agent with validators and human approval gates.', stack: ['Python', 'FastAPI', 'SQLAlchemy', 'PostgreSQL', 'pgvector', 'Next.js', 'React Native', 'Docker Compose', 'Google Cloud', 'AI agents', 'LLM applications'], links: { repo: 'https://github.com/itzsam-lol/careeros' }, see: 'careeros' },
+    { name: 'FinChrona', area: ['research', 'quant'], status: 'Published', d: 'U.S. Treasury rates, 1990 to 2026, in one checked table; on Zenodo, Kaggle and Hugging Face.', stack: ['Python', 'pandas', 'Apache Parquet', 'pytest', 'Zenodo', 'Kaggle Datasets', 'Hugging Face Datasets', 'Treasury rates'], links: { data: 'https://doi.org/10.5281/zenodo.23730813', repo: 'https://github.com/itzsam-lol/finchroma_01' }, see: 'finchrona' },
+    { name: 'BRDO', area: ['research', 'quant'], status: 'In progress', d: 'Indian bond covenants traced through public disclosures, every statement anchored to a page.', stack: ['Python', 'JSON Schema', 'SQLite', 'pytest', 'Trustee disclosures'], links: { repo: 'https://github.com/itzsam-lol/bondholder-rights-observatory' }, see: 'brdo' },
     { name: 'Udyox AI', area: ['research', 'ai', 'web'], status: 'B.Tech project', d: 'AI adoption research and a Hindi/Hinglish voice assistant for small businesses.', stack: ['React', 'TypeScript', 'FastAPI', 'Python', 'Firebase', 'SQLite', 'Groq', 'LLM applications'], links: { live: 'https://udyox-ai.web.app', repo: 'https://github.com/itzsam-lol/udyoxAI' }, see: 'udyox' },
     { name: 'SecondAsk', area: ['ai', 'ml'], status: 'Buildathon', d: 'Failed-payment recovery agent with a 22-rule compliance layer.', stack: ['Python', 'FastAPI', 'AI agents', 'LLM applications', 'Probability calibration'], links: { repo: 'https://github.com/itzsam-lol/SecondAsk' }, see: 'secondask' },
     { name: 'CodeForge', area: ['systems', 'web'], status: 'Completed', d: 'Self-hosted coding assessments with sandboxed execution.', stack: ['TypeScript', 'Express', 'Node.js', 'Next.js', 'Prisma', 'PostgreSQL', 'Redis', 'BullMQ', 'Docker', 'Playwright'], links: { repo: 'https://github.com/itzsam-lol/CodeForge' }, see: 'codeforge' },
@@ -455,16 +495,19 @@ window.DATA = {
     { name: 'Macro Event Study', area: ['quant'], status: 'Completed', d: 'Cross-asset reactions to CPI, NFP, PMI and FOMC releases.', stack: ['Python', 'pandas', 'NumPy', 'SciPy', 'FRED', 'yfinance', 'Matplotlib', 'Event studies'], links: { repo: 'https://github.com/itzsam-lol/macro-event-study-framework' }, see: 'macro' },
     { name: 'LedgerLens', area: ['quant'], status: 'Completed', d: 'Benford’s Law audit analytics on SEC 10-K filings.', stack: ['Python', 'SEC EDGAR', 'Plotly', 'Matplotlib'], links: { repo: 'https://github.com/itzsam-lol/LedgerLens' }, see: 'ledgerlens' },
     { name: 'Oceanic Edge', area: ['quant', 'ml'], status: 'Completed', d: 'Port congestion from AIS data and satellite computer vision.', stack: ['Python', 'pandas', 'XGBoost', 'YOLOv8', 'Backtesting'], links: { repo: 'https://github.com/itzsam-lol/Oceanic-Edge' }, see: 'oceanic' },
+    { name: 'Priced Curiosity', area: ['research', 'ai'], status: 'Paper track', d: 'When exploring is worth its score cost in ARC-AGI-3; pre-registered, and reported as inconclusive.', stack: ['Python', 'AI agents', 'Bootstrap and permutation tests'], links: { notes: 'https://www.kaggle.com/code/samuraiiii/priced-curiosity-ec' } },
     { name: 'Bank Sentinel', area: ['quant', 'ai'], status: 'In progress', d: 'Bank failure prediction from Call Reports and RAG-extracted filing signals.', stack: ['Python', 'XGBoost', 'LangChain', 'RAG', 'FastAPI', 'Streamlit', 'FDIC Call Reports', 'SEC EDGAR', 'Backtesting'], links: { repo: 'https://github.com/itzsam-lol/Bank-Sentinel' } },
-    { name: 'PGIP', area: ['research', 'ml'], status: 'Preprint', d: 'Predicting baseline saturation before a perturbation experiment.', stack: ['Python', 'scikit-learn', 'Bootstrap and permutation tests'], links: { repo: 'https://github.com/itzsam-lol/PGIP' }, see: 'research' },
+    { name: 'MarketRule-ML', area: ['quant', 'research'], status: 'In progress', d: 'Whether order-flow signals survive a change in market rules, studied through the SEC Tick Size Pilot; data audit under way.', stack: ['Python', 'Event studies'], links: {} },
     { name: 'F1 2026 Season Predictor', area: ['ml'], status: 'Completed', d: 'Stacking-ensemble race predictor and Monte Carlo season simulator.', stack: ['Python', 'XGBoost', 'scikit-learn', 'Streamlit', 'Plotly', 'TensorFlow', 'Monte Carlo'], links: { repo: 'https://github.com/itzsam-lol/F1-PREDICTION-APP' } },
     { name: 'RISC-V Toolchain', area: ['systems'], status: 'Completed', d: 'RV32I assembler and simulator, verified against PicoRV32.', stack: ['Python', 'RISC-V', 'SymbiYosys', 'Verilator', 'Computer architecture'], links: { repo: 'https://github.com/itzsam-lol/RISCV_Assembler_Simulator' }, see: 'riscv' },
     { name: 'RR Arbiter', area: ['systems'], status: 'Completed', d: 'Round-robin bus arbiter with an unbounded formal proof by k-induction.', stack: ['SystemVerilog', 'SymbiYosys'], links: { repo: 'https://github.com/itzsam-lol/rr-arbiter-formal' } },
+    { name: 'Ignite Room platform', area: ['web'], status: 'Live', d: 'The igniteroom.in campus-ambassador platform: sign-in, dashboards, task submissions and a live leaderboard, with an admin review portal.', stack: ['React', 'TypeScript', 'Tailwind CSS', 'REST APIs'], links: { live: 'https://igniteroom.in', repo: 'https://github.com/Ignite-Room/ignite-hub' } },
+    { name: 'CiPD website', area: ['web'], status: 'Maintained', d: 'Site and CMS for IIIT-Delhi’s Centre for Intelligent Product Development, with a Medium-style editor.', stack: ['React', 'FastAPI', 'Tailwind CSS'], links: { repo: 'https://github.com/itzsam-lol/cipd' } },
     { name: 'TVC-GRPO', area: ['ai', 'research'], status: 'In research', d: 'Constrained GRPO fine-tuning with tri-vector rewards.', stack: ['LLM applications'], links: {} },
-    { name: 'MirrorHire', area: ['web', 'ai'], status: 'Course project', d: 'An applicant-tracking-system simulator, for Human-AI Interaction.', stack: ['FastAPI', 'LLM applications'], links: {} },
+    { name: 'MirrorHire', area: ['web', 'ai'], status: 'Course project', d: 'An applicant-tracking-system simulator, for Human-AI Interaction.', stack: ['FastAPI', 'LLM applications'], links: { repo: 'https://github.com/itzsam-lol/mirrorhire' } },
+    { name: 'PDF outline extractor', area: ['ai'], status: 'Hackathon', d: 'Adobe India Hackathon 2025: a PDF’s title and heading outline, from its own table of contents or from font and numbering cues.', stack: ['Python', 'Docker'], links: { repo: 'https://github.com/itzsam-lol/adobe-1a' } },
     { name: 'Colonist.io Review', area: ['ai'], status: 'Side project', d: 'Engine-style post-game review for online Catan, built on an MCTS simulator.', stack: ['FastAPI'], links: {} },
     { name: 'DocMind', area: ['ai'], status: 'Completed', d: 'Retrieval-augmented document chatbot.', stack: ['RAG', 'LLM applications'], links: {} },
-    { name: 'Ignite Hub', area: ['web'], status: 'Completed', d: 'Backend platform for the Ignite Room community.', stack: ['REST APIs'], links: { repo: 'https://github.com/Ignite-Room/ignite-hub' } },
   ],
 
   areas: [
@@ -551,16 +594,33 @@ window.DATA = {
       rtl:    ['PicoRV32', 'A real RTL core that the simulator is checked against.'],
       checks: ['Checks', 'A differential harness compares the simulator with PicoRV32, and SymbiYosys runs formal checks. 147 tests pass.'],
     },
-    pgip: {
-      candidate: ['Candidate perturbation', 'A gene someone is thinking of perturbing. Nothing about its response has been measured yet.'],
-      expr:      ['Baseline expression', 'From control cells only: the target gene’s mean expression, detection rate and variance.'],
-      string:    ['STRING network', 'Protein-protein interaction connectivity: degree, weighted degree, clustering and mean edge confidence.'],
-      go:        ['Gene Ontology', 'Counts of process, function and component annotations, plus a transcription-factor flag.'],
-      esm:       ['ESM-2 embedding', 'A frozen protein language model embedding (esm2_t12_35M, 480 dimensions) of the target protein. Used on the Adamson screen.'],
-      stage1:    ['Stage 1', 'Predicts Baseline Saturation from those features alone, before the experiment. Random forest Spearman ρ 0.65 on Replogle K562.'],
-      scale:     ['Baseline Saturation', 'How much of the reproducible signal a simple baseline already captures. Saturated from 0.66, resistant below 0.33. Drag the marker.'],
-      baseline:  ['Free baseline', 'For predicted-saturated perturbations: the additive or mean baseline already does the job.'],
-      stage2:    ['Stage 2 model', 'For predicted-resistant perturbations: a costlier model, and the experiment, where there is still something to learn.'],
+    finchrona: {
+      curve: ['Nominal par yield curve', 'U.S. Treasury par yields at every maturity on the last trading day of the month. Where the Treasury published nothing there is no point: the 30-year is missing from February 2002 to February 2006. Hover a point for the row it comes from.'],
+      real:  ['Real par yields', 'TIPS par yields, published from 2003. They spent long stretches below zero, and all 4,940 negative real yields are kept as published.'],
+      spread: ['10-year minus 2-year', 'The month-end term spread. Below the line, two-year rates sit above ten-year ones: the curve is inverted.'],
+      inv:   ['Inverted days', 'Each red tick is a month with inverted days; its height is the share of that month’s trading days. 1,052 of the release’s 9,209 days.'],
+      clock: ['Month', 'Drag along the timeline, or use the month control, to move through all 442 month-ends from January 1990 to October 2026.'],
+    },
+    brdo: {
+      s0: ['Listed in a breach report', '93 ISINs appear in the covenant-breach reports (Annex-VIIA, Table 5) that six debenture trustees published for the quarter to 30 June 2026. Every trace starts here.'],
+      s1: ['Named in a notice', '59 are also named in a notice the trustee sent to the holders.'],
+      s2: ['Deed cited', 'For 52 the trustee cites a dated trust deed or trustee agreement: the contract exists, and has a date.'],
+      s3: ['Clause printed', 'For 44 the report itself prints the clause or the required level, so the promise survives in the trustee’s own words.'],
+      s4: ['Issuer’s statement', 'For 17 the issuer’s or its auditor’s own statement names the covenant that was breached.'],
+      s5: ['Clause transcribed', '14 reported breaches are linked to a clause transcribed in the dataset, and 13 of those agree with it.'],
+      s6: ['Contract located', 'For 5, a candidate contract document turned up on a page that bars automated retrieval.'],
+      s7: ['Contract retrieved', 'None yet. BSE refuses identified automated clients, NSE’s terms forbid automated collection, and a bond platform’s terms forbid extraction tools. The trace breaks at the last step, for access, not existence.'],
+      k0: ['reported_breach', 'A trustee’s report, a notice or an explicit statement says a breach occurred. 90 of the 96 instruments this quarter.'],
+      k1: ['reported_no_breach', 'An explicit statement covers the instrument and the period, and nothing disagrees. It records someone’s statement; the project does not adopt it.'],
+      k2: ['no_information_reported', 'The reporting party says it received no information about the issuer.'],
+      k3: ['no_report_found', 'The reviewed sources do not list it. Never read as compliance. 3 this quarter.'],
+      k4: ['inaccessible', 'A relevant disclosure could not be reached, or the source policy excludes it.'],
+      k5: ['ambiguous', 'The sources cannot settle it, for example when they disagree on who the trustee is.'],
+      k6: ['conflicting', 'Sources or versions disagree. The record keeps both statements and the disagreement, and does not pick a winner. 2 this quarter.'],
+      k7: ['not_assessed', 'Nobody has looked yet. 1 this quarter.'],
+      mach:  ['Verified by machine', '1,147 quotations were found on the cited page of the hashed file: after folding case, spacing and punctuation, with spaces removed, or as the same words in order.'],
+      vis:   ['Read from the rendered page', '107 passages are not in the file’s text layer (scans, or text drawn as outlines), so they were read from the rendered page. Reported separately and never counted as machine-verified.'],
+      check: ['brdo verify', 'Re-tests every anchor against its source file. A file that has changed at its source shows up as a hash mismatch and is never silently accepted.'],
     },
     macro: {
       m0: ['TLT, event day', 'Long bonds rise 0.15% on the day of a release, on average.'],

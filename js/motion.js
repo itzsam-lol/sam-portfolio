@@ -184,7 +184,8 @@ window.Motion = (function () {
     const sel = [
       '.reveal',
       '.sheet-line, .sheet-desc, .sheet-points, .metrics',
-      '.paper-kicker, .paper-plain, .results, .ds, .paper-meta, .paper-links',
+      '.dset-kicker, .dset-line, .dset-plain, .results, .ds, .rmeta, .rlinks',
+      '.obs-head > *, .obs-plain, .obs-nums li, .obs-caveat',
       '.udyox-head > *, .udyox-nums li, .udyox-text, .udyox-stack',
       '.st-cap', '.aw, .course-list, .langs',
     ].join(', ');
@@ -345,18 +346,25 @@ window.Motion = (function () {
   }
 
   /* =========================================================
-     Research: the preprint page, highlighter, table
+     Research: the data card, highlighter, tables
      ========================================================= */
   function research() {
     if (calm) { $$('.hl').forEach((m) => m.style.setProperty('--hl', '100%')); return; }
-    const sheet = $('.paper-sheet');
+    const sheet = $('.dcard');
     if (sheet) {
       // it lands once, then turns slowly with the scroll, as if being picked up off the desk
       G.set(sheet, { y: 60, opacity: 0 });
-      onView($('#research-paper'), () => G.to(sheet, { y: 0, opacity: 1, duration: 1.4, ease: 'expo.out' }), '-20%');
-      G.fromTo(sheet, { rotation: -3 }, { rotation: 0.6, ease: 'none',
-        scrollTrigger: { trigger: '#research-paper', start: 'top 80%', end: 'bottom 60%', scrub: 1 } });
+      onView($('#finchrona'), () => G.to(sheet, { y: 0, opacity: 1, duration: 1.4, ease: 'expo.out' }), '-20%');
+      // on a phone the card is tall and the margins narrow, so it turns less
+      const tilt = matchMedia('(max-width: 760px)').matches ? 0.25 : 1;
+      G.fromTo(sheet, { rotation: -3 * tilt }, { rotation: 0.6 * tilt, ease: 'none',
+        scrollTrigger: { trigger: '#finchrona', start: 'top 80%', end: 'bottom 60%', scrub: 1 } });
       onView(sheet, () => G.to('.hl', { '--hl': '100%', duration: 0.9, ease: 'power2.inOut', stagger: 0.5 }), '-55%');
+    }
+    const fields = $$('.dc-schema tr');
+    if (fields.length && sheet) {
+      G.set(fields, { opacity: 0, x: -10 });
+      onView(sheet, () => G.to(fields, { opacity: 1, x: 0, duration: 0.5, stagger: 0.07, delay: 0.35, ease: 'expo.out', clearProps: 'opacity,transform' }), '-25%');
     }
     const rows = $$('.ds-table tbody tr');
     if (rows.length) {

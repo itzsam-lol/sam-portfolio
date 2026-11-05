@@ -31,7 +31,7 @@ window.FigKit = (function () {
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   // Greek letters only exist in STIX Two Text's subset
-  const greek = (s) => esc(s).replace(/ρ/g, '<span class="gr">ρ</span>');
+  const greek = (s) => esc(s).replace(/[Ͱ-Ͽ]/g, (c) => `<span class="gr">${c}</span>`);
   const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
   const notesFor = (id) => (D.figures && D.figures[id]) || {};
 
@@ -278,7 +278,7 @@ window.FigKit = (function () {
       const s = this.svg;
       // dashed strokes keep their dash pattern, so they fade in rather than draw
       const strokes = [...s.querySelectorAll('.f-draw:not(.f-dash)')];
-      const soft = [...s.querySelectorAll('text, .f-dash, .f-soft, .f-qr, .f-bit, .f-cell, .f-rule, .f-slot, .f-dot, .f-junction, .f-road, .f-pt, .f-ci, .f-head, .f-ship, .f-tier, .f-bar, .f-mark, .f-chip, .f-packet')]
+      const soft = [...s.querySelectorAll('text, .f-dash, .f-soft, .f-qr, .f-bit, .f-cell, .f-rule, .f-slot, .f-dot, .f-junction, .f-road, .f-head, .f-ship, .f-bar, .f-chip, .f-packet')]
         .filter((e) => !strokes.includes(e) && !e.closest('[data-nodraw]'));
       if (window.DrawSVGPlugin && strokes.length) G.set(strokes, { drawSVG: '0%' });
       if (soft.length) G.set(soft, { opacity: 0 });

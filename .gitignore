@@ -3,3 +3,6 @@ uploads/
 
 # private source data (phone, applications, visa answers): never publish
 portfolio.json
+
+# PDFs in this folder are private working copies; the site links none of them
+*.pdf

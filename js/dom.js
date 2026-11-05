@@ -19,7 +19,7 @@
   const extLink = (l, cls = 'lnk', about = '') =>
     `<a class="${cls}" href="${esc(l.href)}" target="_blank" rel="noopener"${about ? ` aria-label="${esc(about)}: ${esc(l.label)}"` : ''}>${esc(l.label)}${ext}</a>`;
   // Greek letters only exist in STIX's subset
-  const greek = (s) => esc(s).replace(/ρ/g, '<span class="gr">ρ</span>');
+  const greek = (s) => esc(s).replace(/[Ͱ-Ͽ]/g, (c) => `<span class="gr">${c}</span>`);
   // Hubot's zero carries a notch that reads as θ at display sizes; set digits in Mona
   const dg = (s) => esc(s).replace(/\d[\d.,]*/g, '<span class="dg">$&</span>');
   // {words|part} in data.js: words that point at a part of a figure
@@ -28,7 +28,7 @@
 
   // a figure waits as a described placeholder until figkit draws it
   const AR = { careeros: '600/520', secondask: '600/520', codeforge: '600/530', synchropulse: '600/530', campusfind: '600/520',
-    riscv: '600/520', pgip: '600/450', pgipres: '600/420', macro: '300/178', benford: '300/178', splm: '300/178', oceanic: '300/178' };
+    riscv: '600/520', finchrona: '600/560', brdo: '600/510', macro: '300/178', benford: '300/178', splm: '300/178', oceanic: '300/178' };
   function figure(id, n, caption, cls = '') {
     const spec = window.Figures && window.Figures.get(id);
     return `<figure class="fig ${cls}" data-fig="${id}" id="fig-${id}">
@@ -172,17 +172,18 @@
 
   /* ---------- 4. research ---------- */
   function research() {
-    const R = D.paper;
-    const U = D.udyox;
+    const F = D.finchrona, B = D.brdo, U = D.udyox;
 
-    const results = R.results.map((r) => `
+    const schema = F.schema.map(([c, d]) => `<tr><th scope="row">${esc(c)}</th><td>${esc(d)}</td></tr>`).join('');
+
+    const results = F.results.map((r) => `
       <div class="res ${r.primary ? 'is-primary' : ''}">
-        <dt>${greek(r.k)}</dt>
-        <dd><span class="res-v num-roll">${esc(r.v)}</span>${r.ci ? `<span class="res-ci">95% CI ${r.ci[0].toFixed(2)} to ${r.ci[1].toFixed(2)}</span>` : ''}<span class="res-d">${esc(r.d)}</span></dd>
+        <dt>${esc(r.k)}</dt>
+        <dd><span class="res-v num-roll">${esc(r.v)}</span><span class="res-d">${esc(r.d)}</span></dd>
       </div>`).join('');
 
-    const rows = R.datasets.map((d) => `
-      <tr><th scope="row">${esc(d.name)}</th><td>${esc(d.cell)}</td><td>${esc(d.kind)}</td><td>${esc(d.unit)}</td><td class="num">${esc(d.n)}</td></tr>`).join('');
+    const rows = F.coverage.map((c) => `
+      <tr><th scope="row"><code>${esc(c.series)}</code></th><td>${esc(c.d)}</td><td>${esc(c.from)} to ${esc(c.to)}</td><td class="num">${esc(c.rows)}</td></tr>`).join('');
 
     const quant = D.quant.map((q, i) => `
       <article class="qcard" id="${esc(q.id)}">
@@ -199,36 +200,59 @@
 
     return `
     <section class="research" id="research">
-      ${head('Research', 'Research', 'A preprint, a field study, four quant projects',
-        'The questions I keep coming back to are about deciding before spending: which experiment to run, which retry to make, which signal to trust.')}
+      ${head('Research', 'Research', 'Two open datasets, a field study, four quant projects',
+        'The questions I keep coming back to are about what a record can actually support: what a public document proves, which signal to trust, and where the evidence stops.')}
 
-      <div class="paper" id="research-paper">
-        <div class="paper-sheet-wrap">
-          <article class="paper-sheet" aria-label="First page of the preprint">
-            <p class="ps-run"><span>${esc(R.note)}</span></p>
-            <h3 class="ps-title">${esc(R.title)}</h3>
-            <p class="ps-auth">${esc(R.authors)}<sup>1</sup></p>
-            <p class="ps-aff"><sup>1</sup>${esc(R.affiliation)}</p>
-            <p class="ps-abs-h">Abstract</p>
-            <p class="ps-abs">${esc(R.abstract)} On the genome-scale Replogle K562 essential screen the triage achieves Random Forest <mark class="hl">Spearman ρ 0.65</mark> (95% CI [0.61, 0.69]) and <mark class="hl">ROC-AUC 0.86</mark>.</p>
-            <p class="ps-foot"><span>${esc(R.venue)}</span><span>1</span></p>
+      <div class="dset" id="finchrona">
+        <div class="dcard-wrap">
+          <article class="dcard" aria-label="Data card for ${esc(F.title)} version ${esc(F.version)}">
+            <p class="dc-run"><span>Data card</span><span>Version ${esc(F.version)}</span></p>
+            <h3 class="dc-title">${esc(F.title)}</h3>
+            <p class="dc-sub">${esc(F.subtitle)}</p>
+            <p class="dc-by">${esc(F.creator)}, creator and maintainer</p>
+            <p class="dc-doi"><span>DOI</span> <mark class="hl">${esc(F.doi)}</mark></p>
+            <table class="dc-schema">
+              <caption>One row per rate</caption>
+              <tbody>${schema}</tbody>
+            </table>
+            <p class="dc-key"><span>Primary key</span> ${esc(F.key)}</p>
+            <p class="dc-cite">${esc(F.cite)}</p>
+            <p class="dc-foot"><span>${esc(F.licence)}</span><span>${esc(F.source)}</span></p>
           </article>
         </div>
-        <div class="paper-side">
-          <p class="paper-kicker">${esc(R.venue)} · first author</p>
-          <p class="paper-plain">${xref(R.plain, 'pgip')}</p>
-          ${figure('pgip', 7, 'Two-stage triage. Stage 1 predicts Baseline Saturation from features known before the experiment; Stage 2 sends each perturbation to the free baseline or the costly model. Drag the prediction to see where it goes.')}
+        <div class="dset-side">
+          <p class="dset-kicker">${esc(F.kind)}</p>
+          <p class="dset-line">${esc(F.line)}</p>
+          <p class="dset-plain">${xref(F.plain, 'finchrona')}</p>
+          ${figure('finchrona', 7, 'Every month-end Treasury curve from January 1990 to October 2026, drawn from the FinChrona release itself. Below it, the 10-year minus 2-year spread, red when the curve was inverted. Drag the timeline; hover or tap a point for the row it comes from.')}
           <dl class="results">${results}</dl>
-          ${figure('pgipres', 8, 'The results, four ways, all from the preprint: accuracy per screen with 95% bootstrap intervals, ROC-AUC, which feature group matters most on each screen, and how much of each screen is saturated.')}
           <div class="ds">
             <table class="ds-table">
-              <caption>The six screens used, with scored perturbations</caption>
-              <thead><tr><th scope="col">Dataset</th><th scope="col">Cell line</th><th scope="col">Perturbation</th><th scope="col">Unit</th><th scope="col" class="num">Scored</th></tr></thead>
+              <caption>Coverage by series, version ${esc(F.version)}</caption>
+              <thead><tr><th scope="col">Series</th><th scope="col">What it holds</th><th scope="col">Coverage</th><th scope="col" class="num">Rows</th></tr></thead>
               <tbody>${rows}</tbody>
             </table>
           </div>
-          <p class="paper-meta"><span>Methods</span>${esc(R.methods.join(', '))}</p>
-          <p class="paper-links">${R.links.map((l) => extLink(l, 'lnk', 'Preprint')).join('')}</p>
+          <p class="rmeta"><span>Read it as</span>${esc(F.note)}</p>
+          <p class="rmeta"><span>Built with</span>${esc(F.stack.join(', '))}</p>
+          <p class="rlinks">${F.links.map((l) => extLink(l, 'lnk', F.title)).join('')}</p>
+        </div>
+      </div>
+
+      <div class="obs" id="brdo">
+        <div class="obs-head">
+          <p class="obs-kind">${esc(B.short)} · ${esc(B.kind)}</p>
+          <h3 class="obs-title">${esc(B.title)}</h3>
+          <p class="obs-line">${esc(B.line)}</p>
+          <p class="rlinks">${B.links.map((l) => extLink(l, 'lnk', B.short)).join('')}</p>
+        </div>
+        <div class="obs-side">
+          <p class="obs-plain">${xref(B.plain, 'brdo')}</p>
+          <ul class="obs-nums">${B.numbers.map((n) => `<li><b class="num-roll">${esc(n.v)}</b><span>${esc(n.k)}</span></li>`).join('')}</ul>
+          ${figure('brdo', 8, 'Three readings of the first sample, all counted by the project’s own report: how far each listed ISIN can be traced towards its contract, the status each instrument is given, and the 1,254 evidence anchors as the checker re-tests them.')}
+          <p class="obs-caveat">${esc(B.caveat)}</p>
+          <p class="rmeta"><span>Built with</span>${esc(B.stack.join(', '))}</p>
+          <p class="rmeta"><span>As of</span>${esc(B.asof)}</p>
         </div>
       </div>
 
@@ -252,7 +276,7 @@
       </div>
 
       <div class="ongoing">
-        <h3 class="sub-title">On the bench</h3>
+        <h3 class="sub-title">Smaller studies, and what is on the bench</h3>
         <ul class="og-list">${ongoing}</ul>
       </div>
     </section>`;
@@ -409,7 +433,7 @@
         ${esc(a.label)}<sup>${count(a.id)}</sup></button>`).join('');
 
     const areaLabel = Object.fromEntries(D.areas.map((a) => [a.id, a.label]));
-    const LINK = { repo: 'Code', live: 'Live', data: 'Data' };
+    const LINK = { repo: 'Code', live: 'Live', data: 'Data', notes: 'Write-up' };
     const rows = D.archive.map((p, i) => {
       const links = Object.entries(p.links).map(([k, v]) =>
         `<a class="lnk lnk-sm" href="${esc(v)}" target="_blank" rel="noopener" aria-label="${esc(p.name)}: ${LINK[k]}">${LINK[k]}${ext}</a>`).join('');

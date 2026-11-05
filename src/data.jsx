@@ -6,7 +6,7 @@ const PROFILE = {
   season: "2026",
   bio: [
     "B.Tech CS-AI engineer at IIIT Delhi, racing through distributed systems, optimization, and machine learning with the same obsession an F1 team has for laptime.",
-    "Teaching Assistant for DSA and Computer Networks, research intern at CoSY Lab, and first author on a preprint (under review) on pre-experimental triage for single-cell perturbation modeling.",
+    "Teaching Assistant for DSA and Computer Networks, and research intern at CoSY Lab.",
     "A garage of builds spanning fault-tolerant distributed platforms, MILP traffic optimization, a RISC-V toolchain, and production AI backends serving live clients.",
   ],
   stats: [
@@ -56,14 +56,6 @@ const RACES = [
 ];
 
 const PROJECTS = [
-  {
-    n: "01", w: "feat",
-    title: "PGIP — Pre-Experimental Perturbation Triage",
-    desc: "Two-stage ML system that predicts, before a costly single-cell CRISPR experiment is run, whether a perturbation will be saturated (an additive baseline suffices) or resistant (non-additive, worth deep modeling). Ridge / Random Forest over gene-intrinsic features — baseline expression, STRING PPI connectivity, Gene Ontology, and a frozen ESM-2 embedding — across seven public Perturb-seq screens. First-author preprint under review.",
-    stack: ["Python", "scikit-learn", "Random Forest", "ESM-2", "STRING", "Perturb-seq"],
-    speed: "POLE · ROC-AUC 0.86",
-    href: "https://github.com/itzsam-lol/PGIP",
-  },
   {
     n: "02", w: "w-6",
     title: "SynchroPulse AI",

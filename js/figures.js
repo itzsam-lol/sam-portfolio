@@ -29,7 +29,7 @@ window.Figures = (function () {
     `<rect class="${cls}" x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" ${extra}/>`;
   // Greek is only in STIX Two Text's subset, so route it there
   const text = (x, y, s, cls = 'f-label', anchor = 'start', extra = '') =>
-    `<text class="${cls}" x="${f(x)}" y="${f(y)}" text-anchor="${anchor}" ${extra}>${esc(s).replace(/ρ/g, '<tspan class="f-greek">ρ</tspan>')}</text>`;
+    `<text class="${cls}" x="${f(x)}" y="${f(y)}" text-anchor="${anchor}" ${extra}>${esc(s).replace(/[\u0370-\u03ff]/g, (c) => `<tspan class="f-greek">${c}</tspan>`)}</text>`;
   const line = (x1, y1, x2, y2, cls = 'f-line', extra = '') =>
     `<line class="${cls}" x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" ${extra}/>`;
   const path = (d, cls = 'f-line', extra = '') => `<path class="${cls}" d="${d}" ${extra}/>`;
@@ -1184,250 +1184,393 @@ window.Figures = (function () {
   });
 
   /* =========================================================
-     Research: PGIP's two stages, with a prediction you can move
+     Research: FinChrona, the Treasury curve at every month-end
      ========================================================= */
-  const PG_FEATS = [
-    { k: 'expr', t: 'Baseline expression' },
-    { k: 'string', t: 'STRING network' },
-    { k: 'go', t: 'Gene Ontology' },
-    { k: 'esm', t: 'ESM-2 embedding' },
-  ];
-  const PG_DEMO = [0.82, 0.18, 0.71, 0.48, 0.24, 0.9, 0.56];
-  // the paper's tiers: resistant below 0.33, saturated from 0.66
-  const pgTier = (v) => (v >= 0.66 ? 'sat' : v < 0.33 ? 'res' : 'mid');
+  // the curves are the dataset itself: the last trading day of each month from the
+  // v1.0.0 Parquet, in basis points (assets/data/finchrona-monthly.json, 10 KB
+  // compressed). Fetched once, when the figure is first built
+  const FC_URL = 'assets/data/finchrona-monthly.json';
+  let fcData = null, fcLoad = null, fcLast = null;
+  const fcFetch = () => fcLoad || (fcLoad = fetch(FC_URL)
+    .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then((d) => (fcData = d), (e) => { fcLoad = null; throw e; }));
+  const FC_NOM = ['1M', '3M', '6M', '1Y', '2Y', '3Y', '5Y', '7Y', '10Y', '20Y', '30Y'];
+  const FC_REAL = ['5Y', '7Y', '10Y', '20Y', '30Y'];
+  const FC_YRS = { '1M': 1 / 12, '3M': 0.25, '6M': 0.5, '1Y': 1, '2Y': 2, '3Y': 3, '5Y': 5, '7Y': 7, '10Y': 10, '20Y': 20, '30Y': 30 };
+  const FC_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const FC_LO = -2, FC_HI = 10, FC_SLO = -1.5, FC_SHI = 3;      // percent: the curve's scale, then the spread's
+  // one step per month, from January 1990 to the release's last month (October 2026 in v1.0.0)
+  const FC_MONTHS = (() => { const [y, m] = D.finchrona.coverage[0].to.split('-').map(Number); return (y - 1990) * 12 + m; })();
+  const FC_L = {
+    wide: { W: 600, H: 436, X0: 54, X1: 586, CY0: 62, CY1: 246, MY: 265, TY0: 320, TY1: 388, RY: 394, YY: 424, years: 5, mats: FC_NOM },
+    tall: { W: 360, H: 560, X0: 46, X1: 346, CY0: 98, CY1: 330, MY: 350, TY0: 410, TY1: 494, RY: 500, YY: 532, years: 10, mats: ['1M', '6M', '2Y', '5Y', '10Y', '30Y'] },
+  };
+  const fcX = (G, k) => G.X0 + (G.X1 - G.X0) * Math.log(FC_YRS[k] * 12) / Math.log(30 * 12);
+  const fcY = (G, v) => G.CY1 - (G.CY1 - G.CY0) * (v - FC_LO) / (FC_HI - FC_LO);
+  const fcT = (G, i) => G.X0 + (G.X1 - G.X0) * i / (FC_MONTHS - 1);
+  const fcS = (G, s) => G.TY1 - (G.TY1 - G.TY0) * (Math.max(FC_SLO, Math.min(FC_SHI, s)) - FC_SLO) / (FC_SHI - FC_SLO);
+  const fcYM = (i) => ({ y: 1990 + Math.floor(i / 12), m: i % 12 });
+  const fcPct = (bp) => (bp < 0 ? '−' : '') + (Math.abs(bp) / 100).toFixed(2);
 
-  def('pgip', {
-    label: 'PGIP: before an experiment, gene-intrinsic features (baseline expression, STRING connectivity, Gene Ontology, an ESM-2 embedding) feed a Stage 1 model that predicts Baseline Saturation. Stage 2 sends predicted-saturated perturbations (0.66 and above) to the free baseline and predicted-resistant ones (below 0.33) to a costlier model.',
+  def('finchrona', {
+    label: 'FinChrona: the U.S. Treasury nominal par yield curve at every month-end from January 1990 to October 2026, with real (TIPS) par yields from 2003, drawn from the dataset itself. Below it, the month-end spread between the 10-year and 2-year yields, red where the curve was inverted, with a tick for every month that had inverted days.',
     tall: true,
+    // the timeline is dragged, not pinned: a tap on it moves the month instead
+    activate: (k) => k === 'clock',
     svg(L) {
-      const id = 'pgip', tall = L === 'tall';
-      let b = text(14, 28, 'Before the experiment', 'f-kicker');
-      if (!tall) {
-        b += node(12, 128, 104, 64, 'Candidate', 'perturbation', 'f-box', 'candidate');
-        PG_FEATS.forEach((ft, i) => {
-          const y = 58 + i * 52;
-          b += node(140, y, 152, 36, ft.t, '', 'f-box f-box-soft', ft.k);
-          b += path(`M116,160 C128,160 126,${y + 18} 138,${y + 18}`, 'f-thin f-draw', `data-rel="candidate ${ft.k}"`);
-          b += path(`M292,${y + 18} C306,${y + 18} 302,160 314,160`, 'f-thin f-draw', `data-rel="${ft.k} stage1"`);
-        });
-        b += node(316, 124, 102, 72, 'Stage 1', 'predicts BS', 'f-box f-box-ink', 'stage1');
-        b += arrow(id, 'M418,160 L456,160', 'f-line', 'stage1 scale');
-        const SX = 470, SY = 44, SH = 240, y = (v) => SY + SH * (1 - v);
-        let sc = rect(SX - 14, SY - 6, 52, SH + 12, 'f-hit pg-hit');
-        sc += rect(SX, y(1), 22, y(0.66) - y(1), 'f-tier f-tier-sat') + rect(SX, y(0.66), 22, y(0.33) - y(0.66), 'f-tier f-tier-mid') +
-          rect(SX, y(0.33), 22, y(0) - y(0.33), 'f-tier f-tier-res') + rect(SX, SY, 22, SH, 'f-frame f-draw');
-        [[1, '1'], [0.66, '0.66'], [0.33, '0.33'], [0, '0']].forEach(([v, t]) => { sc += text(SX - 6, y(v) + 4, t, 'f-mono f-tiny', 'end'); });
-        sc += text(SX + 11, SY - 12, 'BS', 'f-mono', 'middle');
-        b += part('scale', sc);
-        b += path('M0,0', 'f-line pg-route pg-r-sat', 'data-rel="scale baseline"') + path('M0,0', 'f-line pg-route pg-r-res', 'data-rel="scale stage2"');
-        b += `<g class="pg-mark">${path(`M${SX + 24},0 l11,-7 v14 z`, 'f-head')}</g>`;
-        b += text(522, 64, 'saturated', 'f-mono');
-        b += node(522, 72, 70, 46, 'Baseline', 'free', 'f-box', 'baseline');
-        b += text(557, 166, 'frontier', 'f-mono', 'middle');
-        b += text(522, 206, 'resistant', 'f-mono f-red-text');
-        b += node(522, 214, 70, 46, 'Stage 2', 'costly', 'f-box f-box-red', 'stage2');
-        b += text(14, 314, 'Stage 2', 'f-kicker') + text(84, 314, 'saturated ones go to the free baseline, resistant ones to a costlier model', 'f-note');
-      } else {
-        b += node(100, 40, 160, 50, 'Candidate', 'perturbation', 'f-box', 'candidate');
-        // all four features feed Stage 1: brackets above and below the grid
-        b += path('M180,90 L180,102 M94,102 L266,102 M94,102 L94,112 M266,102 L266,112', 'f-thin f-draw', 'data-rel="candidate expr string go esm"');
-        PG_FEATS.forEach((ft, i) => {
-          const x = i % 2 ? 186 : 14, y = 112 + Math.floor(i / 2) * 48;
-          b += node(x, y, 160, 38, ft.t, '', 'f-box f-box-soft', ft.k);
-        });
-        b += path('M94,198 L94,208 M266,198 L266,208 M94,208 L266,208 M180,208 L180,220', 'f-thin f-draw', 'data-rel="expr string go esm stage1"');
-        b += node(110, 222, 140, 56, 'Stage 1', 'predicts BS', 'f-box f-box-ink', 'stage1');
-        b += arrow(id, 'M180,278 L180,292', 'f-line', 'stage1 scale');
-        const SX = 40, SW = 280, SY = 312, x = (v) => SX + SW * v;
-        let sc = rect(SX - 14, SY - 28, SW + 28, 66, 'f-hit pg-hit');
-        sc += rect(x(0), SY, x(0.33) - x(0), 22, 'f-tier f-tier-res') + rect(x(0.33), SY, x(0.66) - x(0.33), 22, 'f-tier f-tier-mid') +
-          rect(x(0.66), SY, x(1) - x(0.66), 22, 'f-tier f-tier-sat') + rect(SX, SY, SW, 22, 'f-frame f-draw');
-        [[0, '0'], [0.33, '0.33'], [0.66, '0.66'], [1, '1']].forEach(([v, t]) => { sc += text(x(v), SY + 40, t, 'f-mono f-tiny', 'middle'); });
-        sc += text(SX - 8, SY + 16, 'BS', 'f-mono', 'end');
-        sc += text(x(0.495), SY + 15.5, 'frontier', 'f-mono f-tiny pg-mid', 'middle');
-        b += part('scale', sc);
-        b += path('M0,0', 'f-line pg-route pg-r-res', 'data-rel="scale stage2"') + path('M0,0', 'f-line pg-route pg-r-sat', 'data-rel="scale baseline"');
-        b += `<g class="pg-mark">${path(`M0,${SY - 2} l-7,-11 h14 z`, 'f-head')}</g>`;
-        b += node(14, 404, 150, 46, 'Stage 2', 'if resistant', 'f-box f-box-red', 'stage2');
-        b += node(196, 404, 150, 46, 'Baseline', 'if saturated', 'f-box', 'baseline');
-        b += text(14, 484, 'Stage 2', 'f-kicker');
-        b += text(14, 504, 'saturated ones go to the free baseline,', 'f-note') + text(14, 522, 'resistant ones to a costlier model', 'f-note');
+      const id = 'finchrona', g = FC_L[L], tall = L === 'tall', z = fcS(g, 0);
+      let b = `<defs><clipPath id="${id}-${L}-up"><rect x="0" y="0" width="${g.W}" height="${f(z)}"/></clipPath>` +
+        `<clipPath id="${id}-${L}-dn"><rect x="0" y="${f(z)}" width="${g.W}" height="${f(g.H - z)}"/></clipPath></defs>`;
+      b += text(14, 26, 'Par yield curve, month-end', 'f-kicker');
+      b += text(tall ? 14 : g.X1, tall ? 58 : 30, '', 'f-big fc-date', tall ? 'start' : 'end');
+      const lx = tall ? 14 : g.X0, ly = tall ? 82 : 50;
+      b += line(lx, ly - 4, lx + 22, ly - 4, 'fc-nom') + text(lx + 28, ly, 'nominal', 'f-mono f-tiny');
+      b += `<g class="fc-real-g">${line(lx + 108, ly - 4, lx + 130, ly - 4, 'fc-real')}${text(lx + 136, ly, 'real (TIPS)', 'f-mono f-tiny')}</g>`;
+      for (let v = FC_LO; v <= FC_HI; v += 2) {
+        const y = fcY(g, v);
+        b += line(g.X0, y, g.X1, y, v === 0 ? 'f-axis' : 'f-grid') +
+          text(g.X0 - 8, y + 4, v === FC_HI ? v + '%' : (v < 0 ? '−' : '') + Math.abs(v), 'f-mono f-tiny', 'end');
       }
-      return svg(id, tall ? 360 : 600, tall ? 536 : 330, b, this.label);
+      FC_NOM.forEach((k) => { const x = fcX(g, k); b += line(x, g.CY1, x, g.CY1 + 4, 'f-axis'); });
+      g.mats.forEach((k) => { b += text(fcX(g, k), g.MY, k, 'f-mono f-tiny', 'middle'); });
+      // the curves are filled in once the data is in
+      b += part('real', `<g class="fc-real-g">${path('M0,0', 'fc-hitline')}${path('M0,0', 'fc-real fc-real-c')}</g>`);
+      b += part('curve', path('M0,0', 'fc-hitline') + path('M0,0', 'fc-gap') + path('M0,0', 'fc-nom fc-nom-c f-draw'));
+      // the points are not parts: hovering one shows the dataset row it comes from
+      let pts = '';
+      FC_NOM.forEach((k, q) => { pts += `<g class="fc-pg fc-pn f-soft" data-q="${q}" style="display:none">${circle(0, 0, 9, 'f-hit')}${circle(0, 0, 3.6, 'fc-pt')}</g>`; });
+      FC_REAL.forEach((k, q) => { pts += `<g class="fc-pg fc-pr fc-real-g f-soft" data-q="${q}" style="display:none">${circle(0, 0, 9, 'f-hit')}${circle(0, 0, 3.4, 'fc-pt fc-pt-r')}</g>`; });
+      b += `<g class="fc-pts">${pts}</g>`;
+
+      // the timeline: drag anywhere along it
+      b += text(14, g.TY0 - 26, '10-year minus 2-year, month-end', 'f-note');
+      let tl = part('clock', rect(g.X0 - 10, g.TY0 - 22, g.X1 - g.X0 + 20, g.RY - g.TY0 + 40, 'f-hit'));
+      tl += part('spread', path('M0,0', 'fc-sp-up', `clip-path="url(#${id}-${L}-up)"`) +
+        path('M0,0', 'fc-sp-dn', `clip-path="url(#${id}-${L}-dn)"`) + path('M0,0', 'fc-sp f-draw') + line(g.X0, z, g.X1, z, 'f-axis'));
+      tl += part('inv', rect(g.X0, g.RY - 2, g.X1 - g.X0, 14, 'f-hit') + path('M0,0', 'fc-rug'));
+      for (let y = 1990; y <= 2026; y += g.years) {
+        const x = fcT(g, (y - 1990) * 12);
+        tl += line(x, g.RY + 12, x, g.RY + 16, 'f-axis') + text(x, g.YY, String(y), 'f-mono f-tiny', 'middle');
+      }
+      tl += `<g class="fc-cur" transform="translate(${g.X0} 0)">${line(0, g.TY0 - 8, 0, g.RY + 12, 'fc-cur-l')}` +
+        `${path(`M0,${g.TY0 - 8} l-6,-10 h12 z`, 'f-head')}${text(9, g.TY0 - 10, '', 'f-num f-num-sm fc-sv')}</g>`;
+      b += `<g class="fc-tl">${tl}</g>`;
+      b += text(g.X0 - 8, fcS(g, 2) + 4, '+2', 'f-mono f-tiny', 'end') + text(g.X0 - 8, z + 4, '0', 'f-mono f-tiny', 'end');
+      return svg(id, g.W, g.H, b, this.label);
     },
     mount(kit) {
-      const gsap = G(), tall = kit.layout === 'tall';
-      const mark = kit.$('.pg-mark'), rS = kit.$('.pg-r-sat'), rR = kit.$('.pg-r-res'), hit = kit.$('.pg-hit');
-      const base = kit.$('[data-part="baseline"]'), st2 = kit.$('[data-part="stage2"]');
-      const st = { v: PG_DEMO[0] };
-      function paint() {
-        const v = st.v, tier = pgTier(v);
-        if (tall) {
-          const x = 40 + 280 * v;
-          gsap.set(mark, { x });
-          rR.setAttribute('d', `M${f(x)},336 C${f(x)},372 89,368 89,402`);
-          rS.setAttribute('d', `M${f(x)},336 C${f(x)},372 271,368 271,402`);
-        } else {
-          const y = 44 + 240 * (1 - v);
-          gsap.set(mark, { y });
-          rS.setAttribute('d', `M506,${f(y)} C514,${f(y)} 512,95 520,95`);
-          rR.setAttribute('d', `M506,${f(y)} C514,${f(y)} 512,237 520,237`);
-        }
-        rS.classList.toggle('is-on', tier === 'sat'); rR.classList.toggle('is-on', tier === 'res');
-        base.classList.toggle('is-target', tier === 'sat'); st2.classList.toggle('is-target', tier === 'res');
-        const t = v.toFixed(2);
-        kit.status(tier === 'sat' ? `Predicted saturation ${t}: saturated. The free baseline already captures it, so the costly model is not needed`
-          : tier === 'res' ? `Predicted saturation ${t}: resistant. There is structure the baseline misses: worth the costly model, and the experiment`
-          : `Predicted saturation ${t}: frontier, between the two tiers`);
-        if (stepper) stepper.set(Math.round(v * 100));
-      }
-      let k = 0, wait = 1.6, dragging = false;
-      kit.tick((dt) => {
-        if (kit.manual() || dragging) return;
-        wait -= dt;
-        if (wait <= 0) { k = (k + 1) % PG_DEMO.length; gsap.to(st, { v: PG_DEMO[k], duration: 0.85, ease: 'power3.inOut', onUpdate: paint, overwrite: true }); wait = 2.7; }
+      const g = FC_L[kit.layout], $ = kit.$;
+      const nom = $('.fc-nom-c'), real = $('.fc-real-c'), gap = $('.fc-gap'), hits = kit.$$('.fc-hitline');
+      const pn = kit.$$('.fc-pn'), pr = kit.$$('.fc-pr');
+      const date = $('.fc-date'), cur = $('.fc-cur'), sv = $('.fc-sv'), strip = $('.fc-tl');
+      const st = { t: fcLast != null ? fcLast : 0 };
+      let d = null, shown = -1, hover = null, showReal = true, dragging = false, hold = 0, alive = true, still = false;
+
+      // a curve between two month-ends: interpolated where both exist, never filled across a gap
+      const at = (rows, t, w) => {
+        const i = Math.floor(t), j = Math.min(FC_MONTHS - 1, i + 1), u = t - i, a = rows[i], c = rows[j];
+        return Array.from({ length: w }, (_, q) => {
+          const va = a ? a[q] : null, vc = c ? c[q] : null;
+          if (va == null || vc == null) return u < 0.5 ? (va == null ? null : va / 100) : (vc == null ? null : vc / 100);
+          return (va + (vc - va) * u) / 100;
+        });
+      };
+      // solid between neighbouring maturities; across a missing one, only a dashed bridge
+      const trace = (keys, vals) => {
+        let s = '', br = '', last = '', broke = false;
+        keys.forEach((k, q) => {
+          if (vals[q] == null) { broke = !!last; return; }
+          const p = f(fcX(g, k)) + ',' + f(fcY(g, vals[q]));
+          if (broke) br += `M${last}L${p}`;
+          s += (last && !broke ? 'L' : 'M') + p;
+          last = p; broke = false;
+        });
+        return [s || 'M0,0', br || 'M0,0'];
+      };
+      const place = (pts, keys, vals) => pts.forEach((p, q) => {
+        if (vals[q] == null) { p.style.display = 'none'; return; }
+        p.style.display = ''; p.setAttribute('transform', `translate(${f(fcX(g, keys[q]))} ${f(fcY(g, vals[q]))})`);
       });
-      const toV = (e) => {
+
+      function say(i) {
+        const n = d.n[i], v2 = n[4], v10 = n[8], { y, m } = fcYM(i);
+        let s = `${FC_MON[m]} ${y}: 2-year ${fcPct(v2)}%, 10-year ${fcPct(v10)}%, spread ${v10 >= v2 ? '+' : '−'}${(Math.abs(v10 - v2) / 100).toFixed(2)} points`;
+        if (d.inv[i]) s += `, inverted on ${d.inv[i]} of ${d.td[i]} trading days`;
+        const r = d.r[i];
+        if (showReal && r && r[2] != null) s += `; real 10-year ${fcPct(r[2])}%`;
+        return s;
+      }
+      // the row a point comes from, in the dataset's own columns
+      function row(kind, q) {
+        const i = Math.round(st.t), rows = kind === 'n' ? d.n : d.r, v = rows[i] && rows[i][q];
+        if (v == null) return null;
+        const k = (kind === 'n' ? FC_NOM : FC_REAL)[q], mo = k.endsWith('M');
+        const { y, m } = fcYM(i);
+        return `observation_date ${y}-${String(m + 1).padStart(2, '0')}-${String(d.day[i]).padStart(2, '0')} · curve_type ${kind === 'n' ? 'par_nominal' : 'par_real'} · quote_basis par_yield · maturity_label ${k} · maturity_value ${parseFloat(k).toFixed(1)} · maturity_unit ${mo ? 'month' : 'year'} · value_pct ${(v / 100).toFixed(2)}`;
+      }
+
+      function paint() {
+        if (!d) return;
+        const t = st.t, vn = at(d.n, t, FC_NOM.length), vr = showReal ? at(d.r, t, FC_REAL.length) : FC_REAL.map(() => null);
+        const [pn0, gn0] = trace(FC_NOM, vn), [pr0] = trace(FC_REAL, vr);
+        nom.setAttribute('d', pn0); gap.setAttribute('d', gn0); hits[1].setAttribute('d', pn0);
+        real.setAttribute('d', pr0); hits[0].setAttribute('d', pr0);
+        place(pn, FC_NOM, vn); place(pr, FC_REAL, vr);
+        const x = fcT(g, t);
+        cur.setAttribute('transform', `translate(${f(x)} 0)`);
+        const i = Math.round(t);
+        if (i === shown) return;
+        shown = i;
+        const { y, m } = fcYM(i), n = d.n[i], s = n[8] - n[4];
+        date.textContent = `${d.day[i]} ${FC_MON[m]} ${y}`;
+        sv.textContent = (s >= 0 ? '+' : '−') + (Math.abs(s) / 100).toFixed(2);
+        sv.setAttribute('text-anchor', x > g.X1 - 60 ? 'end' : 'start');
+        sv.setAttribute('x', x > g.X1 - 60 ? -9 : 9);
+        sv.classList.toggle('f-red-text', s < 0);
+        if (stepper) stepper.set(i);
+        if (!hover) kit.status(say(i));
+      }
+
+      // the spread, its two shaded sides and a tick for every month with inverted days
+      function build() {
+        let ln = '', rug = '';
+        d.n.forEach((r, i) => {
+          const x = f(fcT(g, i));
+          ln += (i ? 'L' : 'M') + x + ',' + f(fcS(g, (r[8] - r[4]) / 100));
+          if (d.inv[i]) rug += `M${x},${f(g.RY)}v${f(Math.max(1.5, 10 * d.inv[i] / d.td[i]))}`;
+        });
+        const z = f(fcS(g, 0)), area = ln + `L${f(g.X1)},${z}L${f(g.X0)},${z}Z`;
+        $('.fc-sp').setAttribute('d', ln);
+        $('.fc-sp-up').setAttribute('d', area);
+        $('.fc-sp-dn').setAttribute('d', area);
+        $('.fc-rug').setAttribute('d', rug || 'M0,0');
+      }
+      function ready(data) {
+        if (!alive) return;
+        d = data;
+        build();
+        if (still) st.t = FC_MONTHS - 1;
+        shown = -1;
+        paint();
+      }
+
+      // hover or tap a point for its row
+      const show = (p) => {
+        if (!d) return;
+        const r = row(p.classList.contains('fc-pr') ? 'r' : 'n', +p.dataset.q);
+        if (!r) return;
+        if (hover) hover.classList.remove('is-on');
+        hover = p; p.classList.add('is-on');
+        kit.interact(); kit.status(r);
+      };
+      const hide = () => { if (!hover) return; hover.classList.remove('is-on'); hover = null; if (d) kit.status(say(Math.round(st.t))); };
+      // a finger on the drawing holds the month still, and a point answers as soon as it is
+      // touched, so it cannot slide away from under the finger before the tap ends
+      kit.on(kit.svg, 'pointerdown', (e) => { if (e.pointerType !== 'mouse') kit.interact(); });
+      [...pn, ...pr].forEach((p) => {
+        kit.on(p, 'pointerenter', (e) => { if (e.pointerType === 'mouse') show(p); });
+        kit.on(p, 'pointerleave', (e) => { if (e.pointerType === 'mouse') hide(); });
+        kit.on(p, 'pointerdown', (e) => { if (e.pointerType === 'mouse') return; e.stopPropagation(); if (hover === p) hide(); else show(p); });
+        kit.on(p, 'click', (e) => { e.stopPropagation(); if ((e.pointerType || 'mouse') === 'mouse' && hover !== p) show(p); });
+      });
+
+      // drag along the timeline to choose the month
+      const toT = (e) => {
         const p = kit.svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
         const q = p.matrixTransform(kit.svg.getScreenCTM().inverse());
-        return Math.max(0, Math.min(1, tall ? (q.x - 40) / 280 : 1 - (q.y - 44) / 240));
+        return Math.round(Math.max(0, Math.min(FC_MONTHS - 1, (q.x - g.X0) / (g.X1 - g.X0) * (FC_MONTHS - 1))));
       };
-      kit.on(hit, 'pointerdown', (e) => { dragging = true; hit.setPointerCapture(e.pointerId); kit.interact(); gsap.killTweensOf(st); st.v = toV(e); paint(); e.preventDefault(); });
-      kit.on(hit, 'pointermove', (e) => { if (!dragging) return; kit.interact(); st.v = toV(e); paint(); });
+      kit.on(strip, 'pointerdown', (e) => {
+        if (!d) return;
+        dragging = true; strip.setPointerCapture(e.pointerId); kit.interact(); hide();
+        st.t = toT(e); hold = 0; paint(); e.preventDefault();
+      });
+      kit.on(strip, 'pointermove', (e) => { if (!dragging) return; kit.interact(); st.t = toT(e); paint(); });
       const end = () => { dragging = false; };
-      kit.on(hit, 'pointerup', end); kit.on(hit, 'pointercancel', end);
-      const stepper = kit.stepper('Predicted BS', { value: Math.round(st.v * 100), min: 0, max: 100, px: 3, format: (v) => (v / 100).toFixed(2),
-        onChange: (v) => { gsap.killTweensOf(st); st.v = v / 100; paint(); } });
-      paint();
-      return { still() { st.v = 0.24; paint(); } };
+      kit.on(strip, 'pointerup', end); kit.on(strip, 'pointercancel', end);
+
+      // left alone, it runs through the decades, waits at the latest month, then starts again
+      kit.tick((dt) => {
+        if (!d || dragging || hover || kit.manual()) return;
+        if (hold > 0) { hold -= dt; if (hold <= 0) { st.t = 0; paint(); } return; }
+        st.t = Math.min(FC_MONTHS - 1, st.t + 15 * dt);
+        paint();
+        if (st.t >= FC_MONTHS - 1) hold = 2.8;
+      });
+
+      const stepper = kit.stepper('Month', { value: Math.round(st.t), min: 0, max: FC_MONTHS - 1, px: 2,
+        format: (v) => { const { y, m } = fcYM(v); return `${FC_MON[m]} ${y}`; },
+        onChange: (v) => { hide(); st.t = v; hold = 0; paint(); } });
+      kit.segment([['n', 'Nominal'], ['nr', 'Nominal and real']], 'nr', (v) => {
+        showReal = v === 'nr';
+        kit.svg.classList.toggle('fc-no-real', !showReal);
+        hide(); shown = -1; paint();
+      }, { label: 'Which curves to draw' });
+
+      if (fcData) ready(fcData);
+      else {
+        kit.status('Loading the 442 month-end curves from the dataset');
+        fcFetch().then(ready, () => { if (alive) kit.status('The curves could not be loaded here; the dataset itself is linked below.'); });
+      }
+      return {
+        still() { still = true; if (d) { st.t = FC_MONTHS - 1; shown = -1; paint(); } },
+        destroy() { alive = false; fcLast = st.t; },
+      };
     },
   });
 
   /* =========================================================
-     Research: the results, four ways (all numbers from the preprint)
+     Research: BRDO, three readings of the first sample
      ========================================================= */
-  const PR = () => D.paper;
-  const PR_VIEWS = [['rho', 'Spearman ρ'], ['auc', 'ROC-AUC'], ['feat', 'Features'], ['tiers', 'Tiers']];
-  const PR_SAY = {
-    rho: 'How well Stage 1 ranks perturbations by saturation, with 95% bootstrap intervals. The headline is the random forest on Replogle K562: 0.65',
-    auc: 'Telling saturated from not (resistant from not, on the Wessels pairs), with 95% intervals where the paper reports them',
-    feat: 'Leave one feature group out and see how much ρ drops. The group that matters most changes from screen to screen',
-    tiers: 'How much of each screen is saturated, frontier or resistant. Saturation is mostly a property of the screen, not the gene',
+  const BR = () => D.brdo;
+  const BR_VIEWS = [['trace', 'Trace'], ['status', 'Status'], ['anchors', 'Anchors']];
+  const BR_SAY = {
+    trace: 'How many of the 93 listed ISINs reach each stage on the way back to the contract. The stages are not nested',
+    status: 'What the reviewed record says about each instrument this quarter: one status each, from a closed list that is never merged',
+    anchors: 'Every anchor names a file by its hash, a page and the words relied on, and the checker re-tests all of them',
   };
-  const fmt3 = (v) => String(v);
+  const BR_H = { wide: 392, tall: 520 };
+  // the waffle: one cell per anchor, column by column, so the scan reads them in order
+  const BR_GRID = { wide: { x: 14, y: 70, cols: 57, rows: 22, p: 10, c: 8 }, tall: { x: 28, y: 70, cols: 38, rows: 33, p: 8, c: 6.4 } };
 
-  function prView(view, L) {
-    const P = PR(), tall = L === 'tall';
-    const W = tall ? 360 : 600;
+  function brView(view, L) {
+    const B = BR(), tall = L === 'tall', W = tall ? 360 : 600;
     let b = '';
-    const ci = (x1, x2, y, k = '') => line(x1, y, x2, y, 'f-ci ' + k) + line(x1, y - 5, x1, y + 5, 'f-ci ' + k) + line(x2, y - 5, x2, y + 5, 'f-ci ' + k);
-    if (view === 'rho' || view === 'auc') {
-      const rows = view === 'rho' ? P.rho : P.auc;
-      const lo = view === 'rho' ? 0.2 : 0.5, hi = view === 'rho' ? 0.8 : 1.0;
-      const X0 = tall ? 26 : 252, X1 = tall ? 332 : 578;
-      const X = (v) => X0 + (X1 - X0) * (v - lo) / (hi - lo);
-      const step = tall ? (view === 'rho' ? 62 : 86) : (view === 'rho' ? 34 : 46);
-      const top = tall ? 30 : (view === 'rho' ? 34 : 42);
-      const axisY = tall ? 432 : 236;
-      for (let t = lo; t <= hi + 1e-9; t += 0.1) {
-        b += line(X(t), top - 12, X(t), axisY, 'f-grid') + text(X(t), axisY + 18, t.toFixed(1), 'f-mono f-tiny', 'middle');
-      }
-      b += line(X0, axisY, X1, axisY, 'f-axis');
-      rows.forEach((r, i) => {
-        const y = top + i * step;
-        const cy = tall ? y + 34 : y + 6;
-        const sub = view === 'rho' ? `${r.model} · n ${r.n}` : r.task;
-        let g = tall ? text(14, y, r.set, 'f-label') + text(14, y + 16, sub, 'f-mono f-tiny')
-                     : text(14, y + 2, r.set, 'f-label') + text(14, y + 17, sub, 'f-mono f-tiny');
-        if (r.ci) g += ci(X(r.ci[0]), X(r.ci[1]), cy, r.primary ? 'is-red' : '');
-        if (r.v != null) g += circle(X(r.v), cy, 5.5, r.primary ? 'f-pt f-pt-red' : 'f-pt');
-        const label = r.v != null ? fmt3(r.v.toFixed(3)) + (r.ci ? '' : '  (no CI reported)') : `${r.ci[0]} to ${r.ci[1]}`;
-        const lx = X(r.ci ? r.ci[1] : r.v) + 9;
-        g += text(Math.min(lx, W - 8), cy + 4.5, label, 'f-num f-num-sm', lx > W - 60 ? 'end' : 'start');
-        b += part((view === 'rho' ? 'r' : 'a') + i, rect(4, cy - (tall ? 44 : 16), W - 8, tall ? 56 : 30, 'f-hit') + g, 'pr-row');
+    if (view === 'trace') {
+      const top = 48, step = tall ? 58 : 41, bh = tall ? 12 : 10, BW = W - 28;
+      b += text(14, 22, 'From breach report to contract', 'f-kicker');
+      B.trace.forEach(([t, n], i) => {
+        const y = top + i * step, last = i === B.trace.length - 1;
+        let gg = rect(4, y - 8, W - 8, step - 2, 'f-hit') + text(14, y + 10, t, 'f-label') +
+          text(W - 14, y + 10, String(n), 'f-num' + (last ? ' f-red-text' : ''), 'end') +
+          rect(14, y + 18, BW, bh, 'br-track f-soft') + rect(14, y + 18, Math.max(0.01, BW * n / B.traceOf), bh, 'f-bar br-bar');
+        if (last) gg += rect(14, y + 18, BW, bh, 'br-break');
+        b += part('s' + i, gg, 'br-row');
       });
-      if (view === 'auc') b += text(X(0.5) + 4, top - 2, 'chance', 'f-mono f-tiny');
-      b += text(tall ? 14 : X0, axisY + 42, view === 'rho' ? 'Spearman ρ, predicted against measured saturation' : 'ROC-AUC, 0.5 is chance', 'f-note');
-    } else if (view === 'feat') {
-      const A = P.ablation, MAX = 0.4;
-      const pw = tall ? 332 : 278, ph = tall ? 100 : 118;
-      const bx = tall ? 108 : 100, bw = tall ? 180 : 140;
-      A.forEach((a, i) => {
-        const px = tall ? 14 : (i % 2 ? 312 : 14), py = tall ? 12 + i * 106 : 12 + Math.floor(i / 2) * 130;
-        let g = rect(px - 6, py - 4, pw + 8, ph, 'f-hit') + text(px, py + 14, a.set, 'f-label');
-        a.groups.forEach(([k, v], j) => {
-          const y = py + 26 + j * 18;
-          g += text(px, y + 11, k, 'f-mono f-tiny') + rect(px + bx, y + 1, bw * v / MAX, 12, j === 0 ? 'f-bar f-bar-red pr-bar' : 'f-bar pr-bar') +
-            text(px + bx + bw * v / MAX + 6, y + 11.5, '−' + fmt3(v), 'f-mono f-tiny');
-        });
-        if (a.groups.length === 1) g += text(px, py + 62, i === 2 ? 'other groups not reported' : 'GO and STRING negligible', 'f-note');
-        b += part('f' + i, g, 'pr-row');
+      b += text(14, top + B.trace.length * step + (tall ? 4 : 6), `Out of ${B.traceOf} listed ISINs; the stages are not nested`, 'f-note');
+    } else if (view === 'status') {
+      const S = B.status, total = S.reduce((a, s) => a + s[1], 0);
+      const cell = tall ? 24 : 20, cw = tall ? 20 : 16, cols = 12;
+      const gx = tall ? (W - cols * cell) / 2 : 344, gy = tall ? 64 : 66;
+      b += text(14, 26, tall ? 'Status, quarter to 30 June 2026' : 'Status per instrument, quarter to 30 June 2026', 'f-kicker');
+      b += text(14, 46, `${total} instruments · one status each`, 'f-note');
+      let k = 0, cells = '';
+      S.forEach(([, n], s) => {
+        for (let j = 0; j < n; j++, k++) {
+          const x = gx + (k % cols) * cell, y = gy + Math.floor(k / cols) * cell;
+          cells += rect(x, y, cw, cw, `br-cell br-k${s} f-soft`, `data-rel="k${s}"`);
+        }
       });
-      b += text(14, tall ? 446 : 284, 'Drop in ρ when the group is left out, all on one scale', 'f-note');
+      b += `<g class="br-cells">${cells}</g>`;
+      const lx = 14, ly = tall ? gy + 8 * cell + 34 : 84, lstep = tall ? 27 : 32, lw = tall ? W - 28 : 304;
+      S.forEach(([name, n], s) => {
+        const y = ly + s * lstep;
+        b += part('k' + s, rect(lx - 6, y - 17, lw + 12, lstep - 2, 'f-hit') + rect(lx, y - 10, 11, 11, `br-sw br-k${s} f-soft`) +
+          text(lx + 20, y, name, 'f-mono') + text(lx + lw, y, String(n), 'f-num f-num-sm' + (n ? '' : ' br-zero'), 'end'), 'br-st');
+      });
+      b += text(14, ly + S.length * lstep + 4, 'None implies another: no report is not compliance', 'f-note');
     } else {
-      const T = P.tiers;
-      const bx = tall ? 14 : 214, bw = tall ? 332 : 372;
-      const step = tall ? 70 : 42, top = tall ? 14 : 22;
-      T.forEach((t, i) => {
-        const y = top + i * step, by = tall ? y + 22 : y;
-        const sum = t.v[0] + t.v[1] + t.v[2];
-        let g = rect(4, y - 6, W - 8, tall ? 58 : 34, 'f-hit') + text(14, tall ? y + 12 : by + 17, t.set, 'f-label');
-        let x = bx;
-        t.v.forEach((v, j) => {
-          const w = bw * v / sum;
-          g += rect(x, by, w, 24, ['f-tier f-tier-sat', 'f-tier f-tier-mid', 'f-tier f-tier-res'][j] + ' pr-seg');
-          if (w > 28) g += text(x + w / 2, by + 16.5, v + '%', 'f-mono f-tiny pr-seg-t' + (j === 1 ? '' : ' is-light'), 'middle');
-          x += w;
-        });
-        g += rect(bx, by, bw, 24, 'f-frame');
-        b += part('t' + i, g, 'pr-row');
+      const A = B.anchors, G0 = BR_GRID[L], gw = G0.cols * G0.p, gh = G0.rows * G0.p;
+      b += text(14, 26, 'Evidence anchors, re-tested', 'f-kicker');
+      b += text(14, 46, tall ? `${A.total.toLocaleString('en-GB')} anchors: hash, page and quotation` : `${A.total.toLocaleString('en-GB')} anchors: a file by its hash, a page, the words relied on`, 'f-note');
+      b += `<defs><pattern id="brdo-${L}-pend" width="${G0.p}" height="${G0.p}" patternUnits="userSpaceOnUse" x="${G0.x}" y="${G0.y}"><rect class="br-pend" width="${G0.c}" height="${G0.c}"/></pattern>` +
+        `<pattern id="brdo-${L}-ink" width="${G0.p}" height="${G0.p}" patternUnits="userSpaceOnUse" x="${G0.x}" y="${G0.y}"><rect class="br-ink" width="${G0.c}" height="${G0.c}"/></pattern>` +
+        `<clipPath id="brdo-${L}-scan"><rect class="br-scan-r" x="${G0.x}" y="${G0.y - 2}" width="0" height="${gh + 4}"/></clipPath></defs>`;
+      // which anchors were read from the rendered page: a fixed scatter, so it looks the same on every visit
+      const rnd = rng(1254), vis = new Set();
+      while (vis.size < A.visual) vis.add(Math.floor(rnd() * A.total));
+      let vcells = '';
+      vis.forEach((k) => {
+        const x = G0.x + Math.floor(k / G0.rows) * G0.p, y = G0.y + (k % G0.rows) * G0.p;
+        vcells += rect(x, y, G0.c, G0.c, 'br-vis');
       });
-      const ly = tall ? 382 : 254;
-      [['saturated', 'f-tier-sat'], ['frontier', 'f-tier-mid'], ['resistant', 'f-tier-res']].forEach(([t, c], j) => {
-        const x = (tall ? 14 : bx) + j * (tall ? 112 : 124);
-        b += rect(x, ly, 14, 14, 'f-tier ' + c) + rect(x, ly, 14, 14, 'f-frame') + text(x + 20, ly + 12, t, 'f-mono f-tiny');
+      b += rect(G0.x, G0.y, gw, gh, 'br-pendr f-soft', `fill="url(#brdo-${L}-pend)"`);
+      b += `<g clip-path="url(#brdo-${L}-scan)">${rect(G0.x, G0.y, gw, gh, 'br-inkr', `fill="url(#brdo-${L}-ink)" data-rel="mach"`)}<g data-rel="vis">${vcells}</g></g>`;
+      b += part('check', `<g class="br-scan" transform="translate(${G0.x} 0)">${line(0, G0.y - 10, 0, G0.y + gh + 6, 'br-scan-l')}` +
+        `${text(5, G0.y - 4, 'brdo verify', 'f-mono f-tiny f-red-text br-scan-t')}</g>`);
+      const ly = G0.y + gh + (tall ? 36 : 34), lstep = tall ? 34 : 30, lw = W - 28;
+      [['mach', 'br-sw br-ink', tall ? 'Verified by machine' : 'Verified by machine against the text layer', A.machine],
+       ['vis', 'br-sw br-vis', tall ? 'Read from the rendered page' : 'Read from the rendered page, reported separately', A.visual]].forEach(([k, c, t, n], i) => {
+        const y = ly + i * lstep;
+        b += part(k, rect(8, y - 17, lw + 12, lstep - 2, 'f-hit') + rect(14, y - 10, 11, 11, c) + text(34, y, t, 'f-label') +
+          text(14 + lw, y, n.toLocaleString('en-GB'), 'f-num', 'end'));
       });
-      b += text(14, ly + 38, 'saturated: BS 0.66 and above · resistant: below 0.33', 'f-note');
     }
     return b;
   }
 
-  def('pgipres', {
-    label: 'PGIP results from the preprint: Spearman correlation and ROC-AUC per screen with 95% intervals; the drop in correlation when each feature group is left out; and the share of saturated, frontier and resistant perturbations per screen.',
-    tall: true, still: true,
-    notes() {
-      const P = PR(), n = {};
-      P.rho.forEach((r, i) => { n['r' + i] = [`${r.set} · ${r.model}`, `Spearman ρ ${r.v.toFixed(3)}, 95% CI ${r.ci[0]} to ${r.ci[1]}, over ${r.n} ${r.unit === 'double' ? 'double perturbations' : 'perturbations'}. Label-permutation p = 0.003${/forest/i.test(r.model) && !/Ridge/.test(r.model) ? ', computed on the Ridge model' : ''}.`]; });
-      P.auc.forEach((r, i) => { n['a' + i] = [r.set, r.v != null ? `ROC-AUC ${r.v.toFixed(3)} for ${r.task}${r.ci ? `, 95% CI ${r.ci[0]} to ${r.ci[1]}` : '. The paper gives no interval for it'}.` : `ROC-AUC between ${r.ci[0]} and ${r.ci[1]} (the 95% interval) for ${r.task}; no point estimate is reported.`]; });
-      P.ablation.forEach((a, i) => { n['f' + i] = [a.set, a.lead + ' ' + a.groups.map(([k, v]) => `${k} −${v}`).join(', ') + '.']; });
-      P.tiers.forEach((t, i) => { n['t' + i] = [t.set, `${t.v[0]}% saturated, ${t.v[1]}% frontier, ${t.v[2]}% resistant${t.note ? '. ' + t.note : ''}.`]; });
-      return n;
-    },
+  def('brdo', {
+    label: 'BRDO, from its own report for the quarter to 30 June 2026. Trace: of 93 ISINs listed in trustees’ breach reports, 59 are named in a notice to holders, 52 have a trust deed cited, 44 have the clause printed, 17 are named in the issuer’s own statement, 14 are linked to a transcribed clause, 5 have a contract located that cannot be retrieved, and none has its contract retrieved. Status: 90 reported breach, 3 no report found, 2 conflicting, 1 not assessed. Anchors: 1,254, of which 1,147 verified by machine and 107 read from the rendered page.',
+    tall: true,
     svg(L) {
-      return svg('pgipres', L === 'tall' ? 360 : 600, L === 'tall' ? 480 : 300, `<g class="pr-view">${prView('rho', L)}</g>`, this.label);
+      return svg('brdo', L === 'tall' ? 360 : 600, BR_H[L], `<g class="br-view">${brView('trace', L)}</g>`, this.label);
     },
     mount(kit) {
-      const gsap = G(), g = kit.$('.pr-view');
-      let cur = 'rho';
+      const gsap = G(), g = kit.$('.br-view'), tall = kit.layout === 'tall';
+      let cur = 'trace', tl = null;
+      const B = BR(), n = B.trace.length;
+      const replay = kit.button('Replay the trace', () => trace());
+      const verify = kit.button('Run verify', () => scan(), { icon: '›' });
+      verify.hidden = true;
+
+      function trace() {
+        if (tl) { tl.kill(); tl = null; }
+        const bars = kit.$$('.br-bar');
+        kit.status(BR_SAY.trace);
+        if (kit.calm) { gsap.set(bars, { scaleX: 1 }); return; }
+        gsap.set(bars, { scaleX: 0, transformOrigin: '0% 50%' });
+        // one stage at a time, the way a reader would follow an ISIN back towards its contract
+        tl = kit.timeline({ repeat: -1, repeatDelay: 3.4 });
+        tl.set(bars, { scaleX: 0 });
+        B.trace.forEach(([t, v], i) => {
+          tl.to(bars[i], { scaleX: 1, duration: 0.7, ease: 'expo.out' }, i * 0.62)
+            .call(() => kit.status(i === n - 1 ? `${i + 1} of ${n} · ${t}: ${v}. The trace breaks here, for access: the exchanges and platforms that hold the contracts refuse automated readers` : `${i + 1} of ${n} · ${t}: ${v} of ${B.traceOf}`), null, i * 0.62);
+        });
+        const brk = kit.$('.br-break');
+        if (brk) tl.fromTo(brk, { opacity: 0.25 }, { opacity: 1, duration: 0.18, repeat: 3, yoyo: true, ease: 'none' }, (n - 1) * 0.62 + 0.2);
+      }
+      function scan() {
+        if (tl) { tl.kill(); tl = null; }
+        const G0 = BR_GRID[kit.layout], A = B.anchors, gw = G0.cols * G0.p;
+        const r = kit.$('.br-scan-r'), ln = kit.$('.br-scan'), lab = kit.$('.br-scan-t'), total = A.total.toLocaleString('en-GB');
+        // the label rides on the right of the line, then crosses to its left so it never leaves the drawing
+        const side = (p) => { const end = p > 0.78; lab.setAttribute('x', end ? -5 : 5); lab.setAttribute('text-anchor', end ? 'end' : 'start'); };
+        const done = `brdo verify: ${A.machine.toLocaleString('en-GB')} verified by machine and ${A.visual} read from the rendered page, so all ${total} are accounted for`;
+        if (kit.calm) { r.setAttribute('width', gw + 1); ln.setAttribute('transform', `translate(${f(G0.x + gw)} 0)`); side(1); kit.status(done); return; }
+        const s = { p: 0 };
+        tl = kit.timeline({ onComplete: () => kit.status(done) });
+        tl.to(s, { p: 1, duration: 3.2, ease: 'none', onUpdate: () => {
+          r.setAttribute('width', f(gw * s.p + (s.p >= 1 ? 1 : 0)));
+          ln.setAttribute('transform', `translate(${f(G0.x + gw * s.p)} 0)`);
+          side(s.p);
+          kit.status(`brdo verify: checking ${Math.round(A.total * s.p).toLocaleString('en-GB')} of ${total} anchors against their files`);
+        } });
+      }
       function go(v) {
         if (v === cur) return;
         cur = v;
+        if (tl) { tl.kill(); tl = null; }
         kit.redrawn();
+        replay.hidden = v !== 'trace';
+        verify.hidden = v !== 'anchors';
         const swap = () => {
-          g.innerHTML = prView(v, kit.layout);
-          kit.status(PR_SAY[v]);
+          g.innerHTML = brView(v, kit.layout);
+          if (v === 'trace') trace();
+          else if (v === 'anchors') scan();
+          else {
+            kit.status(BR_SAY.status);
+            if (!kit.calm) gsap.from(kit.$$('.br-cell'), { scale: 0, transformOrigin: '50% 50%', duration: 0.4, ease: 'back.out(2)', stagger: 0.008 });
+          }
           if (kit.calm) return;
           gsap.fromTo(g, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.35, ease: 'power3.out' });
-          const grow = g.querySelectorAll('.pr-bar, .pr-seg');
-          if (grow.length) gsap.from(grow, { scaleX: 0, transformOrigin: '0% 50%', duration: 0.6, ease: 'expo.out', stagger: 0.025 });
-          const pts = g.querySelectorAll('.f-pt');
-          if (pts.length) gsap.from(pts, { scale: 0, transformOrigin: '50% 50%', duration: 0.45, ease: 'back.out(2)', stagger: 0.05 });
         };
         if (kit.calm) swap(); else gsap.to(g, { opacity: 0, x: 8, duration: 0.15, ease: 'power1.in', onComplete: swap });
       }
-      kit.segment(PR_VIEWS, 'rho', go, { label: 'Which results to show' });
-      kit.status(PR_SAY.rho);
-      return {};
+      kit.segment(BR_VIEWS, 'trace', go, { label: 'Which reading to show' });
+      // until the trace runs, its bars wait at zero, so the first look does not flash them full
+      if (!kit.calm) gsap.set(kit.$$('.br-bar'), { scaleX: 0, transformOrigin: '0% 50%' });
+      trace();
+      return { still() { gsap.set(kit.$$('.br-bar'), { scaleX: 1 }); kit.status(BR_SAY.trace); } };
     },
   });
 

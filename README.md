@@ -40,8 +40,13 @@ A few things worth knowing about:
   - RISC-V: a live I-type encoder. Change the operation, registers or
     immediate (or drag the immediate sideways) and the bits, hex and binary
     are re-encoded.
-  - The preprint: drag the predicted saturation across the paper's 0.33 and
-    0.66 tiers; the results figure shows the preprint's own numbers four ways.
+  - FinChrona: every month-end U.S. Treasury curve from 1990 to 2026, drawn
+    from the released dataset itself. Drag the timeline through 442 months;
+    hover a point to see the exact row it comes from.
+  - BRDO: three readings of the observatory's first sample: how far each
+    listed bond can be traced back to its contract (and where that breaks),
+    the status each one is given, and its 1,254 evidence anchors as the
+    checker re-tests them.
 
   Hover, tap or arrow-key onto any part for a numbered note, like a parts
   drawing; underlined words in the text point at the part they describe.
@@ -73,6 +78,7 @@ js/
   main.js           boot order, Lenis smooth scroll
 tools/
   prerender.mjs     writes the page into index.html (run after editing data.js)
+  finchrona_curves.py   builds assets/data/finchrona-monthly.json from a FinChrona release
 assets/
   fonts/            self-hosted woff2, trimmed to the weights and widths used
   vendor/           GSAP 3.15 and Lenis 1.3, self-hosted
@@ -80,6 +86,7 @@ assets/
   car/                  Draco-compressed GLB + WebP PBR textures
   car-drawing.webp      still of the drawing, for browsers without WebGL
   og.png                link preview card
+  data/                 finchrona-monthly.json: the curves the FinChrona figure draws
 ```
 
 No build step for the site, no `npm install`. Any static server runs it.
@@ -112,8 +119,12 @@ from `data.js` in the browser; only the search-engine copy is stale.
 - `work[]` are the six drawing sheets. Each names a figure in `figures.js`.
   In `body`, `{words|part}` links the words to a part of that figure.
 - `figures` holds the inspect notes, per figure, in balloon order.
-- `paper.rho`, `paper.auc`, `paper.ablation`, `paper.tiers` are the
-  preprint's numbers behind the results figure.
+- `finchrona` and `brdo` are the two research write-ups. The BRDO figure
+  draws `brdo.trace`, `brdo.status` and `brdo.anchors`, which come from the
+  project's own observability report: update them when it changes.
+- The FinChrona figure fetches `assets/data/finchrona-monthly.json`. For a new
+  release, run `python tools/finchrona_curves.py <its Parquet>` (needs pandas
+  and pyarrow) and update `finchrona.coverage`.
 - `timeline.rows[].stints[]` drive the career chart. Dates are `YYYY-MM`;
   `to: null` means ongoing. `c` picks the compound (`h` education, `s`
   internships, `m` research, `i` teaching, `w` community).
@@ -151,7 +162,7 @@ at the root of its domain, `404.html` uses root paths (`/assets/...`).
   because jsDelivr's auto-minified `three.module.min.js` still imports the
   full-size core.
 - Type: Hubot Sans (display, variable width), Mona Sans (text and numerals),
-  Martian Mono (data), STIX Two Text (the preprint page and Greek letters).
+  Martian Mono (data), STIX Two Text (the data card and Greek letters).
   Nothing a reader needs is set below 13px; sentences start at 15px.
 - Vanilla JS and CSS otherwise.
 
